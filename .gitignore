@@ -1,0 +1,19 @@
+# Environment secrets — NEVER commit
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# AI Lab artifacts / state
+ai-lab/artifacts/
+ai-lab/state.db
+ai-lab/*.log
+
+# macOS
+.DS_Store
