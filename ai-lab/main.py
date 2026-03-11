@@ -23,7 +23,6 @@ from __future__ import annotations
 
 import logging
 import sys
-from pathlib import Path
 
 from config import Thresholds, Paths
 from state import SystemState
@@ -57,13 +56,17 @@ def load_or_create_state(goal: str) -> SystemState:
     return state
 
 
-def experiment_loop(state: SystemState, task: str) -> tuple[SystemState, bool]:
+def experiment_loop(
+    state: SystemState,
+    task: str,
+    success_criteria: list[str] | None = None,
+) -> tuple[SystemState, bool]:
     """
     Inner loop: try a task, evaluate, retry with hints on failure.
     Returns (updated_state, success_flag).
     """
     improvement_hint = ""
-    success_criteria = [
+    criteria = success_criteria or [
         "Output is directly relevant to the stated task.",
         "Output is complete and actionable.",
         "No hallucinated facts or contradictions with constraints.",
@@ -71,7 +74,7 @@ def experiment_loop(state: SystemState, task: str) -> tuple[SystemState, bool]:
 
     for attempt in range(Thresholds.ESCALATE_TO_STRATEGIC_AFTER):
         output = worker.run_task(state, task, improvement_hint=improvement_hint)
-        verdict = critic.evaluate(state, task, output, success_criteria)
+        verdict = critic.evaluate(state, task, output, criteria)
 
         if verdict.passed:
             logger.info("✅ Task passed on attempt %d.", attempt + 1)
@@ -94,20 +97,34 @@ def project_loop(state: SystemState) -> SystemState:
     Middle loop: process task queue, escalate stuck tasks to planner.
     """
     while state.task_queue:
+        if state.loop_iteration >= Thresholds.MAX_PROJECT_ITERATIONS:
+            raise RuntimeError(
+                "Project loop exceeded MAX_PROJECT_ITERATIONS. "
+                "Stopping to prevent infinite execution."
+            )
+
         task_id = state.task_queue.pop(0)
         task_def = next(
             (t for t in state.project_graph if t["id"] == task_id),
             {"name": task_id, "description": task_id},
         )
         task_description = task_def.get("description", task_id)
+        task_criteria = task_def.get("evaluation_criteria", [])
+        if not isinstance(task_criteria, list):
+            task_criteria = []
         state.active_hypothesis = task_description
 
         logger.info("── Project Loop: starting task [%s] %s", task_id, task_def["name"])
 
-        state, success = experiment_loop(state, task_description)
+        state, success = experiment_loop(
+            state,
+            task_description,
+            success_criteria=task_criteria,
+        )
 
         if success:
             state.completed_tasks.append(task_id)
+            state.task_replan_counts.pop(task_id, None)
             # Unlock dependent tasks
             for t in state.project_graph:
                 if task_id in t.get("depends_on", []):
@@ -117,6 +134,17 @@ def project_loop(state: SystemState) -> SystemState:
                     if all_deps_done and t["id"] not in state.task_queue:
                         state.task_queue.append(t["id"])
         else:
+            state.task_replan_counts[task_id] = state.task_replan_counts.get(task_id, 0) + 1
+            if (
+                state.task_replan_counts[task_id]
+                > Thresholds.MAX_STRATEGIC_REPLANS_PER_TASK
+            ):
+                raise RuntimeError(
+                    f"Task {task_id} exceeded MAX_STRATEGIC_REPLANS_PER_TASK="
+                    f"{Thresholds.MAX_STRATEGIC_REPLANS_PER_TASK}. "
+                    "Manual intervention required."
+                )
+
             # Escalate to strategic planner for diagnosis
             state = planner.diagnose_failures(state)
             # Re-queue the task with the new hypothesis
@@ -138,6 +166,8 @@ def strategic_loop(goal: str) -> SystemState:
     if not state.project_graph:
         logger.info("══ Strategic Loop: building project graph via o1.")
         state = planner.build_project_graph(state)
+        if not state.task_queue:
+            raise RuntimeError("Planner returned no executable tasks.")
         state.save(_STATE_FILE)
 
     logger.info("══ Entering project loop with %d tasks.", len(state.task_queue))

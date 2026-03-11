@@ -76,6 +76,14 @@ class Thresholds:
     MAX_EXPERIMENTS_PER_CYCLE: int = int(
         os.environ.get("MAX_EXPERIMENTS", "20")
     )
+    # Hard safety cap to prevent infinite orchestration loops
+    MAX_PROJECT_ITERATIONS: int = int(
+        os.environ.get("MAX_PROJECT_ITERATIONS", "200")
+    )
+    # Prevent endless strategic replans for one stuck task
+    MAX_STRATEGIC_REPLANS_PER_TASK: int = int(
+        os.environ.get("MAX_STRATEGIC_REPLANS_PER_TASK", "3")
+    )
 
 
 # ════════════════════════════════════════════════════════════════

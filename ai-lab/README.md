@@ -51,3 +51,7 @@ All settings live in `.env` (copy from `.env.example`):
 | `memory.py` | Persistent skill heuristics + artifact registry |
 | `tools.py` | Deterministic tools (Python exec, shell, file I/O) |
 | `main.py` | Orchestration engine — wires all three loops together |
+
+## Strategist Prompting
+
+Use [`o1_next_question_mvp.md`](o1_next_question_mvp.md) as the canonical next-question template when asking o1 to define or re-scope the MVP.

@@ -46,6 +46,7 @@ class SystemState:
     project_graph: list[dict[str, Any]] = field(default_factory=list)
     task_queue: list[str] = field(default_factory=list)
     completed_tasks: list[str] = field(default_factory=list)
+    task_replan_counts: dict[str, int] = field(default_factory=dict)
 
     # ── Episodic memory ──────────────────────────────────────────
     recent_experiments: list[ExperimentResult] = field(default_factory=list)
@@ -84,6 +85,9 @@ class SystemState:
             "",
             "CONSTRAINTS:",
             *[f"  - {c}" for c in self.constraints],
+            "",
+            "HEURISTICS:",
+            *[f"  - {h}" for h in self.heuristics],
             "",
             "RECENT EXPERIMENTS:",
         ]
