@@ -13,6 +13,8 @@ venv/
 # AI Lab artifacts / state
 ai-lab/artifacts/
 ai-lab/state.db
+ai-lab/state.db.json
+ai-lab/skills.json
 ai-lab/*.log
 
 # macOS

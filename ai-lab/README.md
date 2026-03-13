@@ -1,57 +1,40 @@
-# AI Lab — Autonomous Engineering System
+# ai-lab/ — Core Engine
 
-A LangGraph-inspired autonomous agent system with **OpenAI o1** as the strategic planner.
+The Python modules that implement the three-loop orchestration. See the [root README](../README.md) for full documentation.
 
-## Architecture
-
-```
-STRATEGIC LOOP  →  o1             (plan, diagnose failures)
-PROJECT LOOP    →  gpt-4o         (evaluate, route tasks)
-EXPERIMENT LOOP →  gpt-4o-mini    (execute, 100s of attempts)
-```
-
-## Quick Start
+## Running
 
 ```bash
-# 1. Provide dependencies
-uv sync
+# Run the lab on a goal
+uv run main.py "Your goal here"
 
-# 2. Set your API key
-cp .env.example .env
-# Edit .env and paste your OPENAI_API_KEY
+# Direct O1 strategic query
+uv run ask_o1.py "Your question"
+uv run ask_o1.py --file ../docs/lab/o1-strategy-prompt.md
 
-# 3. Run
-cd ai-lab
-uv run main.py "Design a lightweight prosthetic ankle joint"
+# Lower reasoning effort for cheaper queries
+uv run ask_o1.py --effort medium "Quick question"
 ```
 
-## Configuration
+## Module Map
 
-All settings live in `.env` (copy from `.env.example`):
+| Module | LOC | Purpose |
+|--------|-----|---------|
+| `main.py` | 186 | Three-loop orchestration (strategic → project → experiment) |
+| `planner.py` | 323 | O1 strategic planning + failure diagnosis |
+| `llm.py` | 185 | Unified LLM client: O1 + Ollama + standard OpenAI |
+| `critic.py` | 113 | Worker output evaluation against success criteria |
+| `state.py` | 121 | 5-layer memory hierarchy, JSON checkpoint/resume |
+| `config.py` | 101 | Model routing, thresholds, env config |
+| `memory.py` | 95 | Skill heuristics DB + artifact registry |
+| `tools.py` | 86 | Deterministic tools: Python exec, shell, file I/O |
+| `worker.py` | 65 | Stateless task execution (fast tier) |
+| `ask_o1.py` | 97 | Direct O1 CLI for strategic queries |
 
-| Variable | Default | Description |
-|---|---|---|
-| `OPENAI_API_KEY` | *(required)* | Your OpenAI API key |
-| `STRATEGIC_MODEL` | `o1` | Model for planning/diagnosis |
-| `PROJECT_MODEL` | `gpt-4o` | Model for evaluation/routing |
-| `WORKER_MODEL` | `gpt-4o-mini` | Model for execution |
-| `O1_REASONING_EFFORT` | `high` | o1 reasoning depth: low/medium/high |
-| `ESCALATE_THRESHOLD` | `5` | Worker failures before calling o1 |
+## Strategy Documents
 
-## Module Overview
-
-| File | Role |
-|---|---|
-| `config.py` | Loads `.env`, defines model tiers and thresholds |
-| `llm.py` | Unified LLM client; handles o1's API quirks transparently |
-| `state.py` | Mutable state object (5-layer memory hierarchy) |
-| `planner.py` | Strategic loop — calls o1 for project graphs & failure diagnosis |
-| `worker.py` | Experiment loop — stateless task execution |
-| `critic.py` | Critic/evaluator — rates worker output, suggests improvements |
-| `memory.py` | Persistent skill heuristics + artifact registry |
-| `tools.py` | Deterministic tools (Python exec, shell, file I/O) |
-| `main.py` | Orchestration engine — wires all three loops together |
-
-## Strategist Prompting
-
-Use [`o1_next_question_mvp.md`](o1_next_question_mvp.md) as the canonical next-question template when asking o1 to define or re-scope the MVP.
+| Document | Purpose |
+|----------|---------|
+| `o1_system_prompt.md` | Chief Strategist role definition — loaded as system prompt for O1 |
+| `o1_next_question_mvp.md` | Template for structured O1 MVP scoping queries |
+| `o1_system_prompt_indexed_draft.md` | Indexed version with section references |

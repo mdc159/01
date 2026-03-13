@@ -4,3 +4,6 @@
 [submodule "references/AutoResearch-mac/autoresearch-macos"]
 	path = references/AutoResearch-mac/autoresearch-macos
 	url = https://github.com/miolini/autoresearch-macos.git
+[submodule "references/AutoResearch-mac/autoresearch-karpathy"]
+	path = references/AutoResearch-mac/autoresearch-karpathy
+	url = https://github.com/karpathy/autoresearch.git

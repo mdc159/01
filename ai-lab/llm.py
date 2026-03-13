@@ -5,6 +5,7 @@ Key design decisions:
 - o1 models require `max_completion_tokens` (not `max_tokens`) and do NOT
   accept `temperature` or `stream` parameters.
 - All other models use the standard chat-completions API.
+- Ollama models are routed via OpenAI-compatible endpoint (localhost).
 - A single `call()` function handles routing transparently, so callers
   don't need to know which model tier they are hitting.
 """
@@ -20,8 +21,21 @@ from config import OPENAI_API_KEY, Models, O1Settings
 
 logger = logging.getLogger(__name__)
 
-# ── Shared client (reuses the same HTTP connection pool) ─────────
+# ── Shared clients ──────────────────────────────────────────────
 _client = OpenAI(api_key=OPENAI_API_KEY)
+
+# Ollama client (OpenAI-compatible API, lazy-init)
+_ollama_client: OpenAI | None = None
+
+def _get_ollama_client() -> OpenAI | None:
+    """Lazily create an Ollama-compatible OpenAI client."""
+    global _ollama_client
+    if _ollama_client is None and Models.OLLAMA_BASE_URL:
+        _ollama_client = OpenAI(
+            base_url=f"{Models.OLLAMA_BASE_URL}/v1",
+            api_key="ollama",  # Ollama doesn't need a real key
+        )
+    return _ollama_client
 
 # Models in the o1 family need special handling
 _O1_FAMILY = {"o1", "o1-mini", "o1-preview", "o1-pro", "o3", "o3-mini"}
@@ -30,6 +44,14 @@ _O1_FAMILY = {"o1", "o1-mini", "o1-preview", "o1-pro", "o3", "o3-mini"}
 def _is_o1(model: str) -> bool:
     """Return True for any model that behaves like o1 (no temp, no stream)."""
     return any(model.startswith(prefix) for prefix in ("o1", "o3"))
+
+
+def _is_ollama(model: str) -> bool:
+    """Return True if this model should be routed to the local Ollama instance."""
+    # Ollama models contain ':' (e.g., llama3.3:70b) or match the configured local model
+    if not Models.OLLAMA_BASE_URL:
+        return False
+    return model == Models.LOCAL_WORKER or ":" in model
 
 
 def call(
@@ -62,6 +84,8 @@ def call(
 
     if _is_o1(model):
         return _call_o1(messages, model, max_tokens)
+    elif _is_ollama(model):
+        return _call_ollama(messages, model, max_tokens, **kwargs)
     else:
         return _call_standard(messages, model, max_tokens, **kwargs)
 
@@ -90,6 +114,32 @@ def _call_o1(
     )
 
     response = _client.chat.completions.create(**params)
+    return response.choices[0].message.content.strip()
+
+
+def _call_ollama(
+    messages: list[dict[str, str]],
+    model: str,
+    max_tokens: int | None,
+    **kwargs: Any,
+) -> str:
+    """Call a local Ollama model via its OpenAI-compatible API."""
+    client = _get_ollama_client()
+    if client is None:
+        raise RuntimeError(
+            "Ollama not configured. Set OLLAMA_BASE_URL in .env."
+        )
+
+    params: dict[str, Any] = {
+        "model": model,
+        "messages": messages,
+        **kwargs,
+    }
+    if max_tokens:
+        params["max_tokens"] = max_tokens
+
+    logger.info("→ [LOCAL] %s via Ollama", model)
+    response = client.chat.completions.create(**params)
     return response.choices[0].message.content.strip()
 
 
@@ -128,3 +178,8 @@ def project(messages: list[dict[str, str]], **kwargs: Any) -> str:
 def worker(messages: list[dict[str, str]], **kwargs: Any) -> str:
     """Call the WORKER model (gpt-4o-mini). Use for execution tasks."""
     return call(messages, model=Models.WORKER, **kwargs)
+
+
+def local(messages: list[dict[str, str]], **kwargs: Any) -> str:
+    """Call the LOCAL model (Ollama). Use for $0 execution on Apple Silicon."""
+    return call(messages, model=Models.LOCAL_WORKER, **kwargs)
