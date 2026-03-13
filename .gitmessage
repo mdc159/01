@@ -1,0 +1,8 @@
+# <type>(<scope>): <subject>
+#
+# Types: feat, fix, refactor, docs, chore, test, perf
+# Scope: planner, llm, worker, critic, state, memory, config, docs, lab
+#
+# Body: explain WHY, not WHAT (the diff shows what)
+#
+# Footer: Co-Authored-By, Breaking Changes, References

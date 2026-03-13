@@ -61,6 +61,8 @@ class O1Settings:
     MAX_COMPLETION_TOKENS: int = int(os.environ.get("O1_MAX_TOKENS", "8000"))
     # reasoning_effort: "low" | "medium" | "high"
     REASONING_EFFORT: str = os.environ.get("O1_REASONING_EFFORT", "high")
+    # v2 contract: if strategist confidence < this, output experiment not plan
+    CONFIDENCE_THRESHOLD: float = float(os.environ.get("O1_CONFIDENCE_THRESHOLD", "0.75"))
 
 
 # ════════════════════════════════════════════════════════════════

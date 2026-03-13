@@ -55,6 +55,39 @@ def save_skill(description: str, context: str = "", tags: list[str] | None = Non
     logger.info("[MEMORY] Skill saved: %s", description[:80])
 
 
+def process_memory_actions(actions: list[dict[str, Any]]) -> None:
+    """
+    Process memory_actions from a v2 strategic response.
+
+    Each action: {"layer": "semantic|artifact|episodic", "action": "write|update|delete", "key": str, "value": str}
+    Currently supports semantic layer (skills DB). Artifact and episodic are logged but not yet wired.
+    """
+    for act in actions:
+        layer = act.get("layer", "")
+        action = act.get("action", "")
+        key = act.get("key", "")
+        value = act.get("value", "")
+
+        if layer == "semantic" and action in ("write", "update"):
+            save_skill(description=value, context=key, tags=[key])
+            logger.info("[MEMORY] Strategic memory action: %s → %s: %s", action, key, value[:80])
+        elif layer == "semantic" and action == "delete":
+            _delete_skill_by_key(key)
+        else:
+            logger.info("[MEMORY] Skipped memory action (layer=%s, action=%s, key=%s)", layer, action, key)
+
+
+def _delete_skill_by_key(key: str) -> None:
+    """Remove skills matching a key from the skills DB."""
+    skills = load_skills()
+    before = len(skills)
+    skills = [s for s in skills if s.get("context") != key and key not in s.get("tags", [])]
+    Paths.SKILLS_DB.write_text(json.dumps(skills, indent=2))
+    removed = before - len(skills)
+    if removed:
+        logger.info("[MEMORY] Deleted %d skill(s) matching key: %s", removed, key)
+
+
 def retrieve_skills(query_tags: list[str] | None = None, top_k: int = 10) -> list[str]:
     """
     Retrieve the most relevant skills as plain strings for prompt injection.

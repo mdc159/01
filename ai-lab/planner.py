@@ -13,7 +13,8 @@ import logging
 from typing import Any
 
 import llm
-from config import Models, Paths
+import memory
+from config import Models, O1Settings, Paths
 from state import SystemState
 
 logger = logging.getLogger(__name__)
@@ -151,101 +152,188 @@ def _build_initial_task_queue(
     return ready
 
 
-def _get_plan_system() -> str:
+def _get_v2_system() -> str:
+    """Load system context + v2 contract output schema."""
     return _load_system_context() + """
 
 ---
-CURRENT OPERATION: STRATEGIC PLANNING
+CURRENT OPERATION: STRATEGIC TIER CALL (v2 contract)
 
-Return JSON only (no markdown).
-Build an executable project graph object:
+Return JSON only (no markdown fences).
+Your response MUST conform to this schema:
 {
-  "project_name": "...",
-  "global_constraints": ["..."],
-  "tasks": [
+  "meta": {
+    "caller": "planner|escalation",
+    "confidence_score": 0.0,
+    "confidence_rationale": "string"
+  },
+  "chosen_strategy": {
+    "option_id": "A",
+    "rationale": "string",
+    "expected_outcome": "string"
+  },
+  "rejected_alternatives": [{"option_id": "B", "reason": "string"}],
+  "assumptions": ["string"],
+  "risk_forecast": [
+    {
+      "failure_mode": "string",
+      "likelihood": "low|medium|high",
+      "impact": "low|medium|high",
+      "detection_signal": "string",
+      "mitigation": "string"
+    }
+  ],
+  "smallest_validating_experiment": {
+    "description": "string",
+    "duration": "string",
+    "success_signal": "string",
+    "failure_signal": "string"
+  },
+  "kill_criteria": {
+    "stop_when": ["string"],
+    "pivot_to": "string",
+    "escalate_when": ["string"]
+  },
+  "ordered_tasks": [
     {
       "task_id": "T-01",
-      "name": "...",
-      "description": "...",
+      "name": "string",
+      "description": "string",
       "dependencies": [],
-      "methodology": "...",
-      "inputs": ["..."],
-      "evaluation_criteria": ["..."],
-      "notes": "..."
+      "evaluation_criteria": ["string"],
+      "risk": "low|medium|high"
     }
-  ]
+  ],
+  "interface_contract": {
+    "artifacts_emitted": ["string"],
+    "state_updates_for_project_loop": "string",
+    "worker_instructions_format": "string"
+  },
+  "memory_actions": [
+    {
+      "layer": "semantic|artifact|episodic",
+      "action": "write|update|delete",
+      "key": "string",
+      "value": "string"
+    }
+  ],
+  "verification": {
+    "how_to_confirm_this_was_right": "string",
+    "observable_result": "string",
+    "reversal_conditions": ["string"]
+  }
 }
 
 Rules:
-- Keep task count minimal but complete (typically 3-8 tasks).
-- Dependencies must reference valid task IDs.
-- Every task must be self-contained and executable by limited-context workers.
-- evaluation_criteria should be concrete and testable.
+- Keep ordered_tasks to 3-7 items.
+- Make evaluation_criteria observable and testable.
+- If confidence_score < confidence_threshold, prioritize smallest_validating_experiment over a full task graph.
+- Always populate kill_criteria.
+- memory_actions must be intentional — only write heuristics worth retaining.
 """
 
 
-def _get_diagnose_system() -> str:
-    return _load_system_context() + """
+def _process_v2_response(state: SystemState, payload: dict[str, Any]) -> SystemState:
+    """Extract v2 contract fields from a strategic response and apply them to state."""
+    # Memory actions — write heuristics to skills DB
+    mem_actions = payload.get("memory_actions", [])
+    if isinstance(mem_actions, list) and mem_actions:
+        memory.process_memory_actions(mem_actions)
+        logger.info("[STRATEGIC] Processed %d memory actions.", len(mem_actions))
 
----
-CURRENT OPERATION: FAILURE DIAGNOSIS
+    # Store verification and kill criteria for downstream loops
+    state.strategic_plan = json.dumps(payload, indent=2)
 
-Return JSON only (no markdown).
-Output object schema:
-{
-  "root_cause": "...",
-  "hidden_assumptions": ["..."],
-  "recommendation": "...",
-  "updated_tasks": [
-    {
-      "task_id": "T-01",
-      "name": "...",
-      "description": "...",
-      "dependencies": [],
-      "methodology": "...",
-      "inputs": ["..."],
-      "evaluation_criteria": ["..."],
-      "notes": "..."
-    }
-  ]
-}
+    # Check confidence threshold
+    meta = payload.get("meta", {})
+    confidence = float(meta.get("confidence_score", 1.0))
+    threshold = O1Settings.CONFIDENCE_THRESHOLD
 
-If no task graph changes are needed, return "updated_tasks": [].
-"""
+    if confidence < threshold:
+        experiment = payload.get("smallest_validating_experiment", {})
+        logger.warning(
+            "[STRATEGIC] Confidence %.2f < threshold %.2f. "
+            "Prioritizing validating experiment: %s",
+            confidence, threshold,
+            experiment.get("description", "N/A"),
+        )
+
+    return state
 
 
 def build_project_graph(state: SystemState) -> SystemState:
-    """Call strategist model and set a normalized, executable project graph."""
+    """Call strategist model using v2 contract and set a normalized, executable project graph."""
     logger.info("[STRATEGIC] Building project graph for goal: %s", state.current_goal)
 
-    snapshot = {
-        "goal": state.current_goal,
-        "constraints": state.constraints,
-        "heuristics": state.heuristics[-10:],
-        "completed_tasks": state.completed_tasks,
-        "loop_iteration": state.loop_iteration,
-    }
+    snapshot = json.dumps({
+        "active_goal": state.current_goal,
+        "runtime_modules": ["main.py", "planner.py", "worker.py", "critic.py", "state.py", "memory.py", "tools.py"],
+        "recent_experiment_results": [
+            f"[{e.outcome.upper()}] {e.hypothesis}: {e.output[:200]}"
+            for e in state.recent_experiments[-5:]
+        ],
+        "known_constraints": state.constraints,
+        "known_gaps": [state.last_error] if state.last_error else [],
+    }, indent=2)
 
-    messages = [
-        {
-            "role": "user",
-            "content": (
-                "OBJECTIVE:\nCreate the minimum reliable project graph for this goal.\n\n"
-                f"STATE SNAPSHOT:\n{json.dumps(snapshot, indent=2)}\n\n"
-                "DECISION QUESTION:\n"
-                "What task graph best maximizes progress under constraints while minimizing risk and rework?"
-            ),
-        }
-    ]
+    skills = memory.retrieve_skills(top_k=10)
+    heuristics_block = "\n".join(f"  - {h}" for h in skills) if skills else "  (none yet)"
 
-    raw = llm.call(messages, model=Models.STRATEGIC, system_prompt=_get_plan_system())
-    state.strategic_plan = raw
+    prompt = f"""## 0. Meta
+- caller: planner
+- confidence_threshold: {O1Settings.CONFIDENCE_THRESHOLD}
+- budget_envelope: Keep task count to 3-7. Prefer local/cheap execution.
+
+## 1. Objective
+{state.current_goal}
+
+## 2. Success Metric
+The project graph is successful if it produces observable, measurable progress toward the objective within the first 3 task completions.
+
+## 3. Current State Snapshot
+{snapshot}
+
+## 4. Constraints
+- Single machine (Apple M4 Pro, 24GB unified memory)
+- Local-first: prefer Ollama workers, escalate to API only when needed
+- Blast radius: patch (no architectural rewrites unless escalation)
+- Completed tasks so far: {json.dumps(state.completed_tasks)}
+
+## 5. Prior Attempts & Failure Signatures
+- Loop iteration: {state.loop_iteration}
+- Failure count this cycle: {state.failure_count}
+- Last error: {state.last_error[:400] if state.last_error else 'None'}
+- Known heuristics from skills DB:
+{heuristics_block}
+
+## 6. Explicit Option Set
+Present at least 2 candidate strategies and adjudicate between them.
+
+## 7. Assumptions & Unknowns
+List what you believe but haven't verified, and what data is missing.
+
+## 8. Decision Question
+Given the objective, constraints, and current state, which strategy and task graph maximizes validated progress per iteration while staying within budget?"""
+
+    messages = [{"role": "user", "content": prompt}]
+    raw = llm.call(messages, model=Models.STRATEGIC, system_prompt=_get_v2_system())
 
     try:
         payload = _parse_json(raw)
-        graph = _normalize_project_graph(payload)
-        state.project_graph = graph
-        state.task_queue = _build_initial_task_queue(graph, completed=state.completed_tasks)
+        if not isinstance(payload, dict):
+            raise ValueError("v2 response must be a JSON object.")
+
+        state = _process_v2_response(state, payload)
+
+        # Extract task graph from v2 response
+        tasks = payload.get("ordered_tasks", [])
+        if tasks:
+            graph = _normalize_project_graph({"tasks": tasks})
+            state.project_graph = graph
+            state.task_queue = _build_initial_task_queue(graph, completed=state.completed_tasks)
+        else:
+            raise ValueError("No ordered_tasks in strategic response.")
+
     except Exception as exc:
         raise RuntimeError(
             f"[STRATEGIC] Failed to build valid project graph: {exc}"
@@ -261,7 +349,7 @@ def build_project_graph(state: SystemState) -> SystemState:
 
 
 def diagnose_failures(state: SystemState) -> SystemState:
-    """Call strategist model to diagnose repeated failures and reframe strategy."""
+    """Call strategist model using v2 contract to diagnose repeated failures and reframe strategy."""
     logger.info(
         "[STRATEGIC] Diagnosing %d failures. Last error: %s",
         state.failure_count,
@@ -274,47 +362,83 @@ def diagnose_failures(state: SystemState) -> SystemState:
         if e.outcome == "failure"
     )
 
-    snapshot = {
-        "goal": state.current_goal,
-        "active_hypothesis": state.active_hypothesis,
-        "current_design": state.current_design,
-        "task_queue": state.task_queue,
-        "completed_tasks": state.completed_tasks,
-    }
+    snapshot = json.dumps({
+        "active_goal": state.current_goal,
+        "runtime_modules": ["main.py", "planner.py", "worker.py", "critic.py", "state.py", "memory.py", "tools.py"],
+        "recent_experiment_results": [
+            f"[{e.outcome.upper()}] {e.hypothesis}: {e.output[:200]}"
+            for e in state.recent_experiments[-10:]
+        ],
+        "known_constraints": state.constraints,
+        "known_gaps": [state.last_error[:400]] if state.last_error else [],
+    }, indent=2)
 
-    messages = [
-        {
-            "role": "user",
-            "content": (
-                "OBJECTIVE:\nDiagnose the root cause of repeated failures and produce a corrected strategy.\n\n"
-                f"STATE SNAPSHOT:\n{json.dumps(snapshot, indent=2)}\n\n"
-                f"FAILURE LOG:\n{failure_log}\n\n"
-                "DECISION QUESTION:\n"
-                "What strategic change gives the highest chance of progress on the next cycle?"
-            ),
-        }
-    ]
+    prompt = f"""## 0. Meta
+- caller: escalation
+- confidence_threshold: {O1Settings.CONFIDENCE_THRESHOLD}
+- budget_envelope: Minimize cost. Prefer smallest corrective action.
 
-    raw = llm.call(messages, model=Models.STRATEGIC, system_prompt=_get_diagnose_system())
-    state.strategic_plan = raw
+## 1. Objective
+Diagnose the root cause of {state.failure_count} consecutive failures and produce a corrected strategy.
+
+## 2. Success Metric
+The corrected strategy produces at least one successful experiment in the next cycle.
+
+## 3. Current State Snapshot
+{snapshot}
+
+## 4. Constraints
+- Active hypothesis: {state.active_hypothesis}
+- Current design: {json.dumps(state.current_design, indent=2)}
+- Task queue: {json.dumps(state.task_queue)}
+- Completed: {json.dumps(state.completed_tasks)}
+- Blast radius: patch | refactor (rewrite only if architecturally broken)
+
+## 5. Prior Attempts & Failure Signatures
+{failure_log}
+
+Failure category analysis requested: logic | tooling | architecture | data | resource
+
+## 6. Explicit Option Set
+Present at least 2 candidate recovery strategies:
+- Option A: Minimal patch to the current approach
+- Option B: Reframe the hypothesis entirely
+- Option C (if needed): Architectural change
+
+## 7. Assumptions & Unknowns
+What assumptions led to these failures? What data is missing?
+
+## 8. Decision Question
+Given {state.failure_count} consecutive failures with the signatures above, which recovery strategy maximizes the probability of successful progress on the next cycle?
+
+Also run a pre-mortem: assume the chosen recovery strategy also fails after 3 more attempts. What are the most likely root causes and what early signals would predict them?"""
+
+    messages = [{"role": "user", "content": prompt}]
+    raw = llm.call(messages, model=Models.STRATEGIC, system_prompt=_get_v2_system())
 
     try:
-        diagnosis = _parse_json(raw)
-        if not isinstance(diagnosis, dict):
-            raise ValueError("Diagnosis response must be an object.")
+        payload = _parse_json(raw)
+        if not isinstance(payload, dict):
+            raise ValueError("v2 diagnosis response must be a JSON object.")
+
+        state = _process_v2_response(state, payload)
+
+        # Extract recommendation from chosen strategy
+        chosen = payload.get("chosen_strategy", {})
+        recommendation = str(chosen.get("rationale") or chosen.get("expected_outcome") or "").strip()
+        if not recommendation:
+            recommendation = "Revise approach based on failure analysis."
+
+        # Apply updated task graph if present
+        tasks = payload.get("ordered_tasks", [])
+        if isinstance(tasks, list) and tasks:
+            graph = _normalize_project_graph({"tasks": tasks})
+            state.project_graph = graph
+            state.task_queue = _build_initial_task_queue(graph, completed=state.completed_tasks)
+            logger.info("[STRATEGIC] Applied updated task graph with %d tasks.", len(graph))
+
     except Exception as exc:
-        raise RuntimeError(f"[STRATEGIC] Failed to parse diagnosis JSON: {exc}") from exc
-
-    recommendation = str(diagnosis.get("recommendation") or "").strip()
-    if not recommendation:
-        recommendation = "Revise approach based on failure analysis."
-
-    updated_tasks = diagnosis.get("updated_tasks", [])
-    if isinstance(updated_tasks, list) and updated_tasks:
-        graph = _normalize_project_graph({"tasks": updated_tasks})
-        state.project_graph = graph
-        state.task_queue = _build_initial_task_queue(graph, completed=state.completed_tasks)
-        logger.info("[STRATEGIC] Applied updated task graph with %d tasks.", len(graph))
+        raise RuntimeError(f"[STRATEGIC] Failed to parse v2 diagnosis: {exc}") from exc
 
     state.active_hypothesis = recommendation
     state.failure_count = 0
