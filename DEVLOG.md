@@ -112,6 +112,9 @@ flowchart TB
 | 2026-03-13 | v2 strategic query contract (12-part) | Synthesized best of O3, GPT-5.4, Codex evaluations | docs/lab/model-eval/ |
 | 2026-03-13 | Architecture validated by Oracle | O1 clean-room design converged on our existing architecture | oracle-v2-clean-room-response.json |
 | 2026-03-13 | Goal 001: model optimization | Known-answer validation — draftbench predicts the outcome | goals/001-model-optimization.md |
+| 2026-03-13 | 14B coder is optimal worker model | 24/25 benchmark score, matches draftbench prediction | GOAL_001_REPORT.md |
+| 2026-03-13 | Model family > param count | Code-tuned 14B > general 7B; tuned 1B > general 1.5B | Goal 001 full sweep |
+| 2026-03-13 | Critic JSON needs robust parsing | gpt-4o wraps JSON in markdown fences; `_extract_json()` added | Bug found during smoke test |
 
 ## Current Status
 
@@ -129,11 +132,26 @@ flowchart TB
 ### What's Next
 - [x] Build the 5-task benchmark suite for quality scoring → `benchmark.py`
 - [x] Build Goal 001 runner → `run_goal_001.py`
-- [ ] Reboot, launch Terminal-only, run smoke test
-- [ ] Pull missing Ollama models (qwen2.5:1.5b, qwen2.5:7b)
-- [ ] Run full sweep and validate convergence against draftbench predictions
+- [x] Reboot, launch Terminal-only, run smoke test
+- [x] Pull missing Ollama models (qwen2.5:1.5b, qwen2.5:7b)
+- [x] Run full sweep and validate convergence against draftbench predictions
+- [x] Fix critic JSON parsing bug (markdown fences) → `_extract_json()`
+- [x] Write GOAL_001_REPORT.md with expected vs actual analysis
 
-### On Deck (not blocking)
+### Goal 001 Results (2026-03-13)
+
+| Model | Score | Time | Rank |
+|-------|-------|------|------|
+| qwen2.5-coder:14b-instruct-q6_K | 24/25 | 50.5s | 1st |
+| qwen2.5:7b | 19/25 | 81.3s | 2nd |
+| llama3.2:1b | 16/25 | 16.1s | 3rd |
+| qwen2.5:1.5b | 11/25 | 46.0s | 4th |
+
+**Winner:** 14B coder — matches draftbench prediction.
+**Full report:** `ai-lab/goal_001_results/GOAL_001_REPORT.md`
+
+### On Deck
+- [ ] Test speculative decoding: 14B + 1.5B draft via MLX (native Apple Silicon)
 - [ ] Extract GPT-5.4's eval harness into `ai-lab/evals/knowledge_plane/`
 - [ ] Build the A/B retrieval comparison (local vs hosted)
 - [ ] Add vector search to skills DB (currently tag-based)
@@ -142,17 +160,17 @@ flowchart TB
 ## V-Model Progress
 
 ```
-30,000 ft ─── Oracle validates architecture ✅ ◄── WE ARE HERE
+30,000 ft ─── Oracle validates architecture ✅
               │
-20,000 ft ─── Goal 001 defined, tools identified
+20,000 ft ─── Goal 001 defined, tools identified ✅
               │
-10,000 ft ─── Wire draftbench, build benchmark suite
+10,000 ft ─── Wire draftbench, build benchmark suite ✅
               │
-Ground    ─── Run end-to-end, observe convergence
+Ground    ─── Run end-to-end, observe convergence ✅
               │
-10,000 ft ─── Validate results against predictions
+10,000 ft ─── Validate results against predictions ✅  ◄── COMPLETED
               │
-20,000 ft ─── Extract learnings, update heuristics
+20,000 ft ─── Extract learnings, update heuristics ← NEXT
               │
 30,000 ft ─── Architecture confirmed or corrected
 ```
