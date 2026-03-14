@@ -445,3 +445,156 @@ Also run a pre-mortem: assume the chosen recovery strategy also fails after 3 mo
     state.escalated = True
     logger.info("[STRATEGIC] Diagnosis complete.")
     return state
+
+
+# ════════════════════════════════════════════════════════════════
+#  .sisyphus/plans/ Emitter (OMO Integration — Option B)
+# ════════════════════════════════════════════════════════════════
+
+_PLANS_DIR = Paths.ROOT.parent / ".sisyphus" / "plans"
+
+
+def _category_for_task(task: dict[str, Any]) -> str:
+    """Heuristic: pick an OMO category based on task keywords."""
+    desc = (task.get("description", "") + " " + task.get("name", "")).lower()
+    if any(kw in desc for kw in ("test", "verify", "validate", "check")):
+        return "quick"
+    if any(kw in desc for kw in ("architect", "design", "diagnos", "review")):
+        return "ultrabrain"
+    if any(kw in desc for kw in ("refactor", "rewrite", "complex", "debug")):
+        return "deep"
+    if any(kw in desc for kw in ("doc", "write", "readme", "report")):
+        return "writing"
+    return "unspecified-low"
+
+
+def _render_task(task: dict[str, Any], index: int) -> str:
+    """Render a single task in Atlas-compatible checkbox format."""
+    task_id = task.get("id", f"T-{index:02d}")
+    name = task.get("name", task_id)
+    desc = task.get("description", "")
+    deps = task.get("depends_on", [])
+    criteria = task.get("evaluation_criteria", [])
+    methodology = task.get("methodology", "")
+    category = _category_for_task(task)
+
+    lines = [f"- [ ] {index}. {name}"]
+    lines.append("")
+    lines.append(f"  **What to do**: {desc}")
+    if methodology:
+        lines.append(f"  {methodology}")
+    lines.append(f"  **Must NOT do**: Do not modify files outside the task scope.")
+    lines.append("")
+    lines.append(f"  **Recommended Agent Profile**:")
+    lines.append(f"  - Category: `{category}`")
+    lines.append("")
+
+    if deps:
+        lines.append(f"  **Parallelization**: Blocked By: {', '.join(deps)}")
+    else:
+        lines.append(f"  **Parallelization**: Can Parallel: YES | Wave 1")
+    lines.append("")
+
+    if criteria:
+        lines.append(f"  **Acceptance Criteria**:")
+        for c in criteria:
+            lines.append(f"  - [ ] {c}")
+    else:
+        lines.append(f"  **Acceptance Criteria**:")
+        lines.append(f"  - [ ] Task completes without errors")
+    lines.append("")
+
+    lines.append(f"  **Commit**: YES | Message: `feat(lab): {name.lower()}`")
+    lines.append("")
+
+    return "\n".join(lines)
+
+
+def emit_sisyphus_plan(state: SystemState, plan_name: str | None = None) -> Path:
+    """
+    Render the current project graph as a .sisyphus/plans/*.md file
+    compatible with OMO's Atlas executor and /start-work command.
+
+    Returns the path to the generated plan file.
+    """
+    if not state.project_graph:
+        raise ValueError("No project graph to emit. Run build_project_graph first.")
+
+    _PLANS_DIR.mkdir(parents=True, exist_ok=True)
+
+    if not plan_name:
+        # Derive from goal
+        slug = state.current_goal[:40].lower()
+        slug = "".join(c if c.isalnum() or c == "-" else "-" for c in slug)
+        slug = slug.strip("-") or "experiment"
+        plan_name = slug
+
+    plan_path = _PLANS_DIR / f"{plan_name}.md"
+
+    # Build the plan markdown
+    sections = []
+
+    # Header
+    sections.append(f"# {state.current_goal}")
+    sections.append("")
+    sections.append("## TL;DR")
+    sections.append(f"> **Summary**: Execute task graph for: {state.current_goal}")
+    sections.append(f"> **Deliverables**: {len(state.project_graph)} tasks")
+
+    # Count waves
+    has_deps = any(t.get("depends_on") for t in state.project_graph)
+    if has_deps:
+        sections.append(f"> **Parallel**: YES - multiple waves")
+    else:
+        sections.append(f"> **Parallel**: YES - all independent")
+
+    sections.append(f"> **Critical Path**: {' → '.join(t['id'] for t in state.project_graph)}")
+    sections.append("")
+
+    # Context
+    sections.append("## Context")
+    sections.append("### Original Request")
+    sections.append(f"Goal: {state.current_goal}")
+    if state.active_hypothesis:
+        sections.append(f"Active hypothesis: {state.active_hypothesis}")
+    sections.append("")
+
+    if state.constraints:
+        sections.append("### Constraints")
+        for c in state.constraints:
+            sections.append(f"- {c}")
+        sections.append("")
+
+    # Tasks
+    sections.append("## Tasks")
+    sections.append("")
+    sections.append("> EVERY task MUST have: Agent Profile + Parallelization + Acceptance Criteria.")
+    sections.append("")
+
+    for i, task in enumerate(state.project_graph, start=1):
+        sections.append(_render_task(task, i))
+
+    # Final Verification Wave
+    sections.append("## Final Verification Wave")
+    sections.append("")
+    sections.append("- [ ] F1. Plan Compliance Audit — oracle")
+    sections.append("- [ ] F2. Code Quality Review — unspecified-high")
+    sections.append("")
+
+    # Commit Strategy
+    sections.append("## Commit Strategy")
+    sections.append("One commit per task. Conventional commit format.")
+    sections.append("")
+
+    # Success Criteria
+    sections.append("## Success Criteria")
+    sections.append(f"All tasks pass acceptance criteria. Eval harness score ≥ baseline (0.562).")
+
+    plan_content = "\n".join(sections)
+    plan_path.write_text(plan_content)
+
+    logger.info(
+        "[STRATEGIC] Emitted .sisyphus plan: %s (%d tasks, %d bytes)",
+        plan_path, len(state.project_graph), len(plan_content),
+    )
+    return plan_path
