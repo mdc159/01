@@ -30,10 +30,18 @@ import planner
 import worker
 import critic
 import memory
+import opencode_executor
 
 # ── Eval harness gate (optional — runs when cases file exists) ────
 _EVAL_CASES = Paths.ROOT / "evals" / "knowledge_plane" / "cases.jsonl"
 _EVAL_SCORE_THRESHOLD = float(__import__("os").environ.get("EVAL_SCORE_THRESHOLD", "0.56"))
+
+# ── OpenCode execution mode ───────────────────────────────────────
+# Set OPENCODE_EXECUTOR=1 to route experiment-loop tasks through
+# opencode run --format json instead of the built-in worker.
+_USE_OPENCODE = __import__("os").environ.get("OPENCODE_EXECUTOR", "") == "1"
+_OPENCODE_AGENT = __import__("os").environ.get("OPENCODE_AGENT", "")  # e.g. "sisyphus"
+_OPENCODE_MODEL = __import__("os").environ.get("OPENCODE_MODEL", "")  # e.g. "openai/gpt-5.3-codex"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -121,7 +129,56 @@ def experiment_loop(
     """
     Inner loop: try a task, evaluate, retry with hints on failure.
     Returns (updated_state, success_flag).
+
+    When OPENCODE_EXECUTOR=1, routes execution through opencode run
+    instead of the built-in worker. OpenCode handles its own retries
+    via OMO agent loops, so we run it once and check the result.
     """
+    # ── OpenCode execution path ───────────────────────────────────
+    if _USE_OPENCODE and opencode_executor.is_available():
+        logger.info("[OPENCODE] Executing task via OpenCode: %s", task[:80])
+        result = opencode_executor.run_task(
+            task,
+            agent=_OPENCODE_AGENT or None,
+            model=_OPENCODE_MODEL or None,
+        )
+
+        if result.success:
+            logger.info(
+                "✅ OpenCode task completed: %d steps, %d tokens, $%.4f, files=%s",
+                result.steps, result.total_tokens, result.total_cost,
+                result.files_changed or "none",
+            )
+            # Record as successful experiment
+            from state import ExperimentResult
+            state.record_experiment(ExperimentResult(
+                hypothesis=task,
+                outcome="success",
+                output=result.text_output[:2000],
+                metadata={
+                    "executor": "opencode",
+                    "agent": _OPENCODE_AGENT or "default",
+                    "session_id": result.session_id,
+                    "tokens": result.total_tokens,
+                    "cost": result.total_cost,
+                    "files_changed": result.files_changed,
+                    "tools_used": [t["tool"] for t in result.tools_used],
+                },
+            ))
+            return state, True
+        else:
+            logger.warning(
+                "❌ OpenCode task failed: %s", result.error or "no DONE signal"
+            )
+            state.record_experiment(ExperimentResult(
+                hypothesis=task,
+                outcome="failure",
+                output=result.error or result.text_output[:2000],
+                metadata={"executor": "opencode", "session_id": result.session_id},
+            ))
+            return state, False
+
+    # ── Built-in worker path ──────────────────────────────────────
     improvement_hint = ""
     criteria = success_criteria or [
         "Output is directly relevant to the stated task.",
@@ -239,7 +296,22 @@ def strategic_loop(goal: str) -> SystemState:
             raise RuntimeError("Planner returned no executable tasks.")
         # T-01: Emit .sisyphus plan for OMO Atlas execution
         plan_path = planner.emit_sisyphus_plan(state)
-        logger.info("══ Plan emitted: %s (use /start-work in OpenCode)", plan_path)
+        logger.info("══ Plan emitted: %s", plan_path)
+
+        # If OpenCode executor is active, execute the plan directly
+        if _USE_OPENCODE and opencode_executor.is_available():
+            logger.info("══ Executing plan via OpenCode agent=%s", _OPENCODE_AGENT or "default")
+            plan_result = opencode_executor.run_plan(
+                plan_path,
+                agent=_OPENCODE_AGENT or "sisyphus",
+                model=_OPENCODE_MODEL or None,
+                timeout=600,
+            )
+            if plan_result.success:
+                logger.info("══ Plan executed successfully via OpenCode (%d steps, $%.4f)",
+                            plan_result.steps, plan_result.total_cost)
+            else:
+                logger.warning("══ Plan execution failed: %s", plan_result.error)
         state.save(_STATE_FILE)
 
     logger.info("══ Entering project loop with %d tasks.", len(state.task_queue))
