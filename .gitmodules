@@ -10,3 +10,9 @@
 [submodule "references/draftbench"]
 	path = references/draftbench
 	url = https://github.com/alexziskind1/draftbench.git
+[submodule "references/opencode"]
+	path = references/opencode
+	url = https://github.com/sst/opencode.git
+[submodule "references/oh-my-opencode"]
+	path = references/oh-my-opencode
+	url = git@github.com:code-yeongyu/oh-my-opencode.git
