@@ -21,21 +21,23 @@ cd ai-lab && uv run main.py "Your goal here"
 
 | File | LOC | Role |
 |------|-----|------|
+| `ai-lab/planner.py` | 447 | O1 strategic planning + failure diagnosis |
+| `ai-lab/memory.py` | 247 | Skill heuristics DB + vector search (Ollama embeddings) |
 | `ai-lab/main.py` | 186 | Three-loop orchestration engine |
-| `ai-lab/planner.py` | 323 | O1 strategic planning + failure diagnosis |
-| `ai-lab/llm.py` | 130 | Unified LLM client (handles O1 API quirks) |
-| `ai-lab/critic.py` | 113 | Worker output evaluation + scoring |
+| `ai-lab/llm.py` | 185 | Unified LLM client (handles O1 API quirks) |
 | `ai-lab/state.py` | 121 | 5-layer memory hierarchy, JSON checkpoint/resume |
-| `ai-lab/config.py` | 101 | Model routing, thresholds, env config |
-| `ai-lab/memory.py` | 95 | Skill heuristics DB + artifact registry |
+| `ai-lab/critic.py` | 113 | Worker output evaluation + scoring |
+| `ai-lab/config.py` | 103 | Model routing, thresholds, env config |
 | `ai-lab/tools.py` | 86 | Deterministic tools: Python exec, shell, file I/O |
 | `ai-lab/worker.py` | 65 | Stateless task execution (fast tier) |
+| `ai-lab/evals/knowledge_plane/` | 870 | A/B retrieval eval harness (10 cases, 5 buckets) |
 
 ## Key Documents
 
 | Document | Purpose |
 |----------|---------|
 | `CANON.md` | Product spec authority — all decisions checked against this |
+| `docs/ORIGIN.md` | Design narrative distilled from the founding GPT-5.4 conversation |
 | `ai-lab/o1_system_prompt.md` | Chief Strategist role definition for O1 |
 | `ai-lab/o1_next_question_mvp.md` | Template for structured O1 queries |
 | `docs/lab/architecture.md` | Mermaid diagrams of full system architecture |
@@ -56,4 +58,4 @@ cd ai-lab && uv run main.py "Your goal here"
 | STRATEGIC | `o1` | Planning, diagnosis | $$ (rare) |
 | PROJECT | `gpt-4o` | Evaluation, routing | $ |
 | WORKER | `gpt-4o-mini` | Execution, attempts | ¢ |
-| LOCAL_WORKER | Ollama `llama3.3:70b` | Local execution | $0 |
+| LOCAL_WORKER | Ollama `qwen2.5-coder:14b` | Local execution | $0 |

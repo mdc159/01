@@ -56,15 +56,15 @@ flowchart TB
 ├── DEVLOG.md                         # ← YOU ARE HERE
 ├── .gitmessage                       # Conventional commit template
 │
-├── ai-lab/                           # Core engine (~1,300 LOC)
+├── ai-lab/                           # Core engine (~1,700 LOC)
 │   ├── main.py                       # Three nested loops (186 LOC)
-│   ├── planner.py                    # Strategic planning, v2 contract (320 LOC)
+│   ├── planner.py                    # Strategic planning, v2 contract (447 LOC)
 │   ├── worker.py                     # Stateless task execution (65 LOC)
 │   ├── critic.py                     # Evaluator / scorer (113 LOC)
 │   ├── state.py                      # 5-layer memory, checkpoints (121 LOC)
-│   ├── memory.py                     # Skills DB + memory actions (130 LOC)
-│   ├── llm.py                        # Unified LLM client (186 LOC)
-│   ├── config.py                     # Model routing + thresholds (101 LOC)
+│   ├── memory.py                     # Skills DB + vector search (247 LOC)
+│   ├── llm.py                        # Unified LLM client (185 LOC)
+│   ├── config.py                     # Model routing + thresholds (103 LOC)
 │   ├── tools.py                      # Deterministic tools (86 LOC)
 │   ├── ask_o1.py                     # Direct O1 CLI
 │   │
@@ -79,6 +79,7 @@ flowchart TB
 │       └── 001-model-optimization.md # First validation goal
 │
 ├── docs/
+│   ├── ORIGIN.md                     # Design narrative (distilled from chat.md)
 │   ├── chat.md                       # Original 4,461-line design conversation with GPT-5.4
 │   ├── frontierscience-paper (1).pdf # Research paper
 │   └── lab/
@@ -86,6 +87,7 @@ flowchart TB
 │       ├── o1-strategy-prompt.md     # Full strategy doc with draftbench data
 │       ├── o1-o3-deployment-decision.md  # Codex's deployment analysis
 │       ├── oracle-v2-clean-room-response.json  # O1's full architecture validation
+│       ├── opencode-workflow-research-prompt.md # Deep research prompt for OMO capabilities
 │       └── model-eval/
 │           ├── README.md             # Scorecard across all models
 │           ├── gpt54-q1-protocol.md  # GPT-5.4 on protocol gaps
@@ -179,11 +181,23 @@ Bugs fixed during first run:
 - `DEFAULT_REPO_ROOT` was `parents[3]` (wrong depth) → fixed to `parents[2]`
 - OpenAI file_search rejects `.example` and `.toml` extensions → added `.txt` fallback in `safe_upload_name`
 
+### Vector Search Results (2026-03-14)
+
+| Backend | Avg Score | vs Stub |
+|---------|-----------|---------|
+| Stub local (DummyLocalBackend) | 0.465 | — |
+| Hosted (OpenAI file_search) | 0.547 | +0.082 |
+| **Vector local (Ollama nomic-embed-text)** | **0.562** | **+0.097** |
+
+Local vector retrieval beats hosted on 7/10 cases at zero API cost.
+Biggest local wins: `arch_001` (0.55 vs 0.44), `arch_002` (0.55 vs 0.20) — multi-doc reasoning cases.
+Backend: `evals/knowledge_plane/local_backend.py` using `RepoSearchBackend`.
+
 ### On Deck
 - [x] Extract GPT-5.4's eval harness into `ai-lab/evals/knowledge_plane/`
 - [x] Build the A/B retrieval comparison (local vs hosted)
+- [x] Add vector search to skills DB / local retrieval backend
 - [ ] Deep research: OpenCode + OMO workflow capabilities for improvement loop
-- [ ] Add vector search to skills DB (currently tag-based)
 - [ ] Observability beyond logging
 
 ## V-Model Progress

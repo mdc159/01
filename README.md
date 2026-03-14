@@ -62,7 +62,7 @@ The system routes to three tiers based on task complexity, not specific models. 
 | **Strategic** | `o1` | Planning, failure diagnosis | $$ (called rarely) |
 | **Project** | `gpt-4o` | Evaluation, task routing | $ |
 | **Worker** | `gpt-4o-mini` | Task execution, 100s of attempts | cents |
-| **Local** | Ollama `llama3.3:70b` | $0 execution on Apple Silicon | free |
+| **Local** | Ollama `qwen2.5-coder:14b` | $0 execution on Apple Silicon | free |
 
 These are starting defaults. One of the lab's first self-improvement goals is to determine optimal model selection for each tier given the hardware constraints. `llm.call()` handles O1 API quirks, Ollama local routing, and standard OpenAI calls behind a single interface — swapping models is a config change, not a code change.
 
@@ -74,23 +74,26 @@ These are starting defaults. One of the lab's first self-improvement goals is to
 ├── CLAUDE.md                   # Quick reference for AI assistants
 ├── .env.example                # All configuration options
 │
-├── ai-lab/                     # Core engine (~1,300 LOC)
+├── ai-lab/                     # Core engine (~1,700 LOC)
 │   ├── main.py                 # Three-loop orchestration
 │   ├── planner.py              # O1 strategic planning + failure diagnosis
 │   ├── llm.py                  # Unified LLM client (O1 + Ollama + standard)
 │   ├── critic.py               # Worker output evaluation + scoring
 │   ├── worker.py               # Stateless task execution
 │   ├── state.py                # 5-layer memory hierarchy + checkpointing
-│   ├── memory.py               # Skill heuristics DB + artifact registry
+│   ├── memory.py               # Skill heuristics DB + vector search (Ollama embeddings)
 │   ├── config.py               # Model routing + safety thresholds
 │   ├── tools.py                # Deterministic tools (Python, shell, file I/O)
 │   ├── ask_o1.py               # Direct O1 CLI for strategic queries
 │   ├── o1_system_prompt.md     # Chief Strategist role definition
-│   └── o1_next_question_mvp.md # Template for structured O1 queries
+│   ├── o1_next_question_mvp.md # Template for structured O1 queries
+│   └── evals/knowledge_plane/  # A/B retrieval eval harness (10 cases, 5 buckets)
 │
-└── docs/lab/                   # Architecture & strategy
-    ├── architecture.md         # Mermaid diagrams of full system
-    └── o1-strategy-prompt.md   # Structured O1 decision document
+├── docs/
+│   ├── ORIGIN.md               # Design narrative (distilled from chat.md)
+│   └── lab/                    # Architecture & strategy
+│       ├── architecture.md     # Mermaid diagrams of full system
+│       └── o1-strategy-prompt.md # Structured O1 decision document
 ```
 
 ## Configuration
