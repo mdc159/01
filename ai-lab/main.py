@@ -102,31 +102,30 @@ def run_eval_gate() -> tuple[float, bool, dict]:
         avg = summary.get("avg_case_score", 0.0)
         passed = avg >= _EVAL_SCORE_THRESHOLD
 
-        # Extract per-metric averages from per-case results
+        # Extract per-metric averages from results file
         details = {"avg_case_score": avg}
-        if len(blocks) > 1:
-            recalls, facts, schemas, citations = [], [], [], []
-            for block in blocks[1:]:
-                block = block.strip()
-                if not block:
-                    continue
-                try:
-                    case = json.loads(block)
-                    rg = case.get("retrieval_grade", {})
-                    recalls.append(rg.get("support_recall", 0.0))
-                    fg = case.get("fact_grade", {})
-                    facts.append(fg.get("gold_fact_coverage", 0.0))
-                    sg = case.get("schema_grade", {})
-                    schemas.append(1.0 if sg.get("schema_ok") else 0.0)
-                    cg = case.get("citation_grade", {})
-                    citations.append(1.0 if cg.get("citations_ok") else 0.0)
-                except (json.JSONDecodeError, TypeError):
-                    continue
-            if recalls:
-                details["avg_support_recall"] = sum(recalls) / len(recalls)
-                details["avg_gold_fact_coverage"] = sum(facts) / len(facts)
-                details["avg_schema_ok"] = sum(schemas) / len(schemas)
-                details["avg_citations_ok"] = sum(citations) / len(citations)
+        results_path = Paths.ROOT / "evals" / "knowledge_plane" / "results" / "latest.json"
+        if results_path.exists():
+            try:
+                results_data = json.loads(results_path.read_text())
+                cases = results_data.get("results", [])
+                if cases:
+                    recalls, facts, schemas, citations = [], [], [], []
+                    for case in cases:
+                        rg = case.get("retrieval_grade", {})
+                        recalls.append(rg.get("support_recall", 0.0))
+                        fg = case.get("fact_grade", {})
+                        facts.append(fg.get("gold_fact_coverage", 0.0))
+                        sg = case.get("schema_grade", {})
+                        schemas.append(1.0 if sg.get("schema_ok") else 0.0)
+                        cg = case.get("citation_grade", {})
+                        citations.append(1.0 if cg.get("citations_ok") else 0.0)
+                    details["avg_support_recall"] = sum(recalls) / len(recalls)
+                    details["avg_gold_fact_coverage"] = sum(facts) / len(facts)
+                    details["avg_schema_ok"] = sum(schemas) / len(schemas)
+                    details["avg_citations_ok"] = sum(citations) / len(citations)
+            except Exception as e:
+                logger.warning("📊 Could not parse results file: %s", e)
 
         logger.info(
             "📊 Eval gate: %.4f (threshold=%.2f) → %s",
@@ -521,10 +520,25 @@ def autonomous_improvement_loop(max_cycles: int | None = None) -> dict:
             logger.info("📸 Snapshot: %s", snapshot["commit_hash"])
 
         # Step 4: Execute improvement
-        state = load_or_create_state(f"autonomous-improvement-cycle-{cycle}")
-        state.active_hypothesis = template["hypothesis"]
-
-        state, success = experiment_loop(state, task_description)
+        # Prefer OpenCode (actual file editing), fall back to built-in worker
+        if _USE_OPENCODE and opencode_executor.is_available():
+            logger.info("[OPENCODE] Executing improvement via OpenCode")
+            oc_result = opencode_executor.run_task(
+                task_description,
+                agent=_OPENCODE_AGENT or None,
+                model=_OPENCODE_MODEL or None,
+            )
+            success = oc_result.success
+            if success:
+                logger.info("✅ OpenCode completed: %d steps, files=%s",
+                            oc_result.steps, oc_result.files_changed or "none")
+            else:
+                logger.warning("❌ OpenCode failed: %s", oc_result.error or "no DONE signal")
+        else:
+            # Built-in worker path — best effort for code tasks
+            state = load_or_create_state(f"autonomous-improvement-cycle-{cycle}")
+            state.active_hypothesis = template["hypothesis"]
+            state, success = experiment_loop(state, task_description)
 
         if not success:
             logger.warning("❌ Cycle %d: experiment failed. Skipping eval.", cycle)
