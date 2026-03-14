@@ -24,7 +24,7 @@ HERE = Path(__file__).resolve().parent
 RESULTS_DIR = HERE / "results"
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
-DEFAULT_REPO_ROOT = HERE.parents[3]
+DEFAULT_REPO_ROOT = HERE.parents[2]
 
 DEFAULT_PATTERNS = [
     "README.md",

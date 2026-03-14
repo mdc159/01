@@ -16,14 +16,34 @@ def canonical_doc_id(path: str | Path) -> str:
     return str(Path(path).as_posix()).lstrip("./")
 
 
+_SUPPORTED_EXTENSIONS = frozenset({
+    ".art", ".bat", ".brf", ".c", ".cls", ".cpp", ".cs", ".css", ".csv",
+    ".diff", ".doc", ".docx", ".dot", ".eml", ".es", ".gif", ".go", ".h",
+    ".hs", ".htm", ".html", ".hwp", ".hwpx", ".ics", ".ifb", ".java",
+    ".jpeg", ".jpg", ".js", ".json", ".keynote", ".ksh", ".ltx", ".mail",
+    ".markdown", ".md", ".mht", ".mhtml", ".mjs", ".nws", ".odt", ".pages",
+    ".patch", ".pdf", ".php", ".pkl", ".pl", ".pm", ".png", ".pot", ".ppa",
+    ".pps", ".ppt", ".pptx", ".pwz", ".py", ".rb", ".rst", ".rtf", ".scala",
+    ".sh", ".shtml", ".srt", ".sty", ".svg", ".svgz", ".tar", ".tex",
+    ".text", ".ts", ".txt", ".vcf", ".vtt", ".webp", ".wiz", ".xla", ".xlb",
+    ".xlc", ".xlm", ".xls", ".xlsx", ".xlt", ".xlw", ".xml", ".yaml",
+    ".yml", ".zip",
+})
+
+
 def safe_upload_name(doc_id: str, sha256_hex: str) -> str:
     """
     Deterministic hosted filename derived from canonical doc_id.
     We do NOT trust hosted filenames to equal repo-relative paths.
+    Appends .txt if the original extension is not supported by OpenAI.
     """
     stem = re.sub(r"[^A-Za-z0-9._-]+", "__", doc_id)
     short = sha256_hex[:12]
-    return f"{short}__{stem}"
+    name = f"{short}__{stem}"
+    ext = Path(name).suffix.lower()
+    if ext not in _SUPPORTED_EXTENSIONS:
+        name = f"{name}.txt"
+    return name
 
 
 def manifest_corpus_version(manifest: dict[str, Any]) -> str:

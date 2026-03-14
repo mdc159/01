@@ -1,0 +1,472 @@
+{
+  "repo_root": "/Users/mike/projects/01",
+  "vector_store_id": "vs_69b52701c360819181b3bba7004f94c5",
+  "created_new_store": true,
+  "file_count": 46,
+  "include_code": true,
+  "include_references": false,
+  "exported_at": "2026-03-14T09:24:51Z",
+  "files": [
+    {
+      "doc_id": "env.example",
+      "path": "env.example",
+      "upload_name": "9ee86e7c0968__env.example.txt",
+      "bytes": 2295,
+      "sha256": "9ee86e7c09683f3b546f5b80cedecf6790fc4c02d01f57e1e17738d60a609a9d",
+      "vector_store_file_id": "file-9gCxBiWXD8EgPap5ZkDXXL",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "CANON.md",
+      "path": "CANON.md",
+      "upload_name": "6104507b2c8d__CANON.md",
+      "bytes": 8280,
+      "sha256": "6104507b2c8d7242fffd23e8847758386ccafec1f242065a90e9719e58da3f11",
+      "vector_store_file_id": "file-2xUytsRSHjQ4UG9kJhpipf",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "CLAUDE.md",
+      "path": "CLAUDE.md",
+      "upload_name": "ca920a1c800a__CLAUDE.md",
+      "bytes": 2708,
+      "sha256": "ca920a1c800a45398d94662393f4362a9114545f1b548d233f6f02302538a0ea",
+      "vector_store_file_id": "file-S3VBFce9StWjUmDpcQxgSw",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "README.md",
+      "path": "README.md",
+      "upload_name": "c2f067b3e02d__README.md",
+      "bytes": 9710,
+      "sha256": "c2f067b3e02dd94ec9f182fd418ad147a2ea9f26b364a94fe3982ed8f45c8466",
+      "vector_store_file_id": "file-EUwXF4xPdtLnPLCmmJ6T6t",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/README.md",
+      "path": "ai-lab/README.md",
+      "upload_name": "1b01661608c0__ai-lab__README.md",
+      "bytes": 1531,
+      "sha256": "1b01661608c0a30d93bf3f8c29d5ee4979785d0075ea5779d920ac794fd5ce36",
+      "vector_store_file_id": "file-Ej48ZtyB5yWsye8KMLHVPD",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/ask_o1.py",
+      "path": "ai-lab/ask_o1.py",
+      "upload_name": "143497436c41__ai-lab__ask_o1.py",
+      "bytes": 2906,
+      "sha256": "143497436c41f26cc53aaef4a19b989975e18a15f384f8cbe9c311ef89313fcd",
+      "vector_store_file_id": "file-3d1XMPXs5T5BW6U6YvCFeU",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/benchmark.py",
+      "path": "ai-lab/benchmark.py",
+      "upload_name": "6775c7fa4550__ai-lab__benchmark.py",
+      "bytes": 9690,
+      "sha256": "6775c7fa4550fa9b54282c4b8fe74d3ab7cf66b7cbbb4b2f1c4e01d1e952f657",
+      "vector_store_file_id": "file-PSbfLGNNdhjBYBws4X2uv1",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/config.py",
+      "path": "ai-lab/config.py",
+      "upload_name": "52e53ee0987f__ai-lab__config.py",
+      "bytes": 5019,
+      "sha256": "52e53ee0987f33028bb16262d50438e5340c66cb7a20bad4fb058c4fd4ed1348",
+      "vector_store_file_id": "file-9HEadMC7BJYAGuugrgp4EP",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/critic.py",
+      "path": "ai-lab/critic.py",
+      "upload_name": "44c40b165be0__ai-lab__critic.py",
+      "bytes": 3268,
+      "sha256": "44c40b165be09362a9ab05699e2d6caac81236f91310fdb4df800a7801f499ba",
+      "vector_store_file_id": "file-NxBvtnpjNMJR9isdpNhzpF",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/evals/__init__.py",
+      "path": "ai-lab/evals/__init__.py",
+      "upload_name": "7d39954bb25d__ai-lab__evals____init__.py",
+      "bytes": 28,
+      "sha256": "7d39954bb25d5f6a476fedc94f1f1dda6f4ad43c26f3e72c3d3a267a879d4b67",
+      "vector_store_file_id": "file-SF2QHtWs6DpMUZK43dURfN",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/evals/knowledge_plane/__init__.py",
+      "path": "ai-lab/evals/knowledge_plane/__init__.py",
+      "upload_name": "7a2815de5c52__ai-lab__evals__knowledge_plane____init__.py",
+      "bytes": 42,
+      "sha256": "7a2815de5c52f8074e980974e12fe9fb7e2abff2ee5d466111d45249431c398a",
+      "vector_store_file_id": "file-BnobUgjSzDLYs3yifEgqBa",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/evals/knowledge_plane/adapters.py",
+      "path": "ai-lab/evals/knowledge_plane/adapters.py",
+      "upload_name": "df2ae12da87a__ai-lab__evals__knowledge_plane__adapters.py",
+      "bytes": 3881,
+      "sha256": "df2ae12da87a855ff9da9eb8512a5e1a0652d36d8913dd02043149eb6f519e7a",
+      "vector_store_file_id": "file-LdqMvq17Co4Vx7Ajazyyf7",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/evals/knowledge_plane/exporters.py",
+      "path": "ai-lab/evals/knowledge_plane/exporters.py",
+      "upload_name": "efe009a188d1__ai-lab__evals__knowledge_plane__exporters.py",
+      "bytes": 6196,
+      "sha256": "efe009a188d1a420ad4b48e4868ea4e39ce5ca0803fae2d6816299292bfbf89c",
+      "vector_store_file_id": "file-FNjwu8J1VDJyaRH2GK5PKf",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/evals/knowledge_plane/graders.py",
+      "path": "ai-lab/evals/knowledge_plane/graders.py",
+      "upload_name": "9cca857527da__ai-lab__evals__knowledge_plane__graders.py",
+      "bytes": 2111,
+      "sha256": "9cca857527da60f88fb534bd25dc739b4d3a9aa26a5bf9cfdc8d24782f23202a",
+      "vector_store_file_id": "file-MtfoCiHM2z7qvHUYDKpsdL",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/evals/knowledge_plane/metrics.py",
+      "path": "ai-lab/evals/knowledge_plane/metrics.py",
+      "upload_name": "f9318f68c21d__ai-lab__evals__knowledge_plane__metrics.py",
+      "bytes": 1349,
+      "sha256": "f9318f68c21d3bef78114fe791d08837d3888255127d45d930e6399170704332",
+      "vector_store_file_id": "file-SNThSJddeGZ1Lvdi77BpQt",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/evals/knowledge_plane/normalization.py",
+      "path": "ai-lab/evals/knowledge_plane/normalization.py",
+      "upload_name": "312271ce04bb__ai-lab__evals__knowledge_plane__normalization.py",
+      "bytes": 4415,
+      "sha256": "312271ce04bbebddea805fc7be9ac8be02fc9a2d65ace5562c80a3b0ac5b3d06",
+      "vector_store_file_id": "file-R1Y8gecPrTEtat232KvVbT",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/evals/knowledge_plane/runner.py",
+      "path": "ai-lab/evals/knowledge_plane/runner.py",
+      "upload_name": "e476712b18d5__ai-lab__evals__knowledge_plane__runner.py",
+      "bytes": 8427,
+      "sha256": "e476712b18d5f8a6aa820e3d96fff22fb51d915346c26f3e85c654a653bbae6b",
+      "vector_store_file_id": "file-H4vbvDwResmYaFPKKrboT5",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/goal_001_results/GOAL_001_REPORT.md",
+      "path": "ai-lab/goal_001_results/GOAL_001_REPORT.md",
+      "upload_name": "059c3b956fd6__ai-lab__goal_001_results__GOAL_001_REPORT.md",
+      "bytes": 10598,
+      "sha256": "059c3b956fd6f2aa4c43f8d154f7649439e938f47704564a39b0564b527ea131",
+      "vector_store_file_id": "file-Hf7kYWkinfDbWjja2tUUsp",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/goals/001-model-optimization.md",
+      "path": "ai-lab/goals/001-model-optimization.md",
+      "upload_name": "b4e7bdcac47f__ai-lab__goals__001-model-optimization.md",
+      "bytes": 3091,
+      "sha256": "b4e7bdcac47f42922c3baa807246eb6c6eebe4ac397cf48230810fee196e1936",
+      "vector_store_file_id": "file-CcmWA6CBBJAHH2wPMcysWy",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/llm.py",
+      "path": "ai-lab/llm.py",
+      "upload_name": "8ad2088e44be__ai-lab__llm.py",
+      "bytes": 6158,
+      "sha256": "8ad2088e44be771f6bf6aae3b012d27a0af2c06865fe6fcd7f3da525d9f444aa",
+      "vector_store_file_id": "file-UfHSqy97uU2ruSFzkH2otb",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/main.py",
+      "path": "ai-lab/main.py",
+      "upload_name": "ee551f748fd0__ai-lab__main.py",
+      "bytes": 7309,
+      "sha256": "ee551f748fd0dd2284e319d90f5100d1116ad2532600ad7382785b38e7d7628c",
+      "vector_store_file_id": "file-D26RbuWb9D2ETsNS6TvoAQ",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/memory.py",
+      "path": "ai-lab/memory.py",
+      "upload_name": "ec90f99fe881__ai-lab__memory.py",
+      "bytes": 5092,
+      "sha256": "ec90f99fe8816df465f94c5097b8f9b76891d66fb366dc17ba087c3ad0a40a82",
+      "vector_store_file_id": "file-WovjgRaWXVfcr3zbRkRaGC",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/o1_next_question_mvp.md",
+      "path": "ai-lab/o1_next_question_mvp.md",
+      "upload_name": "e80c697a6c05__ai-lab__o1_next_question_mvp.md",
+      "bytes": 2061,
+      "sha256": "e80c697a6c050f3dd3211f8bde654579a011f3cb596a4300a8eea70f731fff7a",
+      "vector_store_file_id": "file-HKjgLgzzZ3BrccebZePijL",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/o1_next_question_v2.md",
+      "path": "ai-lab/o1_next_question_v2.md",
+      "upload_name": "e84fc76116fb__ai-lab__o1_next_question_v2.md",
+      "bytes": 3794,
+      "sha256": "e84fc76116fbe55c5f232b181c6b2e6f8ca1d65adf0f273cd095dd4f5f82846d",
+      "vector_store_file_id": "file-9GPkwJ3P5Ycq3oYnDXemvj",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/o1_system_prompt.md",
+      "path": "ai-lab/o1_system_prompt.md",
+      "upload_name": "536e73a4cc29__ai-lab__o1_system_prompt.md",
+      "bytes": 7524,
+      "sha256": "536e73a4cc29412532edeb641d72f7492ed81ef40cd6c9019143e61b4f0d04f3",
+      "vector_store_file_id": "file-UFkWyfbL4Yh3kyp2eb6DLU",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/o1_system_prompt_indexed_draft.md",
+      "path": "ai-lab/o1_system_prompt_indexed_draft.md",
+      "upload_name": "46e65120ef1c__ai-lab__o1_system_prompt_indexed_draft.md",
+      "bytes": 6454,
+      "sha256": "46e65120ef1cb81a7718fa8a40d199198ee97f004edfea6ad8a49c79d07b4dbe",
+      "vector_store_file_id": "file-HuEMarryzvBLD6DYJZxP2C",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/oracle-v2-architecture-review.md",
+      "path": "ai-lab/oracle-v2-architecture-review.md",
+      "upload_name": "fab636eb4b64__ai-lab__oracle-v2-architecture-review.md",
+      "bytes": 4956,
+      "sha256": "fab636eb4b64503674173a72bfd0e6b5eb0cc79991ddd4c1e458e9060ea50139",
+      "vector_store_file_id": "file-Y74tBHEThmtApkm9cp23yp",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/oracle-v2-clean-room.md",
+      "path": "ai-lab/oracle-v2-clean-room.md",
+      "upload_name": "e7527c217196__ai-lab__oracle-v2-clean-room.md",
+      "bytes": 3552,
+      "sha256": "e7527c2171963bddf19c5b3be2046d25df2e5c77b92a7517143ba8f6f24cc90f",
+      "vector_store_file_id": "file-McFhtQFmvMk9hxjghrWXxs",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/planner.py",
+      "path": "ai-lab/planner.py",
+      "upload_name": "ff26ff46da69__ai-lab__planner.py",
+      "bytes": 15043,
+      "sha256": "ff26ff46da6923b8ecbaaabe33c9f6cd2d5e8540309e4145a331421508d7115f",
+      "vector_store_file_id": "file-EEsvzHH2RbwoZWWpLfSmYr",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/query_o1_feedback.py",
+      "path": "ai-lab/query_o1_feedback.py",
+      "upload_name": "b6dcec1a0bbe__ai-lab__query_o1_feedback.py",
+      "bytes": 2031,
+      "sha256": "b6dcec1a0bbe32c73ebd1e29d0b0bd404b9d7a201448e392633263284dcf87c4",
+      "vector_store_file_id": "file-7qC74NdgMVEe7u1W6e3T6F",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/run_goal_001.py",
+      "path": "ai-lab/run_goal_001.py",
+      "upload_name": "064d3c4f8bf8__ai-lab__run_goal_001.py",
+      "bytes": 5879,
+      "sha256": "064d3c4f8bf8af224c3b0da558937b40f4454fa56d21d1b79f9a8fd2b0fca946",
+      "vector_store_file_id": "file-AVrNKkxuJWwr2UT7s3NR8S",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/run_goal_001_mlx.py",
+      "path": "ai-lab/run_goal_001_mlx.py",
+      "upload_name": "08853fb5d94b__ai-lab__run_goal_001_mlx.py",
+      "bytes": 8307,
+      "sha256": "08853fb5d94b47d3443a793d1d6cf82f5da3c904612d91131b9b94be15e789a8",
+      "vector_store_file_id": "file-9XUZHfCLFmcYAeksNCmFN7",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/state.py",
+      "path": "ai-lab/state.py",
+      "upload_name": "341445f80d02__ai-lab__state.py",
+      "bytes": 4782,
+      "sha256": "341445f80d02e2a116c482d097e19d13e3365fb27c8e11990575824e3a96994a",
+      "vector_store_file_id": "file-EnNPzpB3nrTQBRgcsNtbHf",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/tools.py",
+      "path": "ai-lab/tools.py",
+      "upload_name": "036d8f55fc1b__ai-lab__tools.py",
+      "bytes": 2440,
+      "sha256": "036d8f55fc1b49f31f8c9262ef1e13ca91613441b03c443514414faa4bf2a670",
+      "vector_store_file_id": "file-6AEsPhhoisBFyC88PypSvV",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "ai-lab/worker.py",
+      "path": "ai-lab/worker.py",
+      "upload_name": "43341245cda4__ai-lab__worker.py",
+      "bytes": 1833,
+      "sha256": "43341245cda4cfcfd9c71c959bfcd3b3b2045408dd7a537378aebbebb031b82d",
+      "vector_store_file_id": "file-JaQxrArjDQPAfAg2abwzjE",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "docs/lab/architecture.md",
+      "path": "docs/lab/architecture.md",
+      "upload_name": "ad4a92d6dd64__docs__lab__architecture.md",
+      "bytes": 10740,
+      "sha256": "ad4a92d6dd64cea71e1c72cf8ac51ff4b1faaef43f47b453b952d669f5c188bc",
+      "vector_store_file_id": "file-WoapEov7CQJw3zM7XXm9jo",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "docs/lab/model-eval/README.md",
+      "path": "docs/lab/model-eval/README.md",
+      "upload_name": "ffb9cdbdf432__docs__lab__model-eval__README.md",
+      "bytes": 2090,
+      "sha256": "ffb9cdbdf4321739f17c9185babb4eb2dda10e08abe124be2f8b1c94c532aec8",
+      "vector_store_file_id": "file-AoRxRh7Z9zxk3apMuAo59F",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "docs/lab/model-eval/codex-q2-platform.md",
+      "path": "docs/lab/model-eval/codex-q2-platform.md",
+      "upload_name": "955d8aebfe0c__docs__lab__model-eval__codex-q2-platform.md",
+      "bytes": 3481,
+      "sha256": "955d8aebfe0c9844adb0b9b94fc742185e8968b42d83d89dc6cc7edf533e8010",
+      "vector_store_file_id": "file-X9L2GJbvFAfZ1w84oKfb9n",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "docs/lab/model-eval/gpt54-q1-protocol.md",
+      "path": "docs/lab/model-eval/gpt54-q1-protocol.md",
+      "upload_name": "8a506e73c77b__docs__lab__model-eval__gpt54-q1-protocol.md",
+      "bytes": 8938,
+      "sha256": "8a506e73c77bf50b134ccd9d476f55d6e3057db58685f5cb7861e41ad0bf7203",
+      "vector_store_file_id": "file-4Xr8Geg9cp4a7xjgyv5LqS",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "docs/lab/model-eval/gpt54-q2-platform.md",
+      "path": "docs/lab/model-eval/gpt54-q2-platform.md",
+      "upload_name": "e9c380f5d4fc__docs__lab__model-eval__gpt54-q2-platform.md",
+      "bytes": 100313,
+      "sha256": "e9c380f5d4fc5c7d8d7783efd19de6c9d68bfc10531cff23cabc23582ae8090d",
+      "vector_store_file_id": "file-FVbiTcYsyisGPjJmWdDkBW",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "docs/lab/model-eval/o3-q1-protocol.md",
+      "path": "docs/lab/model-eval/o3-q1-protocol.md",
+      "upload_name": "de833c24c237__docs__lab__model-eval__o3-q1-protocol.md",
+      "bytes": 5372,
+      "sha256": "de833c24c237ba1d90bbb1df66150611d49cca2bff94b653146828e8d07ce920",
+      "vector_store_file_id": "file-2irrUfNSTecUvAP9eky6a3",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "docs/lab/model-eval/o3-q2-platform.md",
+      "path": "docs/lab/model-eval/o3-q2-platform.md",
+      "upload_name": "c70794eebd95__docs__lab__model-eval__o3-q2-platform.md",
+      "bytes": 8246,
+      "sha256": "c70794eebd953a2b067bccb5c0ec1a15e5ef36a6573a3caa95143626cebbb490",
+      "vector_store_file_id": "file-NMFwWUeECnKJ785UUjkT9S",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "docs/lab/o1-o3-deployment-decision.md",
+      "path": "docs/lab/o1-o3-deployment-decision.md",
+      "upload_name": "53e77a25e948__docs__lab__o1-o3-deployment-decision.md",
+      "bytes": 6048,
+      "sha256": "53e77a25e9484baf556e4ee4432afb30f4412b754b41a2d9ff7847e64a281a2f",
+      "vector_store_file_id": "file-B9yfexvCV5hKCtzfqs7wBC",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "docs/lab/o1-strategy-prompt.md",
+      "path": "docs/lab/o1-strategy-prompt.md",
+      "upload_name": "b896a70160b7__docs__lab__o1-strategy-prompt.md",
+      "bytes": 22277,
+      "sha256": "b896a70160b79a37136c4e7bbc3a57dea2a90038486bdcce9dd0fcd7d265555d",
+      "vector_store_file_id": "file-7XZaYu8WXndK3yWcYh6SDq",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "pyproject.toml",
+      "path": "pyproject.toml",
+      "upload_name": "d9df30c5dd08__pyproject.toml.txt",
+      "bytes": 354,
+      "sha256": "d9df30c5dd08edb0603d02e47a923b419aca86341bb85e9751adb29183f33de1",
+      "vector_store_file_id": "file-Vhpo5jbzbvW25aUvDbdj9x",
+      "file_id": null,
+      "status": "completed"
+    },
+    {
+      "doc_id": "requirements.txt",
+      "path": "requirements.txt",
+      "upload_name": "773f84782f1f__requirements.txt",
+      "bytes": 36,
+      "sha256": "773f84782f1f8418a88ad1de6bfdab2514753b6ac545f01b3bec08cb0da294da",
+      "vector_store_file_id": "file-Hgn7D8RdTerVft5UvQ4mWR",
+      "file_id": null,
+      "status": "completed"
+    }
+  ],
+  "corpus_version": "f2e9b6306f73589d"
+}
