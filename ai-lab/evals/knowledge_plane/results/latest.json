@@ -6,11 +6,11 @@
   "vector_store_id": "vs_69b52701c360819181b3bba7004f94c5",
   "summary": {
     "count": 10,
-    "avg_case_score": 0.6958,
+    "avg_case_score": 0.7479,
     "by_arm": {
       "local": {
         "count": 10,
-        "avg_case_score": 0.6958
+        "avg_case_score": 0.7479
       }
     }
   },
@@ -69,25 +69,23 @@
           "metadata": {}
         }
       ],
-      "answer_raw": "{\n  \"answer\": \"The document that should govern architectural choices is the 'CANON.md', specifically its sections outlining the Operating Model, Change Control, and Product Spec Authority. The principles that should be treated as binding defaults include the Simplicity Constraint, Determinism Boundary, and Success Criteria as they are explicitly articulated as foundational to the project's architecture and design process.\",\n  \"key_evidence_ids\": [\"CANON.md\", \"CANON.md\", \"CANON.md\"],\n  \"assumptions\": [\n    \"The Canon document is intended as the source of truth for architectural decisions.\",\n    \"The principles within the Canon are clearly articulated and should be adhered to unless explicitly revised.\"\n  ],\n  \"confidence\": 0.9,\n  \"next_action\": \"Formally review and ensure all architectural decisions made align with the principles defined in the Canon document to maintain consistency.\",\n  \"kill_criteria\": [\n    \"Any proposal not aligned with the principles in the Canon document proceeds without consideration.\",\n    \"Major architectural decisions made without a documented consensus in accordance with the change control mechanism.\"\n  ],\n  \"escalation_trigger\": \"If an architectural decision conflicts with the principles outlined in the Canon without proper amendments.\"\n}",
+      "answer_raw": "{\n  \"answer\": \"The document that should govern architectural choices is the 'Canon: Autonomous R&D Lab Objective Contract'. It serves as the source of truth for what we are building and how decisions are made. Key principles that should be treated as binding defaults include: 'Prefer the smallest architecture that preserves reliability' from the Simplicity Constraint, 'Any major prompt, architecture, or framework decision should be checked against this document first' from the Change Control section, and 'No feature is added unless it improves reliability, observability, or decision quality.'\",\n  \"key_evidence_ids\": [\"CANON.md\"],\n  \"assumptions\": [\n    \"The Canon document is clearly defined as the authoritative source.\",\n    \"All architectural decisions must align with the principles stated in the Canon.\"\n  ],\n  \"confidence\": 1.0,\n  \"next_action\": \"Ensure all team members refer to the Canon for any architectural decision-making.\",\n  \"kill_criteria\": [\"Deviating from Canon principles without clear revision.\", \"Lack of consistency in architectural discussions.\"],\n  \"escalation_trigger\": \"When a proposal conflicts with the Canon.\"\n}",
       "answer_obj": {
-        "answer": "The document that should govern architectural choices is the 'CANON.md', specifically its sections outlining the Operating Model, Change Control, and Product Spec Authority. The principles that should be treated as binding defaults include the Simplicity Constraint, Determinism Boundary, and Success Criteria as they are explicitly articulated as foundational to the project's architecture and design process.",
+        "answer": "The document that should govern architectural choices is the 'Canon: Autonomous R&D Lab Objective Contract'. It serves as the source of truth for what we are building and how decisions are made. Key principles that should be treated as binding defaults include: 'Prefer the smallest architecture that preserves reliability' from the Simplicity Constraint, 'Any major prompt, architecture, or framework decision should be checked against this document first' from the Change Control section, and 'No feature is added unless it improves reliability, observability, or decision quality.'",
         "key_evidence_ids": [
-          "CANON.md",
-          "CANON.md",
           "CANON.md"
         ],
         "assumptions": [
-          "The Canon document is intended as the source of truth for architectural decisions.",
-          "The principles within the Canon are clearly articulated and should be adhered to unless explicitly revised."
+          "The Canon document is clearly defined as the authoritative source.",
+          "All architectural decisions must align with the principles stated in the Canon."
         ],
-        "confidence": 0.9,
-        "next_action": "Formally review and ensure all architectural decisions made align with the principles defined in the Canon document to maintain consistency.",
+        "confidence": 1.0,
+        "next_action": "Ensure all team members refer to the Canon for any architectural decision-making.",
         "kill_criteria": [
-          "Any proposal not aligned with the principles in the Canon document proceeds without consideration.",
-          "Major architectural decisions made without a documented consensus in accordance with the change control mechanism."
+          "Deviating from Canon principles without clear revision.",
+          "Lack of consistency in architectural discussions."
         ],
-        "escalation_trigger": "If an architectural decision conflicts with the principles outlined in the Canon without proper amendments."
+        "escalation_trigger": "When a proposal conflicts with the Canon."
       },
       "retrieval_grade": {
         "expected_count": 1,
@@ -104,15 +102,17 @@
       },
       "citation_grade": {
         "citations_ok": true,
-        "cited_count": 3,
+        "cited_count": 1,
         "invalid_citations": []
       },
       "fact_grade": {
-        "gold_fact_coverage": 0.0,
-        "matched_gold_facts": []
+        "gold_fact_coverage": 0.25,
+        "matched_gold_facts": [
+          "source of truth"
+        ]
       },
       "aggregate": {
-        "case_score": 0.75,
+        "case_score": 0.8125,
         "weights": {
           "support_recall": 0.35,
           "gold_fact_coverage": 0.25,
@@ -121,11 +121,11 @@
         }
       },
       "llm_meta": {
-        "latency_sec": 6.515,
+        "latency_sec": 4.731,
         "usage": {
-          "input_tokens": 2419,
-          "output_tokens": 248,
-          "total_tokens": 2667
+          "input_tokens": 2458,
+          "output_tokens": 236,
+          "total_tokens": 2694
         }
       }
     },
@@ -199,24 +199,24 @@
           "metadata": {}
         }
       ],
-      "answer_raw": "{\n  \"answer\": \"The strategic reasoning tier should be invoked when a new goal emerges or if the system encounters a sticking point after 5 consecutive failures in the worker tier. It is essential to keep strategic tier usage minimal, relying on clear criteria outlined in the project. Lower tiers, such as the worker and critic tiers, should handle routine tasks and evaluations promptly without escalating unless necessary.\",\n  \"key_evidence_ids\": [\"ai-lab/o1_system_prompt.md\", \"docs/lab/architecture.md\"],\n  \"assumptions\": [\n    \"The worker tier is effective for routine tasks but may lack the capacity to tackle complex challenges independently.\",\n    \"The critic model can rapidly evaluate outputs, providing immediate feedback to the worker, which keeps the process efficient.\"\n  ],\n  \"confidence\": 0.85,\n  \"next_action\": \"Establish a clear policy documentation outlining the criteria and examples for when to escalate to the strategic tier, ensuring all team members can follow it.\",\n  \"kill_criteria\": [\n    \"If it's determined that the worker or critic tiers can handle a task without strategic oversight.\",\n    \"If the failures are determined to be due to task misconfiguration rather than deeper systemic issues.\"\n  ],\n  \"escalation_trigger\": \"The strategic tier is triggered after 5 consecutive worker failures or when a new project requirement is introduced.\"\n}",
+      "answer_raw": "{\n  \"answer\": \"The strategic reasoning tier should be invoked under two primary conditions: firstly, when 'a new goal arrives' which necessitates producing a `project_graph`, and secondly, 'if the worker fails a task 5+ times', at which point the system escalates back to the strategist for diagnosis and strategic recommendations.\",\n  \"key_evidence_ids\": [\"ai-lab/o1_system_prompt.md\", \"docs/lab/architecture.md\"],\n  \"assumptions\": [\n    \"The current state of the project necessitates a clear routing policy for heavy reasoning calls.\",\n    \"Strategic invocation should remain sparse, adhering strictly to defined criteria.\"\n  ],\n  \"confidence\": 0.9,\n  \"next_action\": \"Formulate explicit project routing policies that define when to escalate to the strategic tier based on failure thresholds and new goals.\",\n  \"kill_criteria\": [\n    \"Failure to establish criteria after escalation\",\n    \"Misidentifying the need for strategic intervention\"\n  ],\n  \"escalation_trigger\": \"Worker task failures exceeding 5 occurrences, or a new goal emerging.\"\n}",
       "answer_obj": {
-        "answer": "The strategic reasoning tier should be invoked when a new goal emerges or if the system encounters a sticking point after 5 consecutive failures in the worker tier. It is essential to keep strategic tier usage minimal, relying on clear criteria outlined in the project. Lower tiers, such as the worker and critic tiers, should handle routine tasks and evaluations promptly without escalating unless necessary.",
+        "answer": "The strategic reasoning tier should be invoked under two primary conditions: firstly, when 'a new goal arrives' which necessitates producing a `project_graph`, and secondly, 'if the worker fails a task 5+ times', at which point the system escalates back to the strategist for diagnosis and strategic recommendations.",
         "key_evidence_ids": [
           "ai-lab/o1_system_prompt.md",
           "docs/lab/architecture.md"
         ],
         "assumptions": [
-          "The worker tier is effective for routine tasks but may lack the capacity to tackle complex challenges independently.",
-          "The critic model can rapidly evaluate outputs, providing immediate feedback to the worker, which keeps the process efficient."
+          "The current state of the project necessitates a clear routing policy for heavy reasoning calls.",
+          "Strategic invocation should remain sparse, adhering strictly to defined criteria."
         ],
-        "confidence": 0.85,
-        "next_action": "Establish a clear policy documentation outlining the criteria and examples for when to escalate to the strategic tier, ensuring all team members can follow it.",
+        "confidence": 0.9,
+        "next_action": "Formulate explicit project routing policies that define when to escalate to the strategic tier based on failure thresholds and new goals.",
         "kill_criteria": [
-          "If it's determined that the worker or critic tiers can handle a task without strategic oversight.",
-          "If the failures are determined to be due to task misconfiguration rather than deeper systemic issues."
+          "Failure to establish criteria after escalation",
+          "Misidentifying the need for strategic intervention"
         ],
-        "escalation_trigger": "The strategic tier is triggered after 5 consecutive worker failures or when a new project requirement is introduced."
+        "escalation_trigger": "Worker task failures exceeding 5 occurrences, or a new goal emerging."
       },
       "retrieval_grade": {
         "expected_count": 3,
@@ -253,11 +253,11 @@
         }
       },
       "llm_meta": {
-        "latency_sec": 6.158,
+        "latency_sec": 4.106,
         "usage": {
-          "input_tokens": 3488,
-          "output_tokens": 277,
-          "total_tokens": 3765
+          "input_tokens": 3527,
+          "output_tokens": 227,
+          "total_tokens": 3754
         }
       }
     },
@@ -331,24 +331,24 @@
           "metadata": {}
         }
       ],
-      "answer_raw": "{\"answer\":\"Local-first retrieval aligns better with the project's architecture principles, given the constraints of preserving explicit external state, maintaining a minimal architecture, and avoiding convenience-driven changes. This approach ensures the system retains greater control over state integrity and reliability, especially in the face of uncertain network conditions or data privacy concerns. Transitioning to a hosted knowledge plane could introduce complexities that contradict the goal of simplicity and reliability.\",\"key_evidence_ids\":[\"CANON.md\",\"CLAUDE.md\",\"ai-lab/o1_system_prompt.md\"],\"assumptions\":[\"Hosted retrieval introduces potential reliability issues with external dependencies.\",\"Local-first systems enhance state control and reduce architectural complexity.\"],\"confidence\":0.8,\"next_action\":\"Document this decision and update the architecture principles in the project canon to reflect the commitment to local-first retrieval.\",\"kill_criteria\":[\"If local-first retrieval consistently fails to meet reliability and performance needs, re-evaluate the architecture.\"],\"escalation_trigger\":\"Modernizing to hosted retrieval without addressing foundational stability and reliability concerns.\"}",
+      "answer_raw": "{\n  \"answer\": \"Local-first retrieval is more aligned with the project's architecture principles. The documentation emphasizes that 'the system must maintain explicit external state as the source of truth.' This aligns with the constraint to 'Preserve explicit external state as the source of truth.' Additionally, adopting a 'smallest architecture that preserves reliability' is prioritized, favoring local systems that minimize complexity.\",\n  \"key_evidence_ids\": [\"CANON.md\", \"CLAUDE.md\"],\n  \"assumptions\": [\n    \"Moving to a hosted retrieval system might compromise the explicit external state management.\",\n    \"Adding hosted retrieval could increase architectural complexity contrary to the simplicity constraint.\"\n  ],\n  \"confidence\": 0.85,\n  \"next_action\": \"Conduct further evaluations on local-first retrieval efficacy while maintaining documentation of insights.\",\n  \"kill_criteria\": [\"Failure to maintain the external state as the source of truth\", \"Significant architectural complexity introduced by hosted approach\"],\n  \"escalation_trigger\": \"Emergence of high uncertainty regarding the efficacy of local-first retrieval.\"\n}",
       "answer_obj": {
-        "answer": "Local-first retrieval aligns better with the project's architecture principles, given the constraints of preserving explicit external state, maintaining a minimal architecture, and avoiding convenience-driven changes. This approach ensures the system retains greater control over state integrity and reliability, especially in the face of uncertain network conditions or data privacy concerns. Transitioning to a hosted knowledge plane could introduce complexities that contradict the goal of simplicity and reliability.",
+        "answer": "Local-first retrieval is more aligned with the project's architecture principles. The documentation emphasizes that 'the system must maintain explicit external state as the source of truth.' This aligns with the constraint to 'Preserve explicit external state as the source of truth.' Additionally, adopting a 'smallest architecture that preserves reliability' is prioritized, favoring local systems that minimize complexity.",
         "key_evidence_ids": [
           "CANON.md",
-          "CLAUDE.md",
-          "ai-lab/o1_system_prompt.md"
+          "CLAUDE.md"
         ],
         "assumptions": [
-          "Hosted retrieval introduces potential reliability issues with external dependencies.",
-          "Local-first systems enhance state control and reduce architectural complexity."
+          "Moving to a hosted retrieval system might compromise the explicit external state management.",
+          "Adding hosted retrieval could increase architectural complexity contrary to the simplicity constraint."
         ],
-        "confidence": 0.8,
-        "next_action": "Document this decision and update the architecture principles in the project canon to reflect the commitment to local-first retrieval.",
+        "confidence": 0.85,
+        "next_action": "Conduct further evaluations on local-first retrieval efficacy while maintaining documentation of insights.",
         "kill_criteria": [
-          "If local-first retrieval consistently fails to meet reliability and performance needs, re-evaluate the architecture."
+          "Failure to maintain the external state as the source of truth",
+          "Significant architectural complexity introduced by hosted approach"
         ],
-        "escalation_trigger": "Modernizing to hosted retrieval without addressing foundational stability and reliability concerns."
+        "escalation_trigger": "Emergence of high uncertainty regarding the efficacy of local-first retrieval."
       },
       "retrieval_grade": {
         "expected_count": 2,
@@ -366,7 +366,7 @@
       },
       "citation_grade": {
         "citations_ok": true,
-        "cited_count": 3,
+        "cited_count": 2,
         "invalid_citations": []
       },
       "fact_grade": {
@@ -383,11 +383,11 @@
         }
       },
       "llm_meta": {
-        "latency_sec": 4.127,
+        "latency_sec": 6.061,
         "usage": {
-          "input_tokens": 3408,
-          "output_tokens": 204,
-          "total_tokens": 3612
+          "input_tokens": 3447,
+          "output_tokens": 216,
+          "total_tokens": 3663
         }
       }
     },
@@ -461,26 +461,24 @@
           "metadata": {}
         }
       ],
-      "answer_raw": "{\n  \"answer\": \"The architecture choice should remain O1-specific for the immediate term. The current focus on strategic decision-making necessitates a dedicated model for planning, which fits the optimization framework in use. Transitioning to a pluggable model system could introduce complexity that may hinder immediate operational efficiency and clarity, contrary to the goal of maintaining simplicity.\",\n  \"key_evidence_ids\": [\"CANON.md\", \"README.md\", \"ai-lab/o1_system_prompt.md\"],\n  \"assumptions\": [\n    \"Maintaining clarity in strategy and optimization practices is paramount.\",\n    \"The current use of O1 ensures focused decision-making aligned with project needs.\",\n    \"Future-proofing must not come at the expense of current project efficiency.\"\n  ],\n  \"confidence\": 0.85,\n  \"next_action\": \"Document the rationale for maintaining the O1-specific strategy in the CANON.md, while outlining potential future considerations for model-pluggability if operational complexity can be justified.\",\n  \"kill_criteria\": [\n    \"Detect significant operational bottlenecks due to model inflexibility.\",\n    \"Receive consistent feedback indicating the need for varied model strategies beyond O1 capabilities.\"\n  ],\n  \"escalation_trigger\": \"If the need for model diversity becomes critical to project success, prompt a strategic review of potential pluggable architectures.\"\n}",
+      "answer_raw": "{\n  \"answer\": \"The strategic model interface should remain O1-specific as it aligns with the current architecture that emphasizes the O1 model as the 'strategic tier' and keeps the optimization focus on model selection as a target. The current repo states that 'model selection is itself an optimization target,' highlighting that the existing framework is designed around O1's capabilities rather than a pluggable model architecture.\",\n  \"key_evidence_ids\": [\"README.md\", \"CANON.md\"],\n  \"assumptions\": [\"The strategic requirements can be met with O1 without needing to complicate the system with a pluggable interface.\", \"Maintaining O1 as the strategic model is consistent with the repository's language and architectural decisions.\"],\n  \"confidence\": 0.85,\n  \"next_action\": \"Confirm that all internal components are optimized to function under an O1-specific architecture before further assessments on additional model integrations.\",\n  \"kill_criteria\": [\"If performance metrics indicate a bottleneck directly attributed to the O1-specific interface.\", \"If model selections fail to meet optimization targets within defined constraints.\"],\n  \"escalation_trigger\": \"If the O1 model consistently underperforms on strategic tasks despite iterative optimization efforts.\"\n}",
       "answer_obj": {
-        "answer": "The architecture choice should remain O1-specific for the immediate term. The current focus on strategic decision-making necessitates a dedicated model for planning, which fits the optimization framework in use. Transitioning to a pluggable model system could introduce complexity that may hinder immediate operational efficiency and clarity, contrary to the goal of maintaining simplicity.",
+        "answer": "The strategic model interface should remain O1-specific as it aligns with the current architecture that emphasizes the O1 model as the 'strategic tier' and keeps the optimization focus on model selection as a target. The current repo states that 'model selection is itself an optimization target,' highlighting that the existing framework is designed around O1's capabilities rather than a pluggable model architecture.",
         "key_evidence_ids": [
-          "CANON.md",
           "README.md",
-          "ai-lab/o1_system_prompt.md"
+          "CANON.md"
         ],
         "assumptions": [
-          "Maintaining clarity in strategy and optimization practices is paramount.",
-          "The current use of O1 ensures focused decision-making aligned with project needs.",
-          "Future-proofing must not come at the expense of current project efficiency."
+          "The strategic requirements can be met with O1 without needing to complicate the system with a pluggable interface.",
+          "Maintaining O1 as the strategic model is consistent with the repository's language and architectural decisions."
         ],
         "confidence": 0.85,
-        "next_action": "Document the rationale for maintaining the O1-specific strategy in the CANON.md, while outlining potential future considerations for model-pluggability if operational complexity can be justified.",
+        "next_action": "Confirm that all internal components are optimized to function under an O1-specific architecture before further assessments on additional model integrations.",
         "kill_criteria": [
-          "Detect significant operational bottlenecks due to model inflexibility.",
-          "Receive consistent feedback indicating the need for varied model strategies beyond O1 capabilities."
+          "If performance metrics indicate a bottleneck directly attributed to the O1-specific interface.",
+          "If model selections fail to meet optimization targets within defined constraints."
         ],
-        "escalation_trigger": "If the need for model diversity becomes critical to project success, prompt a strategic review of potential pluggable architectures."
+        "escalation_trigger": "If the O1 model consistently underperforms on strategic tasks despite iterative optimization efforts."
       },
       "retrieval_grade": {
         "expected_count": 2,
@@ -498,7 +496,7 @@
       },
       "citation_grade": {
         "citations_ok": true,
-        "cited_count": 3,
+        "cited_count": 2,
         "invalid_citations": []
       },
       "fact_grade": {
@@ -515,11 +513,11 @@
         }
       },
       "llm_meta": {
-        "latency_sec": 6.277,
+        "latency_sec": 4.532,
         "usage": {
-          "input_tokens": 3362,
-          "output_tokens": 274,
-          "total_tokens": 3636
+          "input_tokens": 3401,
+          "output_tokens": 251,
+          "total_tokens": 3652
         }
       }
     },
@@ -593,24 +591,24 @@
           "metadata": {}
         }
       ],
-      "answer_raw": "{\n  \"answer\": \"The system should escalate the issue to the strategic tier (O1) for a comprehensive diagnosis and replanning of the task. This escalation must include detailed failure logs and the structured evidence of past attempts, highlighting the conditions under which failures occurred and the specific outputs that did not meet success criteria.\",\n  \"key_evidence_ids\": [\"ai-lab/o1_system_prompt.md\", \"docs/lab/architecture.md\"],\n  \"assumptions\": [\n    \"The worker model is effectively executing tasks but failing due to underlying issues.\",\n    \"Structured replanning is necessary to address the root causes of failure.\"\n  ],\n  \"confidence\": 0.85,\n  \"next_action\": \"Prepare an escalation payload that includes failure logs, details of tasks attempted, outputs produced, and the criteria used to evaluate success.\",\n  \"kill_criteria\": [\n    \"Successful completion of the task\",\n    \"No further escalation needed\"\n  ],\n  \"escalation_trigger\": \"Repeated failure on the same task (6 times with no measurable progress)\"\n}",
+      "answer_raw": "{\n  \"answer\": \"The next system action is to escalate to the strategic loop to diagnose the systemic issue and recommend a new approach, as the worker has failed the task six times with no progress.\",\n  \"key_evidence_ids\": [\"ai-lab/o1_system_prompt.md\", \"docs/lab/architecture.md\"],\n  \"assumptions\": [\n    \"The system operates under predetermined failure thresholds for worker performance.\",\n    \"All existing retry mechanisms have been exhausted without improvement.\"\n  ],\n  \"confidence\": 0.95,\n  \"next_action\": \"Trigger the escalation procedure, transferring the failure logs to the planner for a new direction based on the systemic issue.\",\n  \"kill_criteria\": [\n    \"The worker successfully completes the task.\",\n    \"Future failures are identified that require follow-up interventions.\"\n  ],\n  \"escalation_trigger\": \"5 consecutive worker failures\"\n}",
       "answer_obj": {
-        "answer": "The system should escalate the issue to the strategic tier (O1) for a comprehensive diagnosis and replanning of the task. This escalation must include detailed failure logs and the structured evidence of past attempts, highlighting the conditions under which failures occurred and the specific outputs that did not meet success criteria.",
+        "answer": "The next system action is to escalate to the strategic loop to diagnose the systemic issue and recommend a new approach, as the worker has failed the task six times with no progress.",
         "key_evidence_ids": [
           "ai-lab/o1_system_prompt.md",
           "docs/lab/architecture.md"
         ],
         "assumptions": [
-          "The worker model is effectively executing tasks but failing due to underlying issues.",
-          "Structured replanning is necessary to address the root causes of failure."
+          "The system operates under predetermined failure thresholds for worker performance.",
+          "All existing retry mechanisms have been exhausted without improvement."
         ],
-        "confidence": 0.85,
-        "next_action": "Prepare an escalation payload that includes failure logs, details of tasks attempted, outputs produced, and the criteria used to evaluate success.",
+        "confidence": 0.95,
+        "next_action": "Trigger the escalation procedure, transferring the failure logs to the planner for a new direction based on the systemic issue.",
         "kill_criteria": [
-          "Successful completion of the task",
-          "No further escalation needed"
+          "The worker successfully completes the task.",
+          "Future failures are identified that require follow-up interventions."
         ],
-        "escalation_trigger": "Repeated failure on the same task (6 times with no measurable progress)"
+        "escalation_trigger": "5 consecutive worker failures"
       },
       "retrieval_grade": {
         "expected_count": 2,
@@ -646,11 +644,11 @@
         }
       },
       "llm_meta": {
-        "latency_sec": 4.179,
+        "latency_sec": 3.197,
         "usage": {
-          "input_tokens": 3146,
-          "output_tokens": 217,
-          "total_tokens": 3363
+          "input_tokens": 3185,
+          "output_tokens": 182,
+          "total_tokens": 3367
         }
       }
     },
@@ -724,24 +722,25 @@
           "metadata": {}
         }
       ],
-      "answer_raw": "{\n  \"answer\": \"To effectively address the drift issues without relying on larger prompt history, you should strengthen the explicit state and retrieval memory rather than just adding more context to the prompts. Implement a structured state object that captures critical information from each conversation, which can then be passed seamlessly between components in your system. This would reduce dependence on transient context while enhancing the durability and accuracy of the system's memory. The five-layer memory hierarchy you are aiming for must be the foundation for organizing knowledge and state effectively to avoid context collapse and ensure continuity in reasoning.\",\n  \"key_evidence_ids\": [\"CANON.md\", \"ai-lab/o1_system_prompt.md\"],\n  \"assumptions\": [\n    \"Larger prompt history does not provide sustainable value and may lead to inefficiencies.\",\n    \"Explicitly structured state management can reduce drift effectively.\"\n  ],\n  \"confidence\": 0.85,\n  \"next_action\": \"Design and implement a structured State Object that adheres to the 5-layer memory hierarchy, ensuring each layer is filled with relevant information from interactions.\",\n  \"kill_criteria\": [\"evidence of continuing drift despite implementation\", \"increase in computational overhead from larger prompts\"],\n  \"escalation_trigger\": \"If drift persists after implementing the structured State Object for two consecutive evaluation cycles.\"\n}",
+      "answer_raw": "{\n  \"answer\": \"Drift should be addressed by strengthening explicit state and retrieval memory rather than by larger prompt history. The system relies on a structured JSON **State Object** which enforces a **5-Layer Memory Hierarchy**: 'Identity Memory', 'Working Memory', 'Episodic Memory', 'Semantic Memory (Skills DB)', and 'Artifact Memory'. This architecture ensures 'context windows are disposable; state is durable'. The strategy should focus on maintaining 'explicit external state as the source of truth' and ensuring no features are added unless they improve reliability, observability, or decision quality.\",\n  \"key_evidence_ids\": [\"CANON.md\", \"ai-lab/o1_system_prompt.md\"],\n  \"assumptions\": [\n    \"Strengthening state management will mitigate drift effectively.\",\n    \"Larger prompts do not address the underlying structural issues.\",\n    \"Current architecture supports a state-based approach.\"\n  ],\n  \"confidence\": 0.85,\n  \"next_action\": \"Implement a structured improvement plan for the State Object and review the 5-Layer Memory Hierarchy alignment.\",\n  \"kill_criteria\": [\n    \"Increased drift despite implementing a structured state memory.\",\n    \"Failure to maintain context integrity over long interactions.\"\n  ],\n  \"escalation_trigger\": \"Significant context collapse or reliance on large context windows after implementing state improvements.\"\n}",
       "answer_obj": {
-        "answer": "To effectively address the drift issues without relying on larger prompt history, you should strengthen the explicit state and retrieval memory rather than just adding more context to the prompts. Implement a structured state object that captures critical information from each conversation, which can then be passed seamlessly between components in your system. This would reduce dependence on transient context while enhancing the durability and accuracy of the system's memory. The five-layer memory hierarchy you are aiming for must be the foundation for organizing knowledge and state effectively to avoid context collapse and ensure continuity in reasoning.",
+        "answer": "Drift should be addressed by strengthening explicit state and retrieval memory rather than by larger prompt history. The system relies on a structured JSON **State Object** which enforces a **5-Layer Memory Hierarchy**: 'Identity Memory', 'Working Memory', 'Episodic Memory', 'Semantic Memory (Skills DB)', and 'Artifact Memory'. This architecture ensures 'context windows are disposable; state is durable'. The strategy should focus on maintaining 'explicit external state as the source of truth' and ensuring no features are added unless they improve reliability, observability, or decision quality.",
         "key_evidence_ids": [
           "CANON.md",
           "ai-lab/o1_system_prompt.md"
         ],
         "assumptions": [
-          "Larger prompt history does not provide sustainable value and may lead to inefficiencies.",
-          "Explicitly structured state management can reduce drift effectively."
+          "Strengthening state management will mitigate drift effectively.",
+          "Larger prompts do not address the underlying structural issues.",
+          "Current architecture supports a state-based approach."
         ],
         "confidence": 0.85,
-        "next_action": "Design and implement a structured State Object that adheres to the 5-layer memory hierarchy, ensuring each layer is filled with relevant information from interactions.",
+        "next_action": "Implement a structured improvement plan for the State Object and review the 5-Layer Memory Hierarchy alignment.",
         "kill_criteria": [
-          "evidence of continuing drift despite implementation",
-          "increase in computational overhead from larger prompts"
+          "Increased drift despite implementing a structured state memory.",
+          "Failure to maintain context integrity over long interactions."
         ],
-        "escalation_trigger": "If drift persists after implementing the structured State Object for two consecutive evaluation cycles."
+        "escalation_trigger": "Significant context collapse or reliance on large context windows after implementing state improvements."
       },
       "retrieval_grade": {
         "expected_count": 2,
@@ -763,11 +762,14 @@
         "invalid_citations": []
       },
       "fact_grade": {
-        "gold_fact_coverage": 0.0,
-        "matched_gold_facts": []
+        "gold_fact_coverage": 0.5,
+        "matched_gold_facts": [
+          "context windows are disposable",
+          "explicit external state as the source of truth"
+        ]
       },
       "aggregate": {
-        "case_score": 0.75,
+        "case_score": 0.875,
         "weights": {
           "support_recall": 0.35,
           "gold_fact_coverage": 0.25,
@@ -776,11 +778,11 @@
         }
       },
       "llm_meta": {
-        "latency_sec": 5.562,
+        "latency_sec": 4.705,
         "usage": {
-          "input_tokens": 2935,
-          "output_tokens": 265,
-          "total_tokens": 3200
+          "input_tokens": 2974,
+          "output_tokens": 281,
+          "total_tokens": 3255
         }
       }
     },
@@ -838,24 +840,23 @@
           "metadata": {}
         }
       ],
-      "answer_raw": "{\n  \"answer\": \"Evaluate each subsystem proposal against the 'Simplicity Constraint' heuristic: no feature is added unless it improves reliability, observability, or decision quality.\",\n  \"key_evidence_ids\": [\"CANON.md\", \"CLAUDE.md\"],\n  \"assumptions\": [\n    \"The existing architecture values simplicity and reliability.\",\n    \"Maintaining a compact system is essential for long-term sustainability.\"\n  ],\n  \"confidence\": 0.85,\n  \"next_action\": \"Implement this heuristic in subsystem evaluations to ensure alignment with project goals.\",\n  \"kill_criteria\": [\n    \"Proposals fail to enhance reliability, observability, or decision quality.\",\n    \"Proposals introduce unnecessary complexity.\"\n  ],\n  \"escalation_trigger\": \"If multiple proposals conflict with the simplicity constraint or introduce significant complexity.\"\n}",
+      "answer_raw": "{\n  \"answer\": \"Prefer the smallest architecture that preserves reliability.\",\n  \"key_evidence_ids\": [\"CANON.md\"],\n  \"assumptions\": [\n    \"All proposed subsystems must fit within the existing architecture.\",\n    \"New subsystems should enhance reliability, observability, or decision quality.\"\n  ],\n  \"confidence\": 0.9,\n  \"next_action\": \"Apply this heuristic to all new subsystem proposals to ensure alignment with system reliability objectives.\",\n  \"kill_criteria\": [\n    \"If any proposed subsystem increases complexity without enhancing reliability.\",\n    \"If the proposal deviates from the established simplicity constraint.\"\n  ],\n  \"escalation_trigger\": \"If a proposed subsystem introduces significant uncertainty about reliability.\"\n}",
       "answer_obj": {
-        "answer": "Evaluate each subsystem proposal against the 'Simplicity Constraint' heuristic: no feature is added unless it improves reliability, observability, or decision quality.",
+        "answer": "Prefer the smallest architecture that preserves reliability.",
         "key_evidence_ids": [
-          "CANON.md",
-          "CLAUDE.md"
+          "CANON.md"
         ],
         "assumptions": [
-          "The existing architecture values simplicity and reliability.",
-          "Maintaining a compact system is essential for long-term sustainability."
+          "All proposed subsystems must fit within the existing architecture.",
+          "New subsystems should enhance reliability, observability, or decision quality."
         ],
-        "confidence": 0.85,
-        "next_action": "Implement this heuristic in subsystem evaluations to ensure alignment with project goals.",
+        "confidence": 0.9,
+        "next_action": "Apply this heuristic to all new subsystem proposals to ensure alignment with system reliability objectives.",
         "kill_criteria": [
-          "Proposals fail to enhance reliability, observability, or decision quality.",
-          "Proposals introduce unnecessary complexity."
+          "If any proposed subsystem increases complexity without enhancing reliability.",
+          "If the proposal deviates from the established simplicity constraint."
         ],
-        "escalation_trigger": "If multiple proposals conflict with the simplicity constraint or introduce significant complexity."
+        "escalation_trigger": "If a proposed subsystem introduces significant uncertainty about reliability."
       },
       "retrieval_grade": {
         "expected_count": 1,
@@ -872,15 +873,17 @@
       },
       "citation_grade": {
         "citations_ok": true,
-        "cited_count": 2,
+        "cited_count": 1,
         "invalid_citations": []
       },
       "fact_grade": {
-        "gold_fact_coverage": 0.0,
-        "matched_gold_facts": []
+        "gold_fact_coverage": 0.5,
+        "matched_gold_facts": [
+          "prefer the smallest architecture that preserves reliability"
+        ]
       },
       "aggregate": {
-        "case_score": 0.75,
+        "case_score": 0.875,
         "weights": {
           "support_recall": 0.35,
           "gold_fact_coverage": 0.25,
@@ -889,11 +892,11 @@
         }
       },
       "llm_meta": {
-        "latency_sec": 4.684,
+        "latency_sec": 3.332,
         "usage": {
-          "input_tokens": 2367,
-          "output_tokens": 171,
-          "total_tokens": 2538
+          "input_tokens": 2406,
+          "output_tokens": 149,
+          "total_tokens": 2555
         }
       }
     },
@@ -967,25 +970,25 @@
           "metadata": {}
         }
       ],
-      "answer_raw": "{\n  \"answer\": \"Probabilistic reasoning should be applied to scenarios involving uncertainty, strategic planning, hypothesis generation, and ambiguous interpretations, while deterministic machinery should govern workflow, state transitions, routing policies, tool interfaces, and persistence. This split ensures that the system can reliably make decisions under clearly defined parameters and leverage probabilistic models for navigating complex, uncertain terrains.\",\n  \"key_evidence_ids\": [\"CANON.md\", \"ai-lab/o1_system_prompt.md\", \"docs/lab/architecture.md\"],\n  \"assumptions\": [\n    \"Decision-making environments can be categorized as deterministic or probabilistic.\",\n    \"Probabilistic reasoning enhances the system's ability to handle uncertainty and complex scenarios.\"\n  ],\n  \"confidence\": 0.85,\n  \"next_action\": \"Document the decision framework that delineates deterministic versus probabilistic responsibilities explicitly in the system architecture.\",\n  \"kill_criteria\": [\n    \"If the system runs into context collapse due to mismanagement of state between deterministic and probabilistic processes.\",\n    \"If the architecture becomes overly complex due to inadequate separation of concerns.\"\n  ],\n  \"escalation_trigger\": \"Increased frequency of errors or ambiguity in decision-making processes that correlates with improper categorization of functionalities.\"\n}",
+      "answer_raw": "{\n  \"answer\": \"The distinction between deterministic machinery and probabilistic reasoning should follow the guideline that 'deterministic components' encompass 'workflow/state transitions', 'routing policies', and 'tool interfaces', whereas 'probabilistic components' focus on 'planning', 'hypothesis generation', and 'strategic tradeoff analysis'. This categorization provides a clear boundary that enables structured decision-making in the system's architecture.\",\n  \"key_evidence_ids\": [\"CANON.md\", \"CANON.md\", \"CANON.md\"],\n  \"assumptions\": [\"The categorization matches the system requirements.\", \"Strict boundaries between deterministic and probabilistic elements enhance system architecture.\"],\n  \"confidence\": 0.9,\n  \"next_action\": \"Implement the defined categories into system documentation and architecture plans.\",\n  \"kill_criteria\": [\"If new components blur the defined boundaries.\", \"If architectural complexity increases without clear justification.\"],\n  \"escalation_trigger\": \"Confusion or overlap in categorizing new capabilities or components.\"\n}",
       "answer_obj": {
-        "answer": "Probabilistic reasoning should be applied to scenarios involving uncertainty, strategic planning, hypothesis generation, and ambiguous interpretations, while deterministic machinery should govern workflow, state transitions, routing policies, tool interfaces, and persistence. This split ensures that the system can reliably make decisions under clearly defined parameters and leverage probabilistic models for navigating complex, uncertain terrains.",
+        "answer": "The distinction between deterministic machinery and probabilistic reasoning should follow the guideline that 'deterministic components' encompass 'workflow/state transitions', 'routing policies', and 'tool interfaces', whereas 'probabilistic components' focus on 'planning', 'hypothesis generation', and 'strategic tradeoff analysis'. This categorization provides a clear boundary that enables structured decision-making in the system's architecture.",
         "key_evidence_ids": [
           "CANON.md",
-          "ai-lab/o1_system_prompt.md",
-          "docs/lab/architecture.md"
+          "CANON.md",
+          "CANON.md"
         ],
         "assumptions": [
-          "Decision-making environments can be categorized as deterministic or probabilistic.",
-          "Probabilistic reasoning enhances the system's ability to handle uncertainty and complex scenarios."
+          "The categorization matches the system requirements.",
+          "Strict boundaries between deterministic and probabilistic elements enhance system architecture."
         ],
-        "confidence": 0.85,
-        "next_action": "Document the decision framework that delineates deterministic versus probabilistic responsibilities explicitly in the system architecture.",
+        "confidence": 0.9,
+        "next_action": "Implement the defined categories into system documentation and architecture plans.",
         "kill_criteria": [
-          "If the system runs into context collapse due to mismanagement of state between deterministic and probabilistic processes.",
-          "If the architecture becomes overly complex due to inadequate separation of concerns."
+          "If new components blur the defined boundaries.",
+          "If architectural complexity increases without clear justification."
         ],
-        "escalation_trigger": "Increased frequency of errors or ambiguity in decision-making processes that correlates with improper categorization of functionalities."
+        "escalation_trigger": "Confusion or overlap in categorizing new capabilities or components."
       },
       "retrieval_grade": {
         "expected_count": 1,
@@ -1006,15 +1009,16 @@
         "invalid_citations": []
       },
       "fact_grade": {
-        "gold_fact_coverage": 0.5,
+        "gold_fact_coverage": 0.6666666666666666,
         "matched_gold_facts": [
           "routing policies",
           "planning",
-          "hypothesis generation"
+          "hypothesis generation",
+          "strategic tradeoff analysis"
         ]
       },
       "aggregate": {
-        "case_score": 0.875,
+        "case_score": 0.9167,
         "weights": {
           "support_recall": 0.35,
           "gold_fact_coverage": 0.25,
@@ -1023,11 +1027,11 @@
         }
       },
       "llm_meta": {
-        "latency_sec": 4.492,
+        "latency_sec": 4.396,
         "usage": {
-          "input_tokens": 3233,
-          "output_tokens": 254,
-          "total_tokens": 3487
+          "input_tokens": 3272,
+          "output_tokens": 208,
+          "total_tokens": 3480
         }
       }
     },
@@ -1101,100 +1105,93 @@
           "metadata": {}
         }
       ],
-      "answer_raw": "{\n  \"mvp_name\": \"Task Execution System\",\n  \"mvp_scope\": \"Develop a minimal task graph that executes a single task with a worker, evaluates the output using a critic, retries on failure, and escalates to the strategist after multiple failures.\",\n  \"non_goals\": [\n    \"Implement a full suite of tools\",\n    \"Integrate advanced learning features\",\n    \"Support multiple machines\"\n  ],\n  \"ordered_tasks\": [\n    {\n      \"task_id\": \"T-01\",\n      \"name\": \"Define Task Graph\",\n      \"description\": \"Create a basic task graph that defines a single executable task.\",\n      \"dependencies\": [],\n      \"evaluation_criteria\": [\"Task graph must be valid JSON\", \"Task must have executable output\"],\n      \"risk\": \"low\"\n    },\n    {\n      \"task_id\": \"T-02\",\n      \"name\": \"Implement Worker Execution\",\n      \"description\": \"Develop worker functionality to execute the defined task and capture the output.\",\n      \"dependencies\": [\"T-01\"],\n      \"evaluation_criteria\": [\"Worker must execute task and return output\", \"Output must adhere to expected format\"],\n      \"risk\": \"medium\"\n    },\n    {\n      \"task_id\": \"T-03\",\n      \"name\": \"Integrate Critic Evaluation\",\n      \"description\": \"Connect the critic to evaluate the output of the task execution and define retry logic.\",\n      \"dependencies\": [\"T-02\"],\n      \"evaluation_criteria\": [\"Critic must correctly evaluate successful and failed attempts\", \"Retry logic must trigger based on evaluation\"],\n      \"risk\": \"medium\"\n    },\n    {\n      \"task_id\": \"T-04\",\n      \"name\": \"Implement Escalation Mechanism\",\n      \"description\": \"Establish an escalation mechanism to notify the strategist after multiple failures.\",\n      \"dependencies\": [\"T-03\"],\n      \"evaluation_criteria\": [\"Escalation triggers after 5 consecutive failures\", \"Strategist receives failure logs\"],\n      \"risk\": \"high\"\n    },\n    {\n      \"task_id\": \"T-05\",\n      \"name\": \"Persist State and Handle Clean Shutdown\",\n      \"description\": \"Ensure that the system can save its state and shut down safely without data loss.\",\n      \"dependencies\": [\"T-04\"],\n      \"evaluation_criteria\": [\"State must be saved to state.db.json\", \"System must shut down gracefully\"],\n      \"risk\": \"medium\"\n    }\n  ],\n  \"first_pr_slice\": {\n    \"objective\": \"Develop the task execution system with the ability to run and evaluate a single task.\",\n    \"files\": [\"planner.py\", \"worker.py\", \"critic.py\", \"state.py\"],\n    \"acceptance_checks\": [\"Task graph is valid\", \"Worker executes task without errors\", \"Output is evaluated correctly\"]\n  },\n  \"escalation_triggers\": [\"5 consecutive failures of task execution\"],\n  \"open_questions\": [\"What specific tasks should the first task graph contain?\", \"How should task output be validated?\"]\n}",
+      "answer_raw": "{\n  \"mvp_name\": \"Basic Task Execution MVP\",\n  \"mvp_scope\": \"Enable the system to create a task graph, execute tasks, and handle failure escalation while persisting state.\",\n  \"non_goals\": [\"Feature enhancements\", \"Complex task handling\"],\n  \"ordered_tasks\": [\n    {\n      \"task_id\": \"T-01\",\n      \"name\": \"Create Task Graph\",\n      \"description\": \"Develop a basic task graph structure for a predefined goal.\",\n      \"dependencies\": [],\n      \"evaluation_criteria\": [\"Task graph is complete and executable\"],\n      \"risk\": \"low\"\n    },\n    {\n      \"task_id\": \"T-02\",\n      \"name\": \"Implement Worker Execution\",\n      \"description\": \"Develop worker logic to execute tasks from the task graph.\",\n      \"dependencies\": [\"T-01\"],\n      \"evaluation_criteria\": [\"Tasks executed successfully or retried\"],\n      \"risk\": \"medium\"\n    },\n    {\n      \"task_id\": \"T-03\",\n      \"name\": \"Setup Critic Evaluation\",\n      \"description\": \"Implement the critic model to evaluate task outputs and determine success or failure.\",\n      \"dependencies\": [\"T-02\"],\n      \"evaluation_criteria\": [\"Critic responds with success or failure verdict\"],\n      \"risk\": \"medium\"\n    },\n    {\n      \"task_id\": \"T-04\",\n      \"name\": \"Handle Escalation Triggers\",\n      \"description\": \"Develop mechanism to escalate to strategist after repeated worker failures.\",\n      \"dependencies\": [\"T-03\"],\n      \"evaluation_criteria\": [\"Escalation occurs after 5 consecutive failures\"],\n      \"risk\": \"high\"\n    },\n    {\n      \"task_id\": \"T-05\",\n      \"name\": \"Implement State Persistence\",\n      \"description\": \"Ensure state is saved to allow resuming after failures.\",\n      \"dependencies\": [\"T-04\"],\n      \"evaluation_criteria\": [\"System can resume from last state checkpoint\"],\n      \"risk\": \"low\"\n    }\n  ],\n  \"first_pr_slice\": {\n    \"objective\": \"Build and test basic implementation of task graph creation and worker execution.\",\n    \"files\": [\"main.py\", \"planner.py\", \"worker.py\", \"critic.py\", \"state.py\"],\n    \"acceptance_checks\": [\"Task graph created successfully\", \"Worker executes tasks and evaluates results\"]\n  },\n  \"escalation_triggers\": [\"5 consecutive worker failures\"],\n  \"open_questions\": [\"What specific goals should the task graph address initially?\"]\n}",
       "answer_obj": {
-        "mvp_name": "Task Execution System",
-        "mvp_scope": "Develop a minimal task graph that executes a single task with a worker, evaluates the output using a critic, retries on failure, and escalates to the strategist after multiple failures.",
+        "mvp_name": "Basic Task Execution MVP",
+        "mvp_scope": "Enable the system to create a task graph, execute tasks, and handle failure escalation while persisting state.",
         "non_goals": [
-          "Implement a full suite of tools",
-          "Integrate advanced learning features",
-          "Support multiple machines"
+          "Feature enhancements",
+          "Complex task handling"
         ],
         "ordered_tasks": [
           {
             "task_id": "T-01",
-            "name": "Define Task Graph",
-            "description": "Create a basic task graph that defines a single executable task.",
+            "name": "Create Task Graph",
+            "description": "Develop a basic task graph structure for a predefined goal.",
             "dependencies": [],
             "evaluation_criteria": [
-              "Task graph must be valid JSON",
-              "Task must have executable output"
+              "Task graph is complete and executable"
             ],
             "risk": "low"
           },
           {
             "task_id": "T-02",
             "name": "Implement Worker Execution",
-            "description": "Develop worker functionality to execute the defined task and capture the output.",
+            "description": "Develop worker logic to execute tasks from the task graph.",
             "dependencies": [
               "T-01"
             ],
             "evaluation_criteria": [
-              "Worker must execute task and return output",
-              "Output must adhere to expected format"
+              "Tasks executed successfully or retried"
             ],
             "risk": "medium"
           },
           {
             "task_id": "T-03",
-            "name": "Integrate Critic Evaluation",
-            "description": "Connect the critic to evaluate the output of the task execution and define retry logic.",
+            "name": "Setup Critic Evaluation",
+            "description": "Implement the critic model to evaluate task outputs and determine success or failure.",
             "dependencies": [
               "T-02"
             ],
             "evaluation_criteria": [
-              "Critic must correctly evaluate successful and failed attempts",
-              "Retry logic must trigger based on evaluation"
+              "Critic responds with success or failure verdict"
             ],
             "risk": "medium"
           },
           {
             "task_id": "T-04",
-            "name": "Implement Escalation Mechanism",
-            "description": "Establish an escalation mechanism to notify the strategist after multiple failures.",
+            "name": "Handle Escalation Triggers",
+            "description": "Develop mechanism to escalate to strategist after repeated worker failures.",
             "dependencies": [
               "T-03"
             ],
             "evaluation_criteria": [
-              "Escalation triggers after 5 consecutive failures",
-              "Strategist receives failure logs"
+              "Escalation occurs after 5 consecutive failures"
             ],
             "risk": "high"
           },
           {
             "task_id": "T-05",
-            "name": "Persist State and Handle Clean Shutdown",
-            "description": "Ensure that the system can save its state and shut down safely without data loss.",
+            "name": "Implement State Persistence",
+            "description": "Ensure state is saved to allow resuming after failures.",
             "dependencies": [
               "T-04"
             ],
             "evaluation_criteria": [
-              "State must be saved to state.db.json",
-              "System must shut down gracefully"
+              "System can resume from last state checkpoint"
             ],
-            "risk": "medium"
+            "risk": "low"
           }
         ],
         "first_pr_slice": {
-          "objective": "Develop the task execution system with the ability to run and evaluate a single task.",
+          "objective": "Build and test basic implementation of task graph creation and worker execution.",
           "files": [
+            "main.py",
             "planner.py",
             "worker.py",
             "critic.py",
             "state.py"
           ],
           "acceptance_checks": [
-            "Task graph is valid",
-            "Worker executes task without errors",
-            "Output is evaluated correctly"
+            "Task graph created successfully",
+            "Worker executes tasks and evaluates results"
           ]
         },
         "escalation_triggers": [
-          "5 consecutive failures of task execution"
+          "5 consecutive worker failures"
         ],
         "open_questions": [
-          "What specific tasks should the first task graph contain?",
-          "How should task output be validated?"
+          "What specific goals should the task graph address initially?"
         ]
       },
       "retrieval_grade": {
@@ -1239,11 +1236,11 @@
         }
       },
       "llm_meta": {
-        "latency_sec": 13.141,
+        "latency_sec": 8.72,
         "usage": {
-          "input_tokens": 3406,
-          "output_tokens": 623,
-          "total_tokens": 4029
+          "input_tokens": 3445,
+          "output_tokens": 522,
+          "total_tokens": 3967
         }
       }
     },
@@ -1317,25 +1314,25 @@
           "metadata": {}
         }
       ],
-      "answer_raw": "{\"answer\":\"To submit a strategic question for escalation to the strategist model, adhere to the following minimal but sufficient question contract:\",\"key_evidence_ids\":[\"CANON.md\",\"ai-lab/o1_system_prompt.md\",\"ai-lab/o1_next_question_mvp.md\"],\"assumptions\":[\"The context provided will be sufficient for the strategist model to make informed decisions.\",\"Strategic objectives are clear and aligned with project goals.\"],\"confidence\":0.9,\"next_action\":\"Ensure the question adheres to the structured output schema and includes a detailed current state snapshot, objectives, and constraints.\",\"kill_criteria\":[\"If the response does not contain actionable outputs.\",\"If the confidence level of the strategic recommendation is below 0.5.\"],\"escalation_trigger\":\"If feedback indicates repeated failures in understanding the strategic question. If the output lacks clarity or specificity needed for implementation.\"}",
+      "answer_raw": "{\"answer\":\"The minimal but sufficient question contract for a strategist escalation should include:\\n\\n1. **Objective**: Define the goal clearly.\\n\\n2. **Success Metric**: State an explicit, measurable success criterion.\\n\\n3. **Current State Snapshot**: Provide a structured JSON encapsulation of the project's current status, including relevant variables and known gaps.\\n\\n4. **Constraints**: Mention all constraints (e.g., time, budget, tools, risk) that affect the decision-making process.\\n\\n5. **What Has Already Been Tried**: Document previous attempts and their failure signatures to avoid repetition.\\n\\n6. **Exact Decision to Make**: Frame a precise and bounded decision question, avoiding open-ended formats.\\n\\n7. **Required Output Schema**: Specify the format and structure for the output (preferably in JSON) including desired information outputs like chosen strategies, alternative options, and evaluation criteria.\\n\\nThis contract allows for clarity and structured escalation, ensuring adherence to guidelines documented in the retrieved evidence especially pertaining to the nuances of o1 question requirements as specified in the Evidence.\",\"key_evidence_ids\":[\"CANON.md\",\"ai-lab/o1_system_prompt.md\",\"ai-lab/o1_next_question_mvp.md\"],\"assumptions\":[\"Understanding of project goals and scope is clear among all stakeholders.\",\"All necessary constraints and state snapshots are available for each escalation.\"],\"confidence\":0.85,\"next_action\":\"Implement the outlined question contract for the next strategist escalation.\",\"kill_criteria\":[\"When the proposed strategies fail to yield expected insights or actionable outcomes.\",\"When the scope of the project diverges significantly from the defined objective.\"],\"escalation_trigger\":\"Trigger an escalation after exceeding the maximum threshold of three consecutive unproductive iterations.\"}",
       "answer_obj": {
-        "answer": "To submit a strategic question for escalation to the strategist model, adhere to the following minimal but sufficient question contract:",
+        "answer": "The minimal but sufficient question contract for a strategist escalation should include:\n\n1. **Objective**: Define the goal clearly.\n\n2. **Success Metric**: State an explicit, measurable success criterion.\n\n3. **Current State Snapshot**: Provide a structured JSON encapsulation of the project's current status, including relevant variables and known gaps.\n\n4. **Constraints**: Mention all constraints (e.g., time, budget, tools, risk) that affect the decision-making process.\n\n5. **What Has Already Been Tried**: Document previous attempts and their failure signatures to avoid repetition.\n\n6. **Exact Decision to Make**: Frame a precise and bounded decision question, avoiding open-ended formats.\n\n7. **Required Output Schema**: Specify the format and structure for the output (preferably in JSON) including desired information outputs like chosen strategies, alternative options, and evaluation criteria.\n\nThis contract allows for clarity and structured escalation, ensuring adherence to guidelines documented in the retrieved evidence especially pertaining to the nuances of o1 question requirements as specified in the Evidence.",
         "key_evidence_ids": [
           "CANON.md",
           "ai-lab/o1_system_prompt.md",
           "ai-lab/o1_next_question_mvp.md"
         ],
         "assumptions": [
-          "The context provided will be sufficient for the strategist model to make informed decisions.",
-          "Strategic objectives are clear and aligned with project goals."
+          "Understanding of project goals and scope is clear among all stakeholders.",
+          "All necessary constraints and state snapshots are available for each escalation."
         ],
-        "confidence": 0.9,
-        "next_action": "Ensure the question adheres to the structured output schema and includes a detailed current state snapshot, objectives, and constraints.",
+        "confidence": 0.85,
+        "next_action": "Implement the outlined question contract for the next strategist escalation.",
         "kill_criteria": [
-          "If the response does not contain actionable outputs.",
-          "If the confidence level of the strategic recommendation is below 0.5."
+          "When the proposed strategies fail to yield expected insights or actionable outcomes.",
+          "When the scope of the project diverges significantly from the defined objective."
         ],
-        "escalation_trigger": "If feedback indicates repeated failures in understanding the strategic question. If the output lacks clarity or specificity needed for implementation."
+        "escalation_trigger": "Trigger an escalation after exceeding the maximum threshold of three consecutive unproductive iterations."
       },
       "retrieval_grade": {
         "expected_count": 2,
@@ -1357,11 +1354,16 @@
         "invalid_citations": []
       },
       "fact_grade": {
-        "gold_fact_coverage": 0.0,
-        "matched_gold_facts": []
+        "gold_fact_coverage": 0.6666666666666666,
+        "matched_gold_facts": [
+          "failure signatures",
+          "current state snapshot",
+          "decision question",
+          "required output schema"
+        ]
       },
       "aggregate": {
-        "case_score": 0.75,
+        "case_score": 0.9167,
         "weights": {
           "support_recall": 0.35,
           "gold_fact_coverage": 0.25,
@@ -1370,11 +1372,11 @@
         }
       },
       "llm_meta": {
-        "latency_sec": 3.389,
+        "latency_sec": 7.123,
         "usage": {
-          "input_tokens": 2977,
-          "output_tokens": 177,
-          "total_tokens": 3154
+          "input_tokens": 3016,
+          "output_tokens": 360,
+          "total_tokens": 3376
         }
       }
     }

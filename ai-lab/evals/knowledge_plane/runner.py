@@ -92,6 +92,7 @@ def strategic_prompt(case: dict[str, Any], context_pack: str) -> str:
 
 ## Success Metric
 Return the highest-leverage answer grounded in the retrieved evidence.
+In your answer, quote key phrases and terminology exactly as they appear in the retrieved evidence. Do not paraphrase technical terms, principles, or named concepts; use the exact wording from the source.
 
 ## Current State Snapshot
 {json.dumps(case["context"], indent=2)}
