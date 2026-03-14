@@ -1,0 +1,133 @@
+{
+  "meta": {
+    "caller": "planner",
+    "confidence_score": 0.85,
+    "confidence_rationale": "After evaluating cost, risk, and feasibility, Option B\u2019s plan\u2192execute pipeline using .sisyphus/plans artifacts provides a stable, well-documented integration path. We are sufficiently confident (\u22650.75) that this is viable given the constraints."
+  },
+  "chosen_strategy": {
+    "option_id": "B",
+    "rationale": "Using the plan\u2192execute pipeline is a balanced approach with minimal integration risk, allows structured artifact-based task definition, and easily incorporates our Python orchestrator and eval gating logic. It avoids potential hooking uncertainties in Ralph Loop and the higher development overhead of a full server-based solution.",
+    "expected_outcome": "We will achieve a measurable improvement in experiment throughput under a stable file-based approach that can be iterated easily. Our eval harness can gate or terminate each experiment cycle based on score, and the overhead remains manageable."
+  },
+  "rejected_alternatives": [
+    {
+      "option_id": "A",
+      "reason": "Ralph Loop has uncertain support for external hooking and gating with our Python eval harness, introducing unknown integration overhead."
+    },
+    {
+      "option_id": "C",
+      "reason": "Though flexible, implementing a full server-based integration has a higher engineering cost for building and maintaining the HTTP API client within the 2-week timeframe."
+    },
+    {
+      "option_id": "D",
+      "reason": "Combining both artifact-based planning and Ralph Loop linking adds complexity and increases the integration surface unnecessarily, elevating risk."
+    }
+  ],
+  "assumptions": [
+    "OMO\u2019s artifact format (.sisyphus/plans/*.md) remains stable enough for consistent parse and execution.",
+    "The Python orchestrator can invoke opencode run commands and gather exit codes or structured logs.",
+    "Our eval harness can execute quickly (\u22645s/case) and pass a pass/fail signal back to the main loop."
+  ],
+  "risk_forecast": [
+    {
+      "failure_mode": "Incompatible file-based plan format changes in future OMO releases",
+      "likelihood": "medium",
+      "impact": "medium",
+      "detection_signal": "Execution fails or OMO logs errors about plan syntax",
+      "mitigation": "Pin OMO version; track release notes for changes to plan format"
+    },
+    {
+      "failure_mode": "Eval gating stall (continuous low scores with repeated attempts)",
+      "likelihood": "medium",
+      "impact": "high",
+      "detection_signal": "Multiple attempts never exceed threshold in logs",
+      "mitigation": "Implement maximum iteration limits and revert to prior known stable baseline"
+    },
+    {
+      "failure_mode": "Excess overhead from repeated plan expansions",
+      "likelihood": "low",
+      "impact": "medium",
+      "detection_signal": "Longer run times per iteration or memory constraints triggered",
+      "mitigation": "Optimize plan structure or reduce concurrency to keep overhead manageable"
+    }
+  ],
+  "smallest_validating_experiment": {
+    "description": "Generate a single-step .sisyphus plan, run it via opencode run, and feed its output into the eval harness to confirm it can parse, score, and decide pass/fail automatically.",
+    "duration": "1 day to set up and validate",
+    "success_signal": "The plan successfully executes, logs a score, and halts or continues based on the threshold; captured in ephemeral logs and local artifact outputs",
+    "failure_signal": "Errors in reading or parsing the plan file, or the harness cannot inject pass/fail gating back to the orchestrator"
+  },
+  "kill_criteria": {
+    "stop_when": [
+      "Integration adds >30% overhead to experiment iteration time",
+      "New blocking error surfaces in OMO that halts the pipeline for more than 2 days"
+    ],
+    "pivot_to": "Option C (server-based) if local plan execution repeatedly fails or is unsupportable",
+    "escalate_when": [
+      "Repeated failures in hooking up the eval harness or plan parser that remain unresolved after 5 attempts"
+    ]
+  },
+  "ordered_tasks": [
+    {
+      "task_id": "T-01",
+      "name": "Prototype .sisyphus Plan Generation",
+      "description": "Implement a Python method in planner.py to create minimal .sisyphus/plans/*.md from the tasks, including placeholders for each step.",
+      "dependencies": [],
+      "evaluation_criteria": [
+        "Plans are syntactically valid for opencode run",
+        "Plan files exist in .sisyphus/plans/ after generation"
+      ],
+      "risk": "low"
+    },
+    {
+      "task_id": "T-02",
+      "name": "Add Experiment Loop Hook in Python Orchestrator",
+      "description": "In main.py, after each task execution, run the eval harness and determine if the threshold is met or if we should iterate. Store results in ephemeral logs.",
+      "dependencies": [
+        "T-01"
+      ],
+      "evaluation_criteria": [
+        "Eval harness is triggered immediately after each plan execution",
+        "Stop or continue logic is based on the returned score"
+      ],
+      "risk": "medium"
+    },
+    {
+      "task_id": "T-03",
+      "name": "Plan\u2192Execute\u2192Evaluate Integration Test",
+      "description": "Execute a basic multi-step plan to confirm the orchestrator calls opencode run. The harness returns a pass/fail signal, gating loop progression.",
+      "dependencies": [
+        "T-02"
+      ],
+      "evaluation_criteria": [
+        "Successful gating logic: stops if score\u2265 threshold, or repeats if score< threshold",
+        "No unexpected resource overrun or indefinite loops"
+      ],
+      "risk": "medium"
+    }
+  ],
+  "interface_contract": {
+    "artifacts_emitted": [
+      "sisyphus/plans/*.md detailing tasks",
+      "Runtime logs capturing each iteration\u2019s score"
+    ],
+    "state_updates_for_project_loop": "Upon each experiment iteration, the orchestrator updates the next-task queue with pass/fail status. If pass, queue next plan; if fail, iterate again or escalate.",
+    "worker_instructions_format": "Each .md plan contains steps recognized by opencode run; the Python orchestrator must parse final logs to unify with the lab\u2019s result store."
+  },
+  "memory_actions": [
+    {
+      "layer": "semantic",
+      "action": "write",
+      "key": "OMO_Plan_Format_Heuristic",
+      "value": "We learned that .sisyphus/plans/*.md with short, discrete steps is reliable for incremental gating with a Python orchestrator."
+    }
+  ],
+  "verification": {
+    "how_to_confirm_this_was_right": "Compare the experiment throughput and success rates before and after integration using the harness output. Observe if iteration gating is functioning properly and we see a cost under $0.10 per iteration.",
+    "observable_result": "A gradually improving eval score (0.562 \u2192 more) with stable overhead, no indefinite loops or major errors.",
+    "reversal_conditions": [
+      "Plan parsing becomes incompatible or unmaintainable",
+      "Continuous integration failures persist across multiple expansions of plan tasks"
+    ]
+  }
+}
