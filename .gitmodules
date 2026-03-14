@@ -7,3 +7,6 @@
 [submodule "references/AutoResearch-mac/autoresearch-karpathy"]
 	path = references/AutoResearch-mac/autoresearch-karpathy
 	url = https://github.com/karpathy/autoresearch.git
+[submodule "references/draftbench"]
+	path = references/draftbench
+	url = https://github.com/alexziskind1/draftbench.git
