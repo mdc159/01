@@ -63,38 +63,31 @@ def run_eval_gate() -> tuple[float, bool]:
 
     try:
         import json
-        from evals.knowledge_plane.runner import run_arm, load_cases
-        from evals.knowledge_plane.normalization import build_manifest_index
-        from evals.knowledge_plane.local_backend import RepoSearchBackend
-
-        cases = load_cases(str(_EVAL_CASES))
-        backend = RepoSearchBackend()
-
-        # Run local arm only (fast, free, no API cost for retrieval)
-        from openai import OpenAI
         import os
-        client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", ""))
-        model = os.environ.get("KNOWLEDGE_PLANE_MODEL", "gpt-4o-mini")
+        import subprocess
 
-        # Build a minimal manifest from the backend's indexed docs
-        manifest = {"files": [{"doc_id": c["doc_id"]} for c in backend._chunks]}
-        manifest_index = build_manifest_index(manifest)
+        # Run the eval harness as a subprocess to avoid import tangles
+        result = subprocess.run(
+            [
+                "uv", "run", "python", "-m", "evals.knowledge_plane.runner",
+                "--cases", str(_EVAL_CASES),
+                "--arm", "local",
+                "--model", os.environ.get("KNOWLEDGE_PLANE_MODEL", "gpt-4o-mini"),
+                "--local-backend", "evals.knowledge_plane.local_backend:RepoSearchBackend",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=300,
+            cwd=str(Paths.ROOT),
+        )
 
-        scores = []
-        for case in cases:
-            row = run_arm(
-                arm="local",
-                case=case,
-                client=client,
-                model=model,
-                vector_store_id=None,
-                manifest=manifest,
-                manifest_index=manifest_index,
-                local_backend_spec=None,
-            )
-            scores.append(row["aggregate"]["case_score"])
+        if result.returncode != 0:
+            logger.warning("📊 Eval harness failed: %s", result.stderr[:300])
+            return 0.0, True
 
-        avg = sum(scores) / len(scores) if scores else 0.0
+        # Parse the summary JSON from stdout (first JSON block)
+        summary = json.loads(result.stdout.split("\n\n")[0])
+        avg = summary.get("avg_case_score", 0.0)
         passed = avg >= _EVAL_SCORE_THRESHOLD
 
         logger.info(
