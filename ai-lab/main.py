@@ -461,6 +461,81 @@ def strategic_loop(goal: str) -> SystemState:
 _MAX_IMPROVEMENT_CYCLES = int(__import__("os").environ.get("MAX_IMPROVEMENT_CYCLES", "5"))
 
 
+def _apply_code_improvement(template: dict) -> bool:
+    """
+    Apply a code improvement by reading the target file, asking the LLM
+    to generate the modified version, and writing it back.
+
+    No external agent dependency — just a clean LLM call + file I/O.
+    Uses PROJECT tier (gpt-4o) for reliable code generation.
+    """
+    import json as _json
+    from config import Models
+
+    files = template.get("files", [])
+    if not files:
+        return False
+
+    target_path = Paths.ROOT / files[0]
+    if not target_path.exists():
+        logger.warning("[CODE-MOD] File not found: %s", target_path)
+        return False
+
+    original_code = target_path.read_text()
+
+    prompt = f"""You are modifying a Python file to implement a specific improvement.
+
+FILE: {files[0]}
+CURRENT CODE:
+```python
+{original_code}
+```
+
+IMPROVEMENT TO APPLY:
+{template['action']}
+
+HYPOTHESIS: {template['hypothesis']}
+
+Return ONLY the complete modified file content. No explanations, no markdown fences, no commentary.
+The output must be valid Python that can replace the entire file."""
+
+    try:
+        modified_code = llm.call(
+            [{"role": "user", "content": prompt}],
+            model=Models.PROJECT,
+            system_prompt="You are a precise code modification agent. Return only the modified file content.",
+        )
+
+        # Strip markdown fences if the LLM added them
+        modified_code = modified_code.strip()
+        if modified_code.startswith("```"):
+            lines = modified_code.split("\n")
+            if lines[0].startswith("```"):
+                lines = lines[1:]
+            if lines and lines[-1].strip() == "```":
+                lines = lines[:-1]
+            modified_code = "\n".join(lines)
+
+        # Sanity check: modified code should be valid Python-ish
+        if len(modified_code) < 50:
+            logger.warning("[CODE-MOD] Modified code too short (%d chars). Skipping.", len(modified_code))
+            return False
+
+        if modified_code == original_code:
+            logger.info("[CODE-MOD] No changes detected. Skipping.")
+            return False
+
+        # Write the modified file
+        target_path.write_text(modified_code)
+        logger.info("[CODE-MOD] Applied improvement to %s (%d → %d chars)",
+                     files[0], len(original_code), len(modified_code))
+        return True
+
+    except Exception as e:
+        logger.warning("[CODE-MOD] Failed: %s", e)
+        return False
+
+
 def autonomous_improvement_loop(max_cycles: int | None = None) -> dict:
     """
     Run the autonomous self-improvement loop.
@@ -520,7 +595,11 @@ def autonomous_improvement_loop(max_cycles: int | None = None) -> dict:
             logger.info("📸 Snapshot: %s", snapshot["commit_hash"])
 
         # Step 4: Execute improvement
-        # Prefer OpenCode (actual file editing), fall back to built-in worker
+        # Three execution tiers:
+        #   1. OpenCode (if OPENCODE_EXECUTOR=1) — full agent with file editing
+        #   2. Direct LLM code modification — read file, LLM rewrites, write back
+        #   3. Built-in worker — text-only fallback (unlikely to succeed for code tasks)
+        success = False
         if _USE_OPENCODE and opencode_executor.is_available():
             logger.info("[OPENCODE] Executing improvement via OpenCode")
             oc_result = opencode_executor.run_task(
@@ -534,8 +613,11 @@ def autonomous_improvement_loop(max_cycles: int | None = None) -> dict:
                             oc_result.steps, oc_result.files_changed or "none")
             else:
                 logger.warning("❌ OpenCode failed: %s", oc_result.error or "no DONE signal")
+        elif template.get("files"):
+            # Direct LLM code modification — no external agent dependency
+            success = _apply_code_improvement(template)
         else:
-            # Built-in worker path — best effort for code tasks
+            # No files specified — use built-in worker
             state = load_or_create_state(f"autonomous-improvement-cycle-{cycle}")
             state.active_hypothesis = template["hypothesis"]
             state, success = experiment_loop(state, task_description)
