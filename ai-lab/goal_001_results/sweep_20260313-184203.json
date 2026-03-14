@@ -1,0 +1,177 @@
+{
+  "timestamp": "20260313-184203",
+  "model_count": 2,
+  "results": [
+    {
+      "model_name": "qwen2.5-coder:14b-instruct-q6_K",
+      "total_score": 7.0,
+      "max_score": 25.0,
+      "task_results": [
+        {
+          "task_id": "code_gen",
+          "task_name": "Code Generation",
+          "score": 0,
+          "max_score": 5,
+          "passed_criteria": [],
+          "failed_criteria": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "response_length": 2177,
+          "time_sec": 71.61
+        },
+        {
+          "task_id": "structured_output",
+          "task_name": "Structured JSON Output",
+          "score": 5,
+          "max_score": 5,
+          "passed_criteria": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "failed_criteria": [],
+          "response_length": 363,
+          "time_sec": 5.83
+        },
+        {
+          "task_id": "tool_calling",
+          "task_name": "Tool Selection",
+          "score": 0,
+          "max_score": 5,
+          "passed_criteria": [],
+          "failed_criteria": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "response_length": 365,
+          "time_sec": 6.96
+        },
+        {
+          "task_id": "reasoning",
+          "task_name": "Logical Reasoning",
+          "score": 0,
+          "max_score": 5,
+          "passed_criteria": [],
+          "failed_criteria": [
+            1,
+            2,
+            3
+          ],
+          "response_length": 545,
+          "time_sec": 8.81
+        },
+        {
+          "task_id": "instruction_following",
+          "task_name": "Instruction Following",
+          "score": 2,
+          "max_score": 5,
+          "passed_criteria": [
+            2,
+            3
+          ],
+          "failed_criteria": [
+            1
+          ],
+          "response_length": 379,
+          "time_sec": 4.81
+        }
+      ],
+      "total_time_sec": 98.03,
+      "error": ""
+    },
+    {
+      "model_name": "llama3.2:1b",
+      "total_score": 0.0,
+      "max_score": 25.0,
+      "task_results": [
+        {
+          "task_id": "code_gen",
+          "task_name": "Code Generation",
+          "score": 0,
+          "max_score": 5,
+          "passed_criteria": [],
+          "failed_criteria": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "response_length": 2139,
+          "time_sec": 52.94
+        },
+        {
+          "task_id": "structured_output",
+          "task_name": "Structured JSON Output",
+          "score": 0,
+          "max_score": 5,
+          "passed_criteria": [],
+          "failed_criteria": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "response_length": 990,
+          "time_sec": 2.63
+        },
+        {
+          "task_id": "tool_calling",
+          "task_name": "Tool Selection",
+          "score": 0,
+          "max_score": 5,
+          "passed_criteria": [],
+          "failed_criteria": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "response_length": 967,
+          "time_sec": 2.77
+        },
+        {
+          "task_id": "reasoning",
+          "task_name": "Logical Reasoning",
+          "score": 0,
+          "max_score": 5,
+          "passed_criteria": [],
+          "failed_criteria": [
+            1,
+            2,
+            3
+          ],
+          "response_length": 506,
+          "time_sec": 1.53
+        },
+        {
+          "task_id": "instruction_following",
+          "task_name": "Instruction Following",
+          "score": 0,
+          "max_score": 5,
+          "passed_criteria": [],
+          "failed_criteria": [
+            1,
+            2,
+            3
+          ],
+          "response_length": 467,
+          "time_sec": 1.84
+        }
+      ],
+      "total_time_sec": 61.72,
+      "error": ""
+    }
+  ]
+}
