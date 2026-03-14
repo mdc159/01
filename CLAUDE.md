@@ -17,20 +17,20 @@ uv sync                     # Install deps
 cd ai-lab && uv run main.py "Your goal here"
 ```
 
-## Module Map
+## Module Map (~1,700 LOC core + ~900 LOC evals)
 
-| File | LOC | Role |
-|------|-----|------|
-| `ai-lab/planner.py` | 447 | O1 strategic planning + failure diagnosis |
-| `ai-lab/memory.py` | 247 | Skill heuristics DB + vector search (Ollama embeddings) |
-| `ai-lab/main.py` | 186 | Three-loop orchestration engine |
-| `ai-lab/llm.py` | 185 | Unified LLM client (handles O1 API quirks) |
-| `ai-lab/state.py` | 121 | 5-layer memory hierarchy, JSON checkpoint/resume |
-| `ai-lab/critic.py` | 113 | Worker output evaluation + scoring |
-| `ai-lab/config.py` | 103 | Model routing, thresholds, env config |
-| `ai-lab/tools.py` | 86 | Deterministic tools: Python exec, shell, file I/O |
-| `ai-lab/worker.py` | 65 | Stateless task execution (fast tier) |
-| `ai-lab/evals/knowledge_plane/` | 870 | A/B retrieval eval harness (10 cases, 5 buckets) |
+| File | Role |
+|------|------|
+| `ai-lab/main.py` | Three-loop orchestration engine |
+| `ai-lab/planner.py` | O1 strategic planning + failure diagnosis |
+| `ai-lab/llm.py` | Unified LLM client (handles O1 API quirks) |
+| `ai-lab/critic.py` | Worker output evaluation + scoring |
+| `ai-lab/worker.py` | Stateless task execution (fast tier) |
+| `ai-lab/state.py` | 5-layer memory hierarchy, JSON checkpoint/resume |
+| `ai-lab/memory.py` | Skill heuristics DB + vector search (Ollama embeddings) |
+| `ai-lab/config.py` | Model routing, thresholds, env config |
+| `ai-lab/tools.py` | Deterministic tools: Python exec, shell, file I/O |
+| `ai-lab/evals/knowledge_plane/` | A/B retrieval eval harness (10 cases, 5 buckets) |
 
 ## Key Documents
 
@@ -50,6 +50,7 @@ cd ai-lab && uv run main.py "Your goal here"
 3. **State over context** — context windows are disposable; `state.db.json` is durable
 4. **Escalation is bounded** — max 5 worker failures → critic escalation → O1 strategic replan
 5. **Simplicity constraint** — no feature added unless it improves reliability, observability, or decision quality
+6. **Keep docs in sync** — when adding new top-level directories, key files, or documents, update the Module Map and Key Documents above. Use `wc -l ai-lab/*.py` for accurate LOC if needed; do not hardcode line counts in docs
 
 ## Model Tiers
 
