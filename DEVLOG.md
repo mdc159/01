@@ -162,9 +162,27 @@ flowchart TB
 
 MLX confirmed as preferred runtime. Speculative decoding validated — gains scale with output length.
 
+### Knowledge Plane Eval Results (2026-03-14)
+
+| Arm | Avg Score | Notes |
+|-----|-----------|-------|
+| Local (stub) | 0.465 | DummyLocalBackend — single stub result per query |
+| Hosted (OpenAI file_search) | 0.554 | Real vector store, 20 repo docs uploaded |
+| **Delta** | **+0.089** | Hosted wins 6/10 cases, loses on arch_* cases |
+
+Per-case breakdown:
+- Biggest hosted wins: `failure_001` (+0.38), `canon_002` (+0.23), `heuristic_002` (+0.17)
+- Hosted losses: `arch_002` (-0.18), `arch_001` (-0.06) — multi-doc reasoning may dilute signal
+- Full results: `ai-lab/evals/knowledge_plane/results/latest.json`
+
+Bugs fixed during first run:
+- `DEFAULT_REPO_ROOT` was `parents[3]` (wrong depth) → fixed to `parents[2]`
+- OpenAI file_search rejects `.example` and `.toml` extensions → added `.txt` fallback in `safe_upload_name`
+
 ### On Deck
-- [ ] Extract GPT-5.4's eval harness into `ai-lab/evals/knowledge_plane/`
-- [ ] Build the A/B retrieval comparison (local vs hosted)
+- [x] Extract GPT-5.4's eval harness into `ai-lab/evals/knowledge_plane/`
+- [x] Build the A/B retrieval comparison (local vs hosted)
+- [ ] Deep research: OpenCode + OMO workflow capabilities for improvement loop
 - [ ] Add vector search to skills DB (currently tag-based)
 - [ ] Observability beyond logging
 
