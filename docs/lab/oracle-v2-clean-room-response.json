@@ -1,0 +1,70 @@
+{
+  "query": "oracle-v2-clean-room.md",
+  "model": "o1",
+  "reasoning_effort": "high",
+  "date": "2026-03-13",
+  "context": "Clean room architecture review — no existing code shown to O1, only objective and constraints",
+  "chosen_strategy": "Option A: Multi-tier nested loop architecture with minimal overhead",
+  "rationale": "A nested loop design (strategic → project → experiment) naturally manages multi-step goals while allowing each tier to remain small and focused. It aligns well with autoresearch principles (each experiment is atomic and independently evaluated). Using a dedicated low-level 'worker' for repeated tasks, a mid-level 'critic' to evaluate results, and a high-level 'strategic planner' only when stuck supports both autonomy and minimal dependence on costly external calls. Although it may seem over-engineered, careful implementation with light modules can keep lines of code under the 1,500 target. This approach remains more robust and extensible than a single loop, yet less complex than a full DAG-based task management engine.",
+  "rejected_alternatives": [
+    {
+      "option": "B: Flat single-loop with conditional escalation",
+      "reason": "While simpler, it becomes unwieldy as goals become more complex and multi-step. Lacks clear separation of concerns, increasing the likelihood of logic bloat."
+    },
+    {
+      "option": "C: Graph-based (DAG) task engine",
+      "reason": "Adds unnecessary complexity for a single-machine system and smaller-scale goals. Parallel or advanced scheduling isn't crucial here and would raise the development overhead."
+    }
+  ],
+  "assumptions": [
+    "Local 70B models (quantized) are sufficient for worker-tier tasks on the Apple M4 Pro.",
+    "Minimal dependencies are possible (simple file-based memory, no large frameworks).",
+    "We can achieve basic self-improvement via storing and retrieving heuristics in a lightweight memory layer.",
+    "Rare calls to more advanced APIs (OpenAI, etc.) are allowed but only at strategic junctures."
+  ],
+  "confidence": 0.85,
+  "risk_forecast": {
+    "failure_modes": [
+      {
+        "mode": "Excess complexity in nested loops",
+        "likelihood": "Medium",
+        "impact": "High if the codebase becomes too large or confusing",
+        "detection": "Module-level code reviews showing bloated classes/functions",
+        "mitigation": "Keep each module <200 LOC, enforce clear separation of roles"
+      },
+      {
+        "mode": "Insufficient memory management",
+        "likelihood": "Low",
+        "impact": "High if local 70B model fails due to memory constraints",
+        "detection": "System logs indicate out-of-memory errors when models load",
+        "mitigation": "Use quantized models and load them lazily; monitor memory usage"
+      },
+      {
+        "mode": "Weak improvement over time",
+        "likelihood": "Medium",
+        "impact": "Medium if stored heuristics do not meaningfully guide future tasks",
+        "detection": "No measurable efficiency or accuracy gains after repeated runs",
+        "mitigation": "Implement a simple but clear feedback loop measuring performance metrics"
+      }
+    ]
+  },
+  "smallest_validating_experiment": "Build a minimal nested-loop skeleton that runs an extremely simple 'task' (e.g., compare two trivial text transformations) using a local model as the worker and logs the result to a memory file. Confirm it can automatically iterate, store the outcome, revert failures, and escalate if worker tasks repeat-fail.",
+  "kill_criteria": [
+    "If total lines of core logic exceed ~1,500 and cannot be simplified",
+    "If memory usage consistently exceeds 24GB limit when performing standard tasks",
+    "If repeated attempts at self-improvement show no measurable gains for 10+ trials"
+  ],
+  "ordered_tasks": [
+    {"name": "Define Core Data Structures", "dependency": [], "description": "Create minimal JSON or Python classes for tasks, results, and logs. Keep <100 LOC.", "evaluation_criteria": "Data structures are readable, easily serialized; well-documented"},
+    {"name": "Implement Experiment Loop (Worker & Critic)", "dependency": ["Define Core Data Structures"], "description": "Write a rapid loop that passes a task to the worker model, runs it, and collects an evaluation from a simple critic function or model prompt. Keep it minimal.", "evaluation_criteria": "Loop can run tasks repeatedly, produce consistent logs, handle basic pass/fail"},
+    {"name": "Implement Project Loop (Task Sequencer)", "dependency": ["Implement Experiment Loop (Worker & Critic)"], "description": "Manage a queue of tasks and dispatch them one by one to the experiment loop; record results in memory. Add success/failure logic and simple heuristics for ordering tasks.", "evaluation_criteria": "Can push/pull tasks from a queue; systematically mark tasks complete or retried"},
+    {"name": "Implement Minimal Memory System", "dependency": ["Implement Project Loop (Task Sequencer)"], "description": "Use file-based storage (JSON) for storing heuristics and experiment outcomes. Provide a function for reading/writing a small knowledge base.", "evaluation_criteria": "Read/write overhead is minimal; heuristics update correctly; data remains consistent"},
+    {"name": "Add Strategic Loop (Escalation Mechanism)", "dependency": ["Implement Minimal Memory System"], "description": "If repeated failures occur, call a higher-level model or dedicated code path to diagnose root cause and propose changes. Keep all logic in a single module <200 LOC.", "evaluation_criteria": "Escalation triggers after N repeated failures; logs proposed strategy updates or re-queues tasks"},
+    {"name": "Test with a Simple Demo Goal", "dependency": ["Add Strategic Loop (Escalation Mechanism)"], "description": "Set a trivial multi-step goal, run the entire system end to end, and confirm operation for multiple hours without human intervention.", "evaluation_criteria": "System runs; logs outcome; no crashes; memory usage stable; partial improvements if repeated"}
+  ],
+  "verification": {
+    "method": "Observe the system running end-to-end for ~4-6 hours on a trivial or moderately challenging goal without human intervention. Confirm successful repeated tasks, sensible logs, minimal code overhead, and correct escalation handling.",
+    "success_signal": "No uncaught errors, stable memory usage, incremental improvement in metric logs across tasks",
+    "reversal_conditions": "If too many unexpected errors or no measurable improvement after many iterations, revisit the architecture or reduce complexity"
+  }
+}
