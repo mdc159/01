@@ -62,11 +62,13 @@ def _chunk_text(text: str, doc_id: str) -> list[dict[str, str]]:
     while start < len(text):
         end = start + CHUNK_SIZE
         chunk_text = text[start:end]
-        chunks.append({
-            "doc_id": doc_id,
-            "chunk_id": f"{doc_id}::chunk-{idx}",
-            "text": chunk_text,
-        })
+        chunks.append(
+            {
+                "doc_id": doc_id,
+                "chunk_id": f"{doc_id}::chunk-{idx}",
+                "text": chunk_text,
+            }
+        )
         start = end - CHUNK_OVERLAP
         idx += 1
     return chunks
@@ -83,7 +85,11 @@ def _build_corpus() -> list[dict[str, str]]:
         text = path.read_text(encoding="utf-8", errors="replace")
         doc_id = pattern
         chunks.extend(_chunk_text(text, doc_id))
-    logger.info("[LOCAL] Built corpus: %d chunks from %d doc patterns", len(chunks), len(DOC_PATTERNS))
+    logger.info(
+        "[LOCAL] Built corpus: %d chunks from %d doc patterns",
+        len(chunks),
+        len(DOC_PATTERNS),
+    )
     return chunks
 
 
@@ -129,14 +135,18 @@ class RepoSearchBackend:
         batch_size = 32
         all_embeddings: list[list[float]] = []
         for i in range(0, len(texts), batch_size):
-            batch = texts[i:i + batch_size]
+            batch = texts[i : i + batch_size]
             embs = _ollama_embed(batch)
             all_embeddings.extend(embs)
-            logger.info("[LOCAL] Embedded batch %d-%d / %d", i, i + len(batch), len(texts))
+            logger.info(
+                "[LOCAL] Embedded batch %d-%d / %d", i, i + len(batch), len(texts)
+            )
 
         self._embeddings = all_embeddings
         _save_cache({"chunks": self._chunks, "embeddings": self._embeddings})
-        logger.info("[LOCAL] Cached %d chunk embeddings to %s", len(self._chunks), CACHE_PATH)
+        logger.info(
+            "[LOCAL] Cached %d chunk embeddings to %s", len(self._chunks), CACHE_PATH
+        )
 
     def search(self, query: str, top_k: int = 8) -> list[dict[str, Any]]:
         query_emb = _ollama_embed([query])[0]
@@ -144,13 +154,26 @@ class RepoSearchBackend:
         scored: list[tuple[float, dict[str, Any]]] = []
         for chunk, emb in zip(self._chunks, self._embeddings):
             sim = _cosine_similarity(query_emb, emb)
-            scored.append((sim, {
-                "doc_id": chunk["doc_id"],
-                "chunk_id": chunk["chunk_id"],
-                "text": chunk["text"],
-                "score": sim,
-                "metadata": {},
-            }))
+            scored.append(
+                (
+                    sim,
+                    {
+                        "doc_id": chunk["doc_id"],
+                        "chunk_id": chunk["chunk_id"],
+                        "text": chunk["text"],
+                        "score": sim,
+                        "metadata": {},
+                    },
+                )
+            )
 
-        scored.sort(reverse=True, key=lambda x: x[0])
-        return [item for _, item in scored[:top_k]]
+        best_by_doc: dict[str, tuple[float, dict[str, Any]]] = {}
+        for score, item in scored:
+            doc_id = str(item["doc_id"])
+            current_best = best_by_doc.get(doc_id)
+            if current_best is None or score > current_best[0]:
+                best_by_doc[doc_id] = (score, item)
+
+        deduped = list(best_by_doc.values())
+        deduped.sort(reverse=True, key=lambda x: x[0])
+        return [item for _, item in deduped[:top_k]]

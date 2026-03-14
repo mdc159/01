@@ -6,11 +6,11 @@
   "vector_store_id": "vs_69b52701c360819181b3bba7004f94c5",
   "summary": {
     "count": 10,
-    "avg_case_score": 0.7479,
+    "avg_case_score": 0.7779,
     "by_arm": {
       "local": {
         "count": 10,
-        "avg_case_score": 0.7479
+        "avg_case_score": 0.7779
       }
     }
   },
@@ -29,30 +29,6 @@
           "metadata": {}
         },
         {
-          "doc_id": "CANON.md",
-          "chunk_id": "CANON.md::chunk-0",
-          "text": "# Canon: Autonomous R&D Lab Objective Contract\n\nStatus: Active  \nOwner: Project team  \nPurpose: This is the source of truth for what we are building and how decisions are made.\n\n## 1) Mission\n\nBuild a compact, long-horizon, autonomous engineering/research system that:\n- Accepts broad goals.\n- Decomposes them into executable experiments.\n- Runs experiments continuously at low cost.\n- Learns from outcomes.\n- Escalates to high-reasoning models only when needed.\n\n## 2) Core Philosophy\n\n- Deterministic by default.\n- Probabilistic only where reasoning is required.\n- State over prompt history.\n- Experiments over one-shot answers.\n- Modular system over monolithic framework.\n\n## 3) System Objective\n\nCreate a general-purpose goal engine that can handle coding, engineering, and research workflows by repeatedly executing:\n\nPlan -> Act -> Evaluate -> Update State -> Repeat\n\nFor hard blocks:\n\nRepeated failure -> Strategic diagnosis -> Replan\n\n## 4) Operating Model (Three Nested Loops)\n\n- Experiment Loop (minutes): run worker tasks, tools, checks, retries.\n- Project Loop (hours/days): choose next tasks, track progress, adapt plan.\n- Strategic Loop (days/weeks): architecture-level reframing and recovery when stuck.\n\n## 5) Model Role Contract\n\n- Worker tier (cheap/fast): execution, tool calls, implementation attempts.\n- Critic tier (mid): evaluation, scoring, failure categorization, improvement hints.\n- Strategist tier (o1-class reasoning): decomposition, diagnosis, reframing, decision framew",
-          "score": 0.6120785434084651,
-          "source": "local",
-          "metadata": {}
-        },
-        {
-          "doc_id": "CANON.md",
-          "chunk_id": "CANON.md::chunk-1",
-          "text": "plementation attempts.\n- Critic tier (mid): evaluation, scoring, failure categorization, improvement hints.\n- Strategist tier (o1-class reasoning): decomposition, diagnosis, reframing, decision frameworks.\n\nRule: reasoning models are not default workers.\n\n## 6) State and Memory Contract\n\nThe system must maintain explicit external state as the source of truth.\n\nRequired layers:\n- Structured state store: goals, constraints, hypotheses, task status, validated findings.\n- Artifact store: files, outputs, logs, reports, simulation assets.\n- Retrieval memory: distilled heuristics/insights for reuse.\n- Runtime context: only what is needed for the current node/task.\n\nRule: context windows are disposable; state is durable.\n\n## 7) Escalation Contract\n\nEscalate only when at least one condition is met:\n- Repeated failure without progress.\n- High uncertainty or conflicting evidence.\n- High-stakes decision with material downside.\n- Need for architectural reframing (not just local patching).\n\nEscalation input must include:\n- Goal and constraints.\n- What was tried.\n- Failure signatures.\n- Current state snapshot.\n- Decision question.\n\nEscalation output must include:\n- Root cause hypothesis.\n- Invalid assumptions.\n- Recommended new approach.\n- Concrete next tasks.\n\n## 8) Determinism Boundary\n\nDeterministic components:\n- Workflow/state transitions.\n- Routing policies.\n- Tool interfaces.\n- Persistence and artifact lineage.\n\nProbabilistic components:\n- Planning.\n- Hypothesis generation.\n- Ambiguou",
-          "score": 0.6071043340969036,
-          "source": "local",
-          "metadata": {}
-        },
-        {
-          "doc_id": "CANON.md",
-          "chunk_id": "CANON.md::chunk-4",
-          "text": "ller.\n4. Measure outcomes and feed back validated insights into state/memory.\n\no1 input contract for best leverage:\n- Goal and explicit success metric.\n- Current structured state snapshot.\n- Constraints (time, cost, tools, risk).\n- Attempts so far and failure signatures.\n- Exact decision question to answer.\n- Required output schema.\n\no1 output contract:\n- Chosen strategy and rationale.\n- Rejected alternatives with reasons.\n- Key assumptions and confidence level.\n- Concrete next tasks with evaluation criteria.\n- Trigger conditions for next escalation.\n\n## 15) Product Spec Authority\n\nThis document is the product specification authority for this project.\n\nImplications:\n- Architecture changes are product-spec changes.\n- Prompt-contract changes are product-spec changes.\n- Model-role changes are product-spec changes.\n- State schema changes are product-spec changes.\n\nNo major implementation work should proceed without a spec-consistent decision record.\n\n## 16) o1-in-the-Loop Spec Development Protocol\n\no1 must be used in defining the product, not only operating it.\n\nRequired spec cycle for major decisions:\n1. Draft proposal (human or implementation model).\n2. o1 strategic review (problem framing, tradeoffs, failure modes).\n3. Peer model challenge (Gemini or equivalent) to stress-test assumptions.\n4. o1 adjudication and final recommendation.\n5. Canon/spec update with accepted decision and rationale.\n\nA decision is \"major\" if it affects:\n- Control loop structure.\n- Escalation policy.\n-",
-          "score": 0.5883645257112653,
-          "source": "local",
-          "metadata": {}
-        },
-        {
           "doc_id": "ai-lab/o1_system_prompt.md",
           "chunk_id": "ai-lab/o1_system_prompt.md::chunk-2",
           "text": " logs. You must diagnose the systemic issue and recommend a new approach.\n\n## 3. Persistent Memory and LangGraph State Management\n\nThe system manages context drift deliberately using a deterministic **LangGraph-like state machine**. Do not assume the worker models have your full context window. \n\nInstead of an endless chat thread, the system passes an explicit JSON **State Object** between nodes (Planner \u2192 Manager \u2192 Worker \u2192 Critic). This State Object enforces a **5-Layer Memory Hierarchy**:\n\n1.  **Identity Memory**: The system role.\n2.  **Working Memory**: The current goal, current design variables, and active hypothesis.\n3.  **Episodic Memory**: A buffer of the most recent actions, outputs, and errors.\n4.  **Semantic Memory (Skills DB)**: Heuristics learned from past successes/failures (e.g., \"flexure joints reduce hinge stress by 30%\").\n5.  **Artifact Memory (Filesystem)**: The physical code, reports, and CAD files.\n\nWhen you are asked to evaluate failures or plan tasks, you will receive a snapshot of this **State Object**. This ensures zero hallucination across long-horizon chains. \n\n## 4. Operational Directives for the Strategist\n\nWhen invoked as the **Planner (New Goal)**:\n- Output a precise, structured JSON `project_graph`. Break the problem down into logical, testable sub-tasks that a less capable model can execute one by one. Include explicit evaluation criteria.\n- Always present at least 2 candidate strategies and adjudicate between them. Never answer \"what's optima",
@@ -61,31 +37,55 @@
           "metadata": {}
         },
         {
-          "doc_id": "ai-lab/o1_system_prompt.md",
-          "chunk_id": "ai-lab/o1_system_prompt.md::chunk-3",
-          "text": "-tasks that a less capable model can execute one by one. Include explicit evaluation criteria.\n- Always present at least 2 candidate strategies and adjudicate between them. Never answer \"what's optimal?\" \u2014 answer \"which of these named options wins on these criteria?\"\n- If your confidence is below the threshold specified in the query meta, your primary output MUST be the smallest validating experiment, not a full plan.\n\nWhen invoked as the **Failure Analyst (Escalation)**:\n- Do NOT simply fix syntax errors in the worker's code. Look for *architectural* flaws. Did the worker make a bad assumption? Is a chosen tool the wrong one for the job? Output a new strategic recommendation that reframes the worker's hypothesis.\n- Run a pre-mortem: \"Assume this new strategy also fails after 7 days. What were the three most likely root causes, and what early signals would have predicted them?\"\n\nWhen invoked as the **Adjudicator (Cross-Model Synthesis)**:\n- You may receive candidate strategies from other models (Gemini, GPT-5.4, Codex, Claude). Score each across fixed criteria. Do not average \u2014 make a concrete decision with explicit rationale for why the winner beats the alternatives.\n\n## 5. Multi-Model Reasoning Workflow & Quality Standard\n\n**Adjudication Role:** You are part of a multi-model stack orchestrated by Claude Code. Other frontier models may generate candidate strategies or challenge assumptions. Your job is to **adjudicate, synthesize, and produce the final decision framework**. ",
-          "score": 0.5795319033086981,
+          "doc_id": "CLAUDE.md",
+          "chunk_id": "CLAUDE.md::chunk-1",
+          "text": "ll, file I/O |\n| `ai-lab/worker.py` | 65 | Stateless task execution (fast tier) |\n\n## Key Documents\n\n| Document | Purpose |\n|----------|---------|\n| `CANON.md` | Product spec authority \u2014 all decisions checked against this |\n| `ai-lab/o1_system_prompt.md` | Chief Strategist role definition for O1 |\n| `ai-lab/o1_next_question_mvp.md` | Template for structured O1 queries |\n| `docs/lab/architecture.md` | Mermaid diagrams of full system architecture |\n| `docs/lab/o1-strategy-prompt.md` | Structured O1 decision query for next phase |\n\n## Key Rules\n\n1. **CANON.md is the source of truth** \u2014 architecture changes are product-spec changes\n2. **O1 questions must include**: objective, state snapshot, constraints, prior attempts, decision question, output schema (Section 18)\n3. **State over context** \u2014 context windows are disposable; `state.db.json` is durable\n4. **Escalation is bounded** \u2014 max 5 worker failures \u2192 critic escalation \u2192 O1 strategic replan\n5. **Simplicity constraint** \u2014 no feature added unless it improves reliability, observability, or decision quality\n\n## Model Tiers\n\n| Tier | Default Model | Role | Cost |\n|------|---------------|------|------|\n| STRATEGIC | `o1` | Planning, diagnosis | $$ (rare) |\n| PROJECT | `gpt-4o` | Evaluation, routing | $ |\n| WORKER | `gpt-4o-mini` | Execution, attempts | \u00a2 |\n| LOCAL_WORKER | Ollama `llama3.3:70b` | Local execution | $0 |\n",
+          "score": 0.5655767341409783,
+          "source": "local",
+          "metadata": {}
+        },
+        {
+          "doc_id": "ai-lab/o1_next_question_mvp.md",
+          "chunk_id": "ai-lab/o1_next_question_mvp.md::chunk-0",
+          "text": "# Next o1 Question: MVP Definition and First Build Slice\n\nUse this exact prompt (fill placeholders) when calling the strategic o1 model.\n\n---\n\nYou are the strategist for this project.\n\n## Objective\nDefine the smallest reliable MVP for this autonomous R&D lab and choose the first implementation slice.\n\n## Success Metric\nThe MVP is successful if it can:\n1. Build an executable task graph for a new goal.\n2. Run worker + critic retries on at least one task.\n3. Escalate to strategist after repeated failure.\n4. Persist state and resume cleanly.\n5. Stop safely on loop guardrails.\n\n## Current State Snapshot\n```json\n{\n  \"canon_path\": \"CANON.md\",\n  \"runtime_modules\": [\n    \"main.py\", \"planner.py\", \"worker.py\", \"critic.py\", \"state.py\", \"memory.py\", \"tools.py\"\n  ],\n  \"known_constraints\": [\n    \"deterministic-first architecture\",\n    \"o1 required for strategic decisions\",\n    \"single-machine friendly MVP\"\n  ],\n  \"known_gaps\": [\n    \"tool execution loop is still text-only\",\n    \"limited validation of strategist output\",\n    \"MVP tasks need strict prioritization\"\n  ]\n}\n```\n\n## Constraints\n- Keep MVP scope minimal.\n- Favor reliability over feature breadth.\n- No speculative framework sprawl.\n- Output must be directly implementable in this repo.\n\n## Decision Question\nWhat exact MVP scope and ordered task graph should we execute next to maximize delivery probability in the fewest steps?\n\n## Required Output Schema (JSON only)\n```json\n{\n  \"mvp_name\": \"string\",\n  \"mvp_scope\": \"string\",\n  \"non_goals",
+          "score": 0.5554388022390085,
+          "source": "local",
+          "metadata": {}
+        },
+        {
+          "doc_id": "README.md",
+          "chunk_id": "README.md::chunk-4",
+          "text": " Configuration\n\nAll settings live in `.env` (copy from `.env.example`):\n\n| Variable | Default | Description |\n|----------|---------|-------------|\n| `OPENAI_API_KEY` | *(required)* | Your OpenAI API key |\n| `STRATEGIC_MODEL` | `o1` | Model for planning/diagnosis |\n| `PROJECT_MODEL` | `gpt-4o` | Model for evaluation/routing |\n| `WORKER_MODEL` | `gpt-4o-mini` | Model for execution |\n| `OLLAMA_BASE_URL` | `http://localhost:11434` | Local Ollama instance |\n| `LOCAL_WORKER_MODEL` | `llama3.3:70b` | Ollama model for local execution |\n| `O1_REASONING_EFFORT` | `high` | O1 reasoning depth: low/medium/high |\n| `ESCALATE_THRESHOLD` | `5` | Worker failures before O1 escalation |\n| `MAX_PROJECT_ITERATIONS` | `200` | Hard safety cap on loop iterations |\n\n## Key Concepts\n\n### The Canon\n\n[`CANON.md`](CANON.md) is the product specification authority. All architecture, prompt, model-role, and state schema changes are product-spec changes. Major decisions go through the O1-in-the-loop spec cycle (CANON Section 16).\n\n### Asking the Strategic Tier the Right Questions\n\nThe strategic tier (O1, O3, or any reasoning model) is called rarely but with precision. Every query follows the **v2 Strategic Query Contract** (`ai-lab/o1_next_question_v2.md`), a 12-part protocol synthesized from O3, GPT-5.4, and Codex evaluations:\n\n1. **Meta** \u2014 caller type, confidence threshold, budget envelope\n2. **Objective** and explicit success metric\n3. **Current state snapshot** (structured, not narrative)\n4. **Constrain",
+          "score": 0.5529844112989872,
+          "source": "local",
+          "metadata": {}
+        },
+        {
+          "doc_id": "docs/lab/architecture.md",
+          "chunk_id": "docs/lab/architecture.md::chunk-5",
+          "text": "/ OpenCode fast<br/>Continuous]\n\n    Planner -.->|task graph| Lab\n    Workers -.->|results| Critic\n    Critic -.->|keep/revert| Lab\n    Critic -.->|5 failures| Planner\n\n    style Shizzle fill:#1a1a2e,stroke:#e94560,color:#fff\n    style Lab fill:#16213e,stroke:#0f3460,color:#fff\n    style Planner fill:#533483,stroke:#e94560,color:#fff\n    style Critic fill:#0f3460,stroke:#e94560,color:#fff\n    style Workers fill:#1a1a2e,stroke:#0f3460,color:#fff\n```\n\n### Model Tier Mapping\n\n| Role | Model | Tier | Cost | When Called |\n|------|-------|------|------|-------------|\n| Strategic Planner | O1 / O3 / reasoning model (eval-gated) | heavy | $$ | New goals, escalations only |\n| Critic / Evaluator | Gemini 2.5 Flash | medium | ~$0.001/call | Every experiment |\n| Worker / Executor | Ollama (llama3.3:70b on M4 Pro) | fast | $0 | Continuous |\n| Orchestrator | Claude Code (Max sub) | heavy | $0 (subscription) | Delegation, execution, tool routing |\n\n## 5. Optimization Sequence\n\nThe improvement loop optimizes the system in layers, where each layer multiplies the effectiveness of the next.\n\n```mermaid\ngraph TB\n    L1[Layer 1: LLM Models<br/>Which models run best on M4 Pro 24GB?<br/>Quantization, context windows, throughput]\n    L2[Layer 2: Tools<br/>Fork-terminal, OpenCode workflows<br/>Better tools = better experiments]\n    L3[Layer 3: Loop Chains<br/>Combine loops for complex goals<br/>Model optimization \u2192 tool optimization \u2192 ...]\n    L4[Layer 4: Orchestrator Tuning<br/>Shizzle prompt, routi",
+          "score": 0.5169189051124404,
           "source": "local",
           "metadata": {}
         }
       ],
-      "answer_raw": "{\n  \"answer\": \"The document that should govern architectural choices is the 'Canon: Autonomous R&D Lab Objective Contract'. It serves as the source of truth for what we are building and how decisions are made. Key principles that should be treated as binding defaults include: 'Prefer the smallest architecture that preserves reliability' from the Simplicity Constraint, 'Any major prompt, architecture, or framework decision should be checked against this document first' from the Change Control section, and 'No feature is added unless it improves reliability, observability, or decision quality.'\",\n  \"key_evidence_ids\": [\"CANON.md\"],\n  \"assumptions\": [\n    \"The Canon document is clearly defined as the authoritative source.\",\n    \"All architectural decisions must align with the principles stated in the Canon.\"\n  ],\n  \"confidence\": 1.0,\n  \"next_action\": \"Ensure all team members refer to the Canon for any architectural decision-making.\",\n  \"kill_criteria\": [\"Deviating from Canon principles without clear revision.\", \"Lack of consistency in architectural discussions.\"],\n  \"escalation_trigger\": \"When a proposal conflicts with the Canon.\"\n}",
+      "answer_raw": "{\n  \"answer\": \"The document that should govern architectural choices is `CANON.md`. This document states that it is the \\\"product specification authority\\\" and that \\\"all architecture, prompt, model-role, and state schema changes are product-spec changes.\\\" Therefore, any major prompt, architecture, or framework decision should be checked against this document first, and if a proposal conflicts with the canon, the canon wins unless explicitly revised.\",\n  \"key_evidence_ids\": [\"CANON.md\", \"README.md\"],\n  \"assumptions\": [\"Architectural decisions should follow the clearly outlined principles in `CANON.md`.\"],\n  \"confidence\": 1.0,\n  \"next_action\": \"Ensure that all architectural choices are validated against `CANON.md` to maintain compliance with the documented principles.\",\n  \"kill_criteria\": [\"If a proposal is implemented that is not in line with `CANON.md`.\", \"If deviations from `CANON.md` are made without explicit revisions.\"],\n  \"escalation_trigger\": \"Proposal conflicts with the principles stated in `CANON.md`.\"\n}",
       "answer_obj": {
-        "answer": "The document that should govern architectural choices is the 'Canon: Autonomous R&D Lab Objective Contract'. It serves as the source of truth for what we are building and how decisions are made. Key principles that should be treated as binding defaults include: 'Prefer the smallest architecture that preserves reliability' from the Simplicity Constraint, 'Any major prompt, architecture, or framework decision should be checked against this document first' from the Change Control section, and 'No feature is added unless it improves reliability, observability, or decision quality.'",
+        "answer": "The document that should govern architectural choices is `CANON.md`. This document states that it is the \"product specification authority\" and that \"all architecture, prompt, model-role, and state schema changes are product-spec changes.\" Therefore, any major prompt, architecture, or framework decision should be checked against this document first, and if a proposal conflicts with the canon, the canon wins unless explicitly revised.",
         "key_evidence_ids": [
-          "CANON.md"
+          "CANON.md",
+          "README.md"
         ],
         "assumptions": [
-          "The Canon document is clearly defined as the authoritative source.",
-          "All architectural decisions must align with the principles stated in the Canon."
+          "Architectural decisions should follow the clearly outlined principles in `CANON.md`."
         ],
         "confidence": 1.0,
-        "next_action": "Ensure all team members refer to the Canon for any architectural decision-making.",
+        "next_action": "Ensure that all architectural choices are validated against `CANON.md` to maintain compliance with the documented principles.",
         "kill_criteria": [
-          "Deviating from Canon principles without clear revision.",
-          "Lack of consistency in architectural discussions."
+          "If a proposal is implemented that is not in line with `CANON.md`.",
+          "If deviations from `CANON.md` are made without explicit revisions."
         ],
-        "escalation_trigger": "When a proposal conflicts with the Canon."
+        "escalation_trigger": "Proposal conflicts with the principles stated in `CANON.md`."
       },
       "retrieval_grade": {
         "expected_count": 1,
@@ -102,17 +102,15 @@
       },
       "citation_grade": {
         "citations_ok": true,
-        "cited_count": 1,
+        "cited_count": 2,
         "invalid_citations": []
       },
       "fact_grade": {
-        "gold_fact_coverage": 0.25,
-        "matched_gold_facts": [
-          "source of truth"
-        ]
+        "gold_fact_coverage": 0.0,
+        "matched_gold_facts": []
       },
       "aggregate": {
-        "case_score": 0.8125,
+        "case_score": 0.75,
         "weights": {
           "support_recall": 0.35,
           "gold_fact_coverage": 0.25,
@@ -121,11 +119,11 @@
         }
       },
       "llm_meta": {
-        "latency_sec": 4.731,
+        "latency_sec": 4.818,
         "usage": {
-          "input_tokens": 2458,
-          "output_tokens": 236,
-          "total_tokens": 2694
+          "input_tokens": 2768,
+          "output_tokens": 225,
+          "total_tokens": 2993
         }
       }
     },
@@ -159,92 +157,79 @@
           "metadata": {}
         },
         {
-          "doc_id": "ai-lab/o1_system_prompt.md",
-          "chunk_id": "ai-lab/o1_system_prompt.md::chunk-3",
-          "text": "-tasks that a less capable model can execute one by one. Include explicit evaluation criteria.\n- Always present at least 2 candidate strategies and adjudicate between them. Never answer \"what's optimal?\" \u2014 answer \"which of these named options wins on these criteria?\"\n- If your confidence is below the threshold specified in the query meta, your primary output MUST be the smallest validating experiment, not a full plan.\n\nWhen invoked as the **Failure Analyst (Escalation)**:\n- Do NOT simply fix syntax errors in the worker's code. Look for *architectural* flaws. Did the worker make a bad assumption? Is a chosen tool the wrong one for the job? Output a new strategic recommendation that reframes the worker's hypothesis.\n- Run a pre-mortem: \"Assume this new strategy also fails after 7 days. What were the three most likely root causes, and what early signals would have predicted them?\"\n\nWhen invoked as the **Adjudicator (Cross-Model Synthesis)**:\n- You may receive candidate strategies from other models (Gemini, GPT-5.4, Codex, Claude). Score each across fixed criteria. Do not average \u2014 make a concrete decision with explicit rationale for why the winner beats the alternatives.\n\n## 5. Multi-Model Reasoning Workflow & Quality Standard\n\n**Adjudication Role:** You are part of a multi-model stack orchestrated by Claude Code. Other frontier models may generate candidate strategies or challenge assumptions. Your job is to **adjudicate, synthesize, and produce the final decision framework**. ",
-          "score": 0.6301704983853027,
-          "source": "local",
-          "metadata": {}
-        },
-        {
-          "doc_id": "docs/lab/architecture.md",
-          "chunk_id": "docs/lab/architecture.md::chunk-0",
-          "text": "# Autonomous Self-Improvement Lab \u2014 Architecture\n\n## 1. System Overview \u2014 The Three Layers\n\n```mermaid\ngraph TB\n    subgraph Orchestrator[\"ORCHESTRATOR (Shizzle)\"]\n        direction LR\n        O1[Delegates only \u2014 never executes]\n        O2[Surfaces: Telegram / CLI / Cron]\n    end\n\n    subgraph Loops[\"IMPROVEMENT LOOPS\"]\n        direction LR\n        L1[Generic try \u2192 measure \u2192 keep/revert]\n        L2[Chainable for any goal]\n    end\n\n    subgraph Tools[\"TOOL LAYER\"]\n        direction LR\n        T1[OpenCode fork-terminal]\n        T2[Ollama local LLMs]\n        T3[Codex / Gemini workers]\n    end\n\n    subgraph Foundation[\"FOUNDATION\"]\n        direction LR\n        F1[Apple M4 Pro \u2014 24GB unified]\n        F2[State + Memory + Traces]\n        F3[Postgres + pgvector + FTS]\n    end\n\n    Orchestrator --> Loops\n    Loops --> Tools\n    Tools --> Foundation\n```\n\n## 2. Improvement Loop (Generic)\n\nThe core loop follows the autoresearch discipline: every experiment is a discrete, measurable unit with an explicit keep/revert decision.\n\n```mermaid\nstateDiagram-v2\n    [*] --> IDLE\n\n    IDLE --> PLAN: new goal or escalation\n    PLAN --> EXPERIMENT: task graph ready\n\n    EXPERIMENT --> EVALUATE: run complete\n    EVALUATE --> APPLY: metric improved \u2192 keep\n    EVALUATE --> EXPERIMENT: metric flat/worse \u2192 revert + try next\n    EVALUATE --> PLAN: 5 consecutive failures \u2192 escalate\n\n    APPLY --> IDLE: checkpoint saved\n\n    note right of PLAN\n        Strategic tier (O1 / O3 / any reasoning model)\n        Ca",
-          "score": 0.6276517303825202,
-          "source": "local",
-          "metadata": {}
-        },
-        {
-          "doc_id": "ai-lab/o1_system_prompt.md",
-          "chunk_id": "ai-lab/o1_system_prompt.md::chunk-2",
-          "text": " logs. You must diagnose the systemic issue and recommend a new approach.\n\n## 3. Persistent Memory and LangGraph State Management\n\nThe system manages context drift deliberately using a deterministic **LangGraph-like state machine**. Do not assume the worker models have your full context window. \n\nInstead of an endless chat thread, the system passes an explicit JSON **State Object** between nodes (Planner \u2192 Manager \u2192 Worker \u2192 Critic). This State Object enforces a **5-Layer Memory Hierarchy**:\n\n1.  **Identity Memory**: The system role.\n2.  **Working Memory**: The current goal, current design variables, and active hypothesis.\n3.  **Episodic Memory**: A buffer of the most recent actions, outputs, and errors.\n4.  **Semantic Memory (Skills DB)**: Heuristics learned from past successes/failures (e.g., \"flexure joints reduce hinge stress by 30%\").\n5.  **Artifact Memory (Filesystem)**: The physical code, reports, and CAD files.\n\nWhen you are asked to evaluate failures or plan tasks, you will receive a snapshot of this **State Object**. This ensures zero hallucination across long-horizon chains. \n\n## 4. Operational Directives for the Strategist\n\nWhen invoked as the **Planner (New Goal)**:\n- Output a precise, structured JSON `project_graph`. Break the problem down into logical, testable sub-tasks that a less capable model can execute one by one. Include explicit evaluation criteria.\n- Always present at least 2 candidate strategies and adjudicate between them. Never answer \"what's optima",
-          "score": 0.6251382217809802,
-          "source": "local",
-          "metadata": {}
-        },
-        {
-          "doc_id": "docs/lab/architecture.md",
-          "chunk_id": "docs/lab/architecture.md::chunk-5",
-          "text": "/ OpenCode fast<br/>Continuous]\n\n    Planner -.->|task graph| Lab\n    Workers -.->|results| Critic\n    Critic -.->|keep/revert| Lab\n    Critic -.->|5 failures| Planner\n\n    style Shizzle fill:#1a1a2e,stroke:#e94560,color:#fff\n    style Lab fill:#16213e,stroke:#0f3460,color:#fff\n    style Planner fill:#533483,stroke:#e94560,color:#fff\n    style Critic fill:#0f3460,stroke:#e94560,color:#fff\n    style Workers fill:#1a1a2e,stroke:#0f3460,color:#fff\n```\n\n### Model Tier Mapping\n\n| Role | Model | Tier | Cost | When Called |\n|------|-------|------|------|-------------|\n| Strategic Planner | O1 / O3 / reasoning model (eval-gated) | heavy | $$ | New goals, escalations only |\n| Critic / Evaluator | Gemini 2.5 Flash | medium | ~$0.001/call | Every experiment |\n| Worker / Executor | Ollama (llama3.3:70b on M4 Pro) | fast | $0 | Continuous |\n| Orchestrator | Claude Code (Max sub) | heavy | $0 (subscription) | Delegation, execution, tool routing |\n\n## 5. Optimization Sequence\n\nThe improvement loop optimizes the system in layers, where each layer multiplies the effectiveness of the next.\n\n```mermaid\ngraph TB\n    L1[Layer 1: LLM Models<br/>Which models run best on M4 Pro 24GB?<br/>Quantization, context windows, throughput]\n    L2[Layer 2: Tools<br/>Fork-terminal, OpenCode workflows<br/>Better tools = better experiments]\n    L3[Layer 3: Loop Chains<br/>Combine loops for complex goals<br/>Model optimization \u2192 tool optimization \u2192 ...]\n    L4[Layer 4: Orchestrator Tuning<br/>Shizzle prompt, routi",
-          "score": 0.6247554368023186,
-          "source": "local",
-          "metadata": {}
-        },
-        {
           "doc_id": "README.md",
           "chunk_id": "README.md::chunk-1",
           "text": "and the system learns from every iteration. The lab builds and optimizes itself.\n\n## How It Works\n\nThree nested loops run autonomously against any goal:\n\n```\n\u250c\u2500 STRATEGIC LOOP (heavy reasoning \u2014 e.g. O1) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502  Called rarely \u2014 new goals and failure diagnosis only.        \u2502\n\u2502                                                              \u2502\n\u2502  \u250c\u2500 PROJECT LOOP (medium tier \u2014 critic/evaluator) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510  \u2502\n\u2502  \u2502  Evaluates results. Manages the task queue.             \u2502  \u2502\n\u2502  \u2502                                                         \u2502  \u2502\n\u2502  \u2502  \u250c\u2500 EXPERIMENT LOOP (fast tier \u2014 local or cheap) \u2500\u2500\u2500\u2500\u2510  \u2502  \u2502\n\u2502  \u2502  \u2502  Worker tries \u2192 Critic scores \u2192 Retry or escalate  \u2502  \u2502  \u2502\n\u2502  \u2502  \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518  \u2502  \u2502\n\u2502  \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518  \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n```\n\nModel selection for each tier is a key decision the lab optimizes. Defaults are configured in `.env` but the system is designed to evaluate and improve its own model choices.\n\nThe core discipline comes from [autoresearch](https://github.com/karpathy/autoresearch): every experiment is atomic, metrics are the only truth, and failures are reverted cleanly.\n\n## Quick Start\n\n```bash\n# 1. Install dependencies\nuv sync\n\n# 2. Configure\ncp .env.example .env\n# Edit .env \u2014 at minimum set OPENAI_API_KEY\n\n# 3. Run the lab on a goal\ncd ai-lab\nuv run main.py \"Optimize local LLM inference on Apple Silicon\"\n\n# Or ask O1 a str",
           "score": 0.6242505301469317,
           "source": "local",
           "metadata": {}
+        },
+        {
+          "doc_id": "CANON.md",
+          "chunk_id": "CANON.md::chunk-3",
+          "text": "s explicitly revised.\n\n## 13) Strategic Model Leverage Protocol (o1 Included by Design)\n\no1-class reasoning must be part of development, but used selectively for high-leverage decisions.\n\nMandatory o1 usage points:\n- Project initialization: produce initial decomposition and risk map.\n- Replanning after repeated failure: diagnose root cause and propose strategic pivot.\n- Architecture decisions with long-term consequences: state model, loop design, evaluation policy, safety boundaries.\n- High-uncertainty or high-stakes tradeoff decisions.\n\nDefault non-usage points:\n- Routine execution steps.\n- Brute-force retries.\n- Deterministic transformations.\n- Low-risk formatting or glue logic.\n\n## 14) Multi-Model Reasoning Workflow (Gemini + o1 + Worker Stack)\n\nUse role separation, not model averaging:\n- Gemini (or peer frontier model): generate an alternative plan, critique, or edge-case challenge.\n- o1 strategist: adjudicate, synthesize, and produce final decision framework.\n- Worker/Critic tiers: implement and validate experimentally.\n\nDecision pattern:\n1. Generate candidate strategies (at least 2 when problem is ambiguous).\n2. Run cross-model critique (Gemini challenges assumptions; o1 evaluates failure modes and selects approach).\n3. Commit one executable plan to the deterministic controller.\n4. Measure outcomes and feed back validated insights into state/memory.\n\no1 input contract for best leverage:\n- Goal and explicit success metric.\n- Current structured state snapshot.\n- Constrain",
+          "score": 0.6193235852662322,
+          "source": "local",
+          "metadata": {}
+        },
+        {
+          "doc_id": "CLAUDE.md",
+          "chunk_id": "CLAUDE.md::chunk-0",
+          "text": "# CLAUDE.md \u2014 Autonomous R&D Lab (01)\n\nA self-improving autonomous engineering system. O1 plans, workers execute, critics evaluate, and the system learns from every experiment. This repo builds and optimizes itself.\n\n## What This Is\n\nThree nested loops that run autonomously:\n- **Strategic Loop** (O1) \u2014 Plans task graphs, diagnoses failures. Called rarely.\n- **Project Loop** (GPT-4o / Gemini) \u2014 Evaluates results, manages task queue.\n- **Experiment Loop** (Ollama / fast) \u2014 Executes tasks, runs 100s of attempts.\n\n## Quick Start\n\n```bash\ncp .env.example .env        # Add your OPENAI_API_KEY\nuv sync                     # Install deps\ncd ai-lab && uv run main.py \"Your goal here\"\n```\n\n## Module Map\n\n| File | LOC | Role |\n|------|-----|------|\n| `ai-lab/main.py` | 186 | Three-loop orchestration engine |\n| `ai-lab/planner.py` | 323 | O1 strategic planning + failure diagnosis |\n| `ai-lab/llm.py` | 130 | Unified LLM client (handles O1 API quirks) |\n| `ai-lab/critic.py` | 113 | Worker output evaluation + scoring |\n| `ai-lab/state.py` | 121 | 5-layer memory hierarchy, JSON checkpoint/resume |\n| `ai-lab/config.py` | 101 | Model routing, thresholds, env config |\n| `ai-lab/memory.py` | 95 | Skill heuristics DB + artifact registry |\n| `ai-lab/tools.py` | 86 | Deterministic tools: Python exec, shell, file I/O |\n| `ai-lab/worker.py` | 65 | Stateless task execution (fast tier) |\n\n## Key Documents\n\n| Document | Purpose |\n|----------|---------|\n| `CANON.md` | Product spec authority \u2014 all decisions",
+          "score": 0.5849250435729556,
+          "source": "local",
+          "metadata": {}
         }
       ],
-      "answer_raw": "{\n  \"answer\": \"The strategic reasoning tier should be invoked under two primary conditions: firstly, when 'a new goal arrives' which necessitates producing a `project_graph`, and secondly, 'if the worker fails a task 5+ times', at which point the system escalates back to the strategist for diagnosis and strategic recommendations.\",\n  \"key_evidence_ids\": [\"ai-lab/o1_system_prompt.md\", \"docs/lab/architecture.md\"],\n  \"assumptions\": [\n    \"The current state of the project necessitates a clear routing policy for heavy reasoning calls.\",\n    \"Strategic invocation should remain sparse, adhering strictly to defined criteria.\"\n  ],\n  \"confidence\": 0.9,\n  \"next_action\": \"Formulate explicit project routing policies that define when to escalate to the strategic tier based on failure thresholds and new goals.\",\n  \"kill_criteria\": [\n    \"Failure to establish criteria after escalation\",\n    \"Misidentifying the need for strategic intervention\"\n  ],\n  \"escalation_trigger\": \"Worker task failures exceeding 5 occurrences, or a new goal emerging.\"\n}",
+      "answer_raw": "{\n  \"answer\": \"The strategic reasoning tier (O1) should be invoked under two main conditions: 1) when 'a new goal arrives' requiring the production of a 'project_graph'\u2014a JSON list of sub-tasks with dependencies; 2) when 'the system is stuck' after a worker has 'failed a task 5+ times', necessitating a diagnosis of the systemic issue and a recommendation for a new approach. In contrast, routine execution, brute-force retries, and low-risk adjustments should remain within the worker and critic tiers to ensure that strategic usage remains sparse and targeted.\",\n  \"key_evidence_ids\": [\"CANON.md\", \"o1_system_prompt.md\", \"architecture.md\"],\n  \"assumptions\": [\n    \"Escalation to the strategist tier is limited to high-leverage scenarios.\",\n    \"The current operational design allows for effective separation of tasks among tiers.\"\n  ],\n  \"confidence\": 0.9,\n  \"next_action\": \"Develop a clear documentation policy defining thresholds for escalation scenarios and ensure that the worker and critic tiers are utilized effectively.\",\n  \"kill_criteria\": [\n    \"Failure to adequately define a routing policy by the next review cycle.\",\n    \"Repeated misallocation of tasks to the strategist tier.\"\n  ],\n  \"escalation_trigger\": \"Five consecutive task failures.\"\n}",
       "answer_obj": {
-        "answer": "The strategic reasoning tier should be invoked under two primary conditions: firstly, when 'a new goal arrives' which necessitates producing a `project_graph`, and secondly, 'if the worker fails a task 5+ times', at which point the system escalates back to the strategist for diagnosis and strategic recommendations.",
+        "answer": "The strategic reasoning tier (O1) should be invoked under two main conditions: 1) when 'a new goal arrives' requiring the production of a 'project_graph'\u2014a JSON list of sub-tasks with dependencies; 2) when 'the system is stuck' after a worker has 'failed a task 5+ times', necessitating a diagnosis of the systemic issue and a recommendation for a new approach. In contrast, routine execution, brute-force retries, and low-risk adjustments should remain within the worker and critic tiers to ensure that strategic usage remains sparse and targeted.",
         "key_evidence_ids": [
-          "ai-lab/o1_system_prompt.md",
-          "docs/lab/architecture.md"
+          "CANON.md",
+          "o1_system_prompt.md",
+          "architecture.md"
         ],
         "assumptions": [
-          "The current state of the project necessitates a clear routing policy for heavy reasoning calls.",
-          "Strategic invocation should remain sparse, adhering strictly to defined criteria."
+          "Escalation to the strategist tier is limited to high-leverage scenarios.",
+          "The current operational design allows for effective separation of tasks among tiers."
         ],
         "confidence": 0.9,
-        "next_action": "Formulate explicit project routing policies that define when to escalate to the strategic tier based on failure thresholds and new goals.",
+        "next_action": "Develop a clear documentation policy defining thresholds for escalation scenarios and ensure that the worker and critic tiers are utilized effectively.",
         "kill_criteria": [
-          "Failure to establish criteria after escalation",
-          "Misidentifying the need for strategic intervention"
+          "Failure to adequately define a routing policy by the next review cycle.",
+          "Repeated misallocation of tasks to the strategist tier."
         ],
-        "escalation_trigger": "Worker task failures exceeding 5 occurrences, or a new goal emerging."
+        "escalation_trigger": "Five consecutive task failures."
       },
       "retrieval_grade": {
         "expected_count": 3,
-        "hit_count": 2,
-        "support_recall": 0.6666666666666666,
+        "hit_count": 3,
+        "support_recall": 1.0,
         "hits": [
+          "CANON.md",
           "README.md",
           "ai-lab/o1_system_prompt.md"
         ],
-        "misses": [
-          "CANON.md"
-        ]
+        "misses": []
       },
       "schema_grade": {
         "schema_ok": true,
         "missing_fields": []
       },
       "citation_grade": {
-        "citations_ok": true,
-        "cited_count": 2,
-        "invalid_citations": []
+        "citations_ok": false,
+        "cited_count": 3,
+        "invalid_citations": [
+          "architecture.md",
+          "o1_system_prompt.md"
+        ]
       },
       "fact_grade": {
         "gold_fact_coverage": 0.0,
         "matched_gold_facts": []
       },
       "aggregate": {
-        "case_score": 0.6333,
+        "case_score": 0.55,
         "weights": {
           "support_recall": 0.35,
           "gold_fact_coverage": 0.25,
@@ -253,11 +238,11 @@
         }
       },
       "llm_meta": {
-        "latency_sec": 4.106,
+        "latency_sec": 4.613,
         "usage": {
-          "input_tokens": 3527,
-          "output_tokens": 227,
-          "total_tokens": 3754
+          "input_tokens": 2665,
+          "output_tokens": 275,
+          "total_tokens": 2940
         }
       }
     },
@@ -279,14 +264,6 @@
           "chunk_id": "CLAUDE.md::chunk-1",
           "text": "ll, file I/O |\n| `ai-lab/worker.py` | 65 | Stateless task execution (fast tier) |\n\n## Key Documents\n\n| Document | Purpose |\n|----------|---------|\n| `CANON.md` | Product spec authority \u2014 all decisions checked against this |\n| `ai-lab/o1_system_prompt.md` | Chief Strategist role definition for O1 |\n| `ai-lab/o1_next_question_mvp.md` | Template for structured O1 queries |\n| `docs/lab/architecture.md` | Mermaid diagrams of full system architecture |\n| `docs/lab/o1-strategy-prompt.md` | Structured O1 decision query for next phase |\n\n## Key Rules\n\n1. **CANON.md is the source of truth** \u2014 architecture changes are product-spec changes\n2. **O1 questions must include**: objective, state snapshot, constraints, prior attempts, decision question, output schema (Section 18)\n3. **State over context** \u2014 context windows are disposable; `state.db.json` is durable\n4. **Escalation is bounded** \u2014 max 5 worker failures \u2192 critic escalation \u2192 O1 strategic replan\n5. **Simplicity constraint** \u2014 no feature added unless it improves reliability, observability, or decision quality\n\n## Model Tiers\n\n| Tier | Default Model | Role | Cost |\n|------|---------------|------|------|\n| STRATEGIC | `o1` | Planning, diagnosis | $$ (rare) |\n| PROJECT | `gpt-4o` | Evaluation, routing | $ |\n| WORKER | `gpt-4o-mini` | Execution, attempts | \u00a2 |\n| LOCAL_WORKER | Ollama `llama3.3:70b` | Local execution | $0 |\n",
           "score": 0.565986777786749,
-          "source": "local",
-          "metadata": {}
-        },
-        {
-          "doc_id": "CANON.md",
-          "chunk_id": "CANON.md::chunk-2",
-          "text": "ministic components:\n- Workflow/state transitions.\n- Routing policies.\n- Tool interfaces.\n- Persistence and artifact lineage.\n\nProbabilistic components:\n- Planning.\n- Hypothesis generation.\n- Ambiguous interpretation.\n- Strategic tradeoff analysis.\n\n## 9) Simplicity Constraint\n\nPrefer the smallest architecture that preserves reliability.\n\nDefault build order:\n1. State store.\n2. Artifact store.\n3. Retrieval memory.\n4. Deterministic controller loop.\n5. Worker + critic.\n6. Strategic escalation.\n\nNo feature is added unless it improves reliability, observability, or decision quality.\n\n## 10) Success Criteria\n\nThe system is successful when it can:\n- Run for long periods without context collapse.\n- Recover from failures through structured replanning.\n- Improve over time via distilled reusable insights.\n- Keep high-reasoning model usage sparse and high-leverage.\n- Stay understandable, inspectable, and maintainable.\n\n## 11) Non-Goals (for now)\n\n- Building a bloated general assistant platform.\n- Adding channels/plugins before core loop stability.\n- Treating larger prompts as a substitute for state design.\n\n## 12) Change Control\n\nAny major prompt, architecture, or framework decision should be checked against this document first.\n\nIf a proposal conflicts with this canon, the canon wins unless explicitly revised.\n\n## 13) Strategic Model Leverage Protocol (o1 Included by Design)\n\no1-class reasoning must be part of development, but used selectively for high-leverage decisions.\n\nMandatory o1",
-          "score": 0.5559810779043056,
           "source": "local",
           "metadata": {}
         },
@@ -315,14 +292,6 @@
           "metadata": {}
         },
         {
-          "doc_id": "CANON.md",
-          "chunk_id": "CANON.md::chunk-4",
-          "text": "ller.\n4. Measure outcomes and feed back validated insights into state/memory.\n\no1 input contract for best leverage:\n- Goal and explicit success metric.\n- Current structured state snapshot.\n- Constraints (time, cost, tools, risk).\n- Attempts so far and failure signatures.\n- Exact decision question to answer.\n- Required output schema.\n\no1 output contract:\n- Chosen strategy and rationale.\n- Rejected alternatives with reasons.\n- Key assumptions and confidence level.\n- Concrete next tasks with evaluation criteria.\n- Trigger conditions for next escalation.\n\n## 15) Product Spec Authority\n\nThis document is the product specification authority for this project.\n\nImplications:\n- Architecture changes are product-spec changes.\n- Prompt-contract changes are product-spec changes.\n- Model-role changes are product-spec changes.\n- State schema changes are product-spec changes.\n\nNo major implementation work should proceed without a spec-consistent decision record.\n\n## 16) o1-in-the-Loop Spec Development Protocol\n\no1 must be used in defining the product, not only operating it.\n\nRequired spec cycle for major decisions:\n1. Draft proposal (human or implementation model).\n2. o1 strategic review (problem framing, tradeoffs, failure modes).\n3. Peer model challenge (Gemini or equivalent) to stress-test assumptions.\n4. o1 adjudication and final recommendation.\n5. Canon/spec update with accepted decision and rationale.\n\nA decision is \"major\" if it affects:\n- Control loop structure.\n- Escalation policy.\n-",
-          "score": 0.5351521439635263,
-          "source": "local",
-          "metadata": {}
-        },
-        {
           "doc_id": "README.md",
           "chunk_id": "README.md::chunk-4",
           "text": " Configuration\n\nAll settings live in `.env` (copy from `.env.example`):\n\n| Variable | Default | Description |\n|----------|---------|-------------|\n| `OPENAI_API_KEY` | *(required)* | Your OpenAI API key |\n| `STRATEGIC_MODEL` | `o1` | Model for planning/diagnosis |\n| `PROJECT_MODEL` | `gpt-4o` | Model for evaluation/routing |\n| `WORKER_MODEL` | `gpt-4o-mini` | Model for execution |\n| `OLLAMA_BASE_URL` | `http://localhost:11434` | Local Ollama instance |\n| `LOCAL_WORKER_MODEL` | `llama3.3:70b` | Ollama model for local execution |\n| `O1_REASONING_EFFORT` | `high` | O1 reasoning depth: low/medium/high |\n| `ESCALATE_THRESHOLD` | `5` | Worker failures before O1 escalation |\n| `MAX_PROJECT_ITERATIONS` | `200` | Hard safety cap on loop iterations |\n\n## Key Concepts\n\n### The Canon\n\n[`CANON.md`](CANON.md) is the product specification authority. All architecture, prompt, model-role, and state schema changes are product-spec changes. Major decisions go through the O1-in-the-loop spec cycle (CANON Section 16).\n\n### Asking the Strategic Tier the Right Questions\n\nThe strategic tier (O1, O3, or any reasoning model) is called rarely but with precision. Every query follows the **v2 Strategic Query Contract** (`ai-lab/o1_next_question_v2.md`), a 12-part protocol synthesized from O3, GPT-5.4, and Codex evaluations:\n\n1. **Meta** \u2014 caller type, confidence threshold, budget envelope\n2. **Objective** and explicit success metric\n3. **Current state snapshot** (structured, not narrative)\n4. **Constrain",
@@ -331,24 +300,24 @@
           "metadata": {}
         }
       ],
-      "answer_raw": "{\n  \"answer\": \"Local-first retrieval is more aligned with the project's architecture principles. The documentation emphasizes that 'the system must maintain explicit external state as the source of truth.' This aligns with the constraint to 'Preserve explicit external state as the source of truth.' Additionally, adopting a 'smallest architecture that preserves reliability' is prioritized, favoring local systems that minimize complexity.\",\n  \"key_evidence_ids\": [\"CANON.md\", \"CLAUDE.md\"],\n  \"assumptions\": [\n    \"Moving to a hosted retrieval system might compromise the explicit external state management.\",\n    \"Adding hosted retrieval could increase architectural complexity contrary to the simplicity constraint.\"\n  ],\n  \"confidence\": 0.85,\n  \"next_action\": \"Conduct further evaluations on local-first retrieval efficacy while maintaining documentation of insights.\",\n  \"kill_criteria\": [\"Failure to maintain the external state as the source of truth\", \"Significant architectural complexity introduced by hosted approach\"],\n  \"escalation_trigger\": \"Emergence of high uncertainty regarding the efficacy of local-first retrieval.\"\n}",
+      "answer_raw": "{\n  \"answer\": \"Given the repo's architecture principles, the local-first retrieval system is more aligned. The reason is underscored by the principle that 'the system must maintain explicit external state as the source of truth.' This emphasizes the need for reliability and truthfulness, which is inherently aligned with local control.\",\n  \"key_evidence_ids\": [\"CANON.md\", \"CLAUDE.md\"],\n  \"assumptions\": [\n    \"Moving retrieval to a hosted solution may jeopardize the control and explicitness of the state.\",\n    \"Local-first retrieval ensures that the source of truth is maintained as intended.\"\n  ],\n  \"confidence\": 0.85,\n  \"next_action\": \"Proceed to implement enhancements for local-first retrieval that maintain the explicit external state as a source of truth.\",\n  \"kill_criteria\": [\n    \"Evidence of unreliability in hosted retrieval models.\",\n    \"Ability to improve functionality without compromising state integrity.\"\n  ],\n  \"escalation_trigger\": \"Inability to maintain reliability or explicit state in the current local-first retrieval implementation.\"\n}",
       "answer_obj": {
-        "answer": "Local-first retrieval is more aligned with the project's architecture principles. The documentation emphasizes that 'the system must maintain explicit external state as the source of truth.' This aligns with the constraint to 'Preserve explicit external state as the source of truth.' Additionally, adopting a 'smallest architecture that preserves reliability' is prioritized, favoring local systems that minimize complexity.",
+        "answer": "Given the repo's architecture principles, the local-first retrieval system is more aligned. The reason is underscored by the principle that 'the system must maintain explicit external state as the source of truth.' This emphasizes the need for reliability and truthfulness, which is inherently aligned with local control.",
         "key_evidence_ids": [
           "CANON.md",
           "CLAUDE.md"
         ],
         "assumptions": [
-          "Moving to a hosted retrieval system might compromise the explicit external state management.",
-          "Adding hosted retrieval could increase architectural complexity contrary to the simplicity constraint."
+          "Moving retrieval to a hosted solution may jeopardize the control and explicitness of the state.",
+          "Local-first retrieval ensures that the source of truth is maintained as intended."
         ],
         "confidence": 0.85,
-        "next_action": "Conduct further evaluations on local-first retrieval efficacy while maintaining documentation of insights.",
+        "next_action": "Proceed to implement enhancements for local-first retrieval that maintain the explicit external state as a source of truth.",
         "kill_criteria": [
-          "Failure to maintain the external state as the source of truth",
-          "Significant architectural complexity introduced by hosted approach"
+          "Evidence of unreliability in hosted retrieval models.",
+          "Ability to improve functionality without compromising state integrity."
         ],
-        "escalation_trigger": "Emergence of high uncertainty regarding the efficacy of local-first retrieval."
+        "escalation_trigger": "Inability to maintain reliability or explicit state in the current local-first retrieval implementation."
       },
       "retrieval_grade": {
         "expected_count": 2,
@@ -383,11 +352,11 @@
         }
       },
       "llm_meta": {
-        "latency_sec": 6.061,
+        "latency_sec": 4.657,
         "usage": {
-          "input_tokens": 3447,
-          "output_tokens": 216,
-          "total_tokens": 3663
+          "input_tokens": 2784,
+          "output_tokens": 220,
+          "total_tokens": 3004
         }
       }
     },
@@ -429,14 +398,6 @@
           "metadata": {}
         },
         {
-          "doc_id": "README.md",
-          "chunk_id": "README.md::chunk-4",
-          "text": " Configuration\n\nAll settings live in `.env` (copy from `.env.example`):\n\n| Variable | Default | Description |\n|----------|---------|-------------|\n| `OPENAI_API_KEY` | *(required)* | Your OpenAI API key |\n| `STRATEGIC_MODEL` | `o1` | Model for planning/diagnosis |\n| `PROJECT_MODEL` | `gpt-4o` | Model for evaluation/routing |\n| `WORKER_MODEL` | `gpt-4o-mini` | Model for execution |\n| `OLLAMA_BASE_URL` | `http://localhost:11434` | Local Ollama instance |\n| `LOCAL_WORKER_MODEL` | `llama3.3:70b` | Ollama model for local execution |\n| `O1_REASONING_EFFORT` | `high` | O1 reasoning depth: low/medium/high |\n| `ESCALATE_THRESHOLD` | `5` | Worker failures before O1 escalation |\n| `MAX_PROJECT_ITERATIONS` | `200` | Hard safety cap on loop iterations |\n\n## Key Concepts\n\n### The Canon\n\n[`CANON.md`](CANON.md) is the product specification authority. All architecture, prompt, model-role, and state schema changes are product-spec changes. Major decisions go through the O1-in-the-loop spec cycle (CANON Section 16).\n\n### Asking the Strategic Tier the Right Questions\n\nThe strategic tier (O1, O3, or any reasoning model) is called rarely but with precision. Every query follows the **v2 Strategic Query Contract** (`ai-lab/o1_next_question_v2.md`), a 12-part protocol synthesized from O3, GPT-5.4, and Codex evaluations:\n\n1. **Meta** \u2014 caller type, confidence threshold, budget envelope\n2. **Objective** and explicit success metric\n3. **Current state snapshot** (structured, not narrative)\n4. **Constrain",
-          "score": 0.6111232631517576,
-          "source": "local",
-          "metadata": {}
-        },
-        {
           "doc_id": "CANON.md",
           "chunk_id": "CANON.md::chunk-4",
           "text": "ller.\n4. Measure outcomes and feed back validated insights into state/memory.\n\no1 input contract for best leverage:\n- Goal and explicit success metric.\n- Current structured state snapshot.\n- Constraints (time, cost, tools, risk).\n- Attempts so far and failure signatures.\n- Exact decision question to answer.\n- Required output schema.\n\no1 output contract:\n- Chosen strategy and rationale.\n- Rejected alternatives with reasons.\n- Key assumptions and confidence level.\n- Concrete next tasks with evaluation criteria.\n- Trigger conditions for next escalation.\n\n## 15) Product Spec Authority\n\nThis document is the product specification authority for this project.\n\nImplications:\n- Architecture changes are product-spec changes.\n- Prompt-contract changes are product-spec changes.\n- Model-role changes are product-spec changes.\n- State schema changes are product-spec changes.\n\nNo major implementation work should proceed without a spec-consistent decision record.\n\n## 16) o1-in-the-Loop Spec Development Protocol\n\no1 must be used in defining the product, not only operating it.\n\nRequired spec cycle for major decisions:\n1. Draft proposal (human or implementation model).\n2. o1 strategic review (problem framing, tradeoffs, failure modes).\n3. Peer model challenge (Gemini or equivalent) to stress-test assumptions.\n4. o1 adjudication and final recommendation.\n5. Canon/spec update with accepted decision and rationale.\n\nA decision is \"major\" if it affects:\n- Control loop structure.\n- Escalation policy.\n-",
@@ -445,40 +406,32 @@
           "metadata": {}
         },
         {
-          "doc_id": "CANON.md",
-          "chunk_id": "CANON.md::chunk-3",
-          "text": "s explicitly revised.\n\n## 13) Strategic Model Leverage Protocol (o1 Included by Design)\n\no1-class reasoning must be part of development, but used selectively for high-leverage decisions.\n\nMandatory o1 usage points:\n- Project initialization: produce initial decomposition and risk map.\n- Replanning after repeated failure: diagnose root cause and propose strategic pivot.\n- Architecture decisions with long-term consequences: state model, loop design, evaluation policy, safety boundaries.\n- High-uncertainty or high-stakes tradeoff decisions.\n\nDefault non-usage points:\n- Routine execution steps.\n- Brute-force retries.\n- Deterministic transformations.\n- Low-risk formatting or glue logic.\n\n## 14) Multi-Model Reasoning Workflow (Gemini + o1 + Worker Stack)\n\nUse role separation, not model averaging:\n- Gemini (or peer frontier model): generate an alternative plan, critique, or edge-case challenge.\n- o1 strategist: adjudicate, synthesize, and produce final decision framework.\n- Worker/Critic tiers: implement and validate experimentally.\n\nDecision pattern:\n1. Generate candidate strategies (at least 2 when problem is ambiguous).\n2. Run cross-model critique (Gemini challenges assumptions; o1 evaluates failure modes and selects approach).\n3. Commit one executable plan to the deterministic controller.\n4. Measure outcomes and feed back validated insights into state/memory.\n\no1 input contract for best leverage:\n- Goal and explicit success metric.\n- Current structured state snapshot.\n- Constrain",
-          "score": 0.594649402230568,
-          "source": "local",
-          "metadata": {}
-        },
-        {
-          "doc_id": "ai-lab/o1_system_prompt.md",
-          "chunk_id": "ai-lab/o1_system_prompt.md::chunk-4",
-          "text": "ack orchestrated by Claude Code. Other frontier models may generate candidate strategies or challenge assumptions. Your job is to **adjudicate, synthesize, and produce the final decision framework**. Do not average the models; make direct, concrete decisions based on cross-model critiques.\n\n**Prompt Context Standard:** You will always receive a query conforming to the v2 Strategic Query Contract (see `o1_next_question_v2.md`). It will contain: meta (caller type, confidence threshold, budget), objective, success metric, state snapshot, constraints with blast radius, prior attempts with failure signatures, explicit option set, assumptions & unknowns, decision question, and required output schema. If you do not have these things, demand them.\n\n**Strategic Output Contract:** When you output a decision, you must include:\n- Chosen strategy with rationale and expected outcome.\n- Rejected alternatives with reasons.\n- Assumptions (what we believe but haven't verified).\n- Confidence score (0-1) with rationale.\n- Risk forecast: failure modes with likelihood, impact, detection signals, and mitigations.\n- Smallest validating experiment: what to run first, how long, what signals success or failure.\n- Kill criteria: when to stop, when to pivot, when to escalate.\n- Ordered tasks with dependencies and evaluation criteria.\n- Interface contract: what artifacts you emit, what format workers consume.\n- Memory actions: what heuristics to write/update/delete in the Skills DB. Be intentional \u2014 only ",
-          "score": 0.5939349339500963,
+          "doc_id": "CLAUDE.md",
+          "chunk_id": "CLAUDE.md::chunk-1",
+          "text": "ll, file I/O |\n| `ai-lab/worker.py` | 65 | Stateless task execution (fast tier) |\n\n## Key Documents\n\n| Document | Purpose |\n|----------|---------|\n| `CANON.md` | Product spec authority \u2014 all decisions checked against this |\n| `ai-lab/o1_system_prompt.md` | Chief Strategist role definition for O1 |\n| `ai-lab/o1_next_question_mvp.md` | Template for structured O1 queries |\n| `docs/lab/architecture.md` | Mermaid diagrams of full system architecture |\n| `docs/lab/o1-strategy-prompt.md` | Structured O1 decision query for next phase |\n\n## Key Rules\n\n1. **CANON.md is the source of truth** \u2014 architecture changes are product-spec changes\n2. **O1 questions must include**: objective, state snapshot, constraints, prior attempts, decision question, output schema (Section 18)\n3. **State over context** \u2014 context windows are disposable; `state.db.json` is durable\n4. **Escalation is bounded** \u2014 max 5 worker failures \u2192 critic escalation \u2192 O1 strategic replan\n5. **Simplicity constraint** \u2014 no feature added unless it improves reliability, observability, or decision quality\n\n## Model Tiers\n\n| Tier | Default Model | Role | Cost |\n|------|---------------|------|------|\n| STRATEGIC | `o1` | Planning, diagnosis | $$ (rare) |\n| PROJECT | `gpt-4o` | Evaluation, routing | $ |\n| WORKER | `gpt-4o-mini` | Execution, attempts | \u00a2 |\n| LOCAL_WORKER | Ollama `llama3.3:70b` | Local execution | $0 |\n",
+          "score": 0.5847642596952471,
           "source": "local",
           "metadata": {}
         }
       ],
-      "answer_raw": "{\n  \"answer\": \"The strategic model interface should remain O1-specific as it aligns with the current architecture that emphasizes the O1 model as the 'strategic tier' and keeps the optimization focus on model selection as a target. The current repo states that 'model selection is itself an optimization target,' highlighting that the existing framework is designed around O1's capabilities rather than a pluggable model architecture.\",\n  \"key_evidence_ids\": [\"README.md\", \"CANON.md\"],\n  \"assumptions\": [\"The strategic requirements can be met with O1 without needing to complicate the system with a pluggable interface.\", \"Maintaining O1 as the strategic model is consistent with the repository's language and architectural decisions.\"],\n  \"confidence\": 0.85,\n  \"next_action\": \"Confirm that all internal components are optimized to function under an O1-specific architecture before further assessments on additional model integrations.\",\n  \"kill_criteria\": [\"If performance metrics indicate a bottleneck directly attributed to the O1-specific interface.\", \"If model selections fail to meet optimization targets within defined constraints.\"],\n  \"escalation_trigger\": \"If the O1 model consistently underperforms on strategic tasks despite iterative optimization efforts.\"\n}",
+      "answer_raw": "{\"answer\":\"The architecture choice that better fits the repo today is the O1-specific strategy wiring. The evidence states, \\\"Repo currently frames O1 as the strategic tier but also says model selection is itself an optimization target,\\\" which suggests that continuing with a specific reliance on O1 avoids complexity and aligns with the current framing. Furthermore, the design is guided by the principle that \\\"architecture changes are product-spec changes,\\\" and there is a strong emphasis on maintaining simplicity and reliability within the existing constraints. Future-proofing through model-pluggability introduces unnecessary complexity, as \\\"simplicity constraint is a rule\\\" in the project.\",\"key_evidence_ids\":[\"CANON.md\",\"README.md\"],\"assumptions\":[\"The current framing of O1 fulfills the optimization needs without requiring extensive changes.\",\"Any future changes towards model-pluggability would complicate the current straightforward strategy. \"],\"confidence\":0.85,\"next_action\":\"Continue development within the O1-specific framework while monitoring the need for future flexibility in model selection.\",\"kill_criteria\":[\"A significant increase in complexity without clear benefits.\",\"Failure to meet initial optimization goals within the O1 context.\"],\"escalation_trigger\":\"Identification of core limitations of the O1 strategy after testing with multiple models.\"}",
       "answer_obj": {
-        "answer": "The strategic model interface should remain O1-specific as it aligns with the current architecture that emphasizes the O1 model as the 'strategic tier' and keeps the optimization focus on model selection as a target. The current repo states that 'model selection is itself an optimization target,' highlighting that the existing framework is designed around O1's capabilities rather than a pluggable model architecture.",
+        "answer": "The architecture choice that better fits the repo today is the O1-specific strategy wiring. The evidence states, \"Repo currently frames O1 as the strategic tier but also says model selection is itself an optimization target,\" which suggests that continuing with a specific reliance on O1 avoids complexity and aligns with the current framing. Furthermore, the design is guided by the principle that \"architecture changes are product-spec changes,\" and there is a strong emphasis on maintaining simplicity and reliability within the existing constraints. Future-proofing through model-pluggability introduces unnecessary complexity, as \"simplicity constraint is a rule\" in the project.",
         "key_evidence_ids": [
-          "README.md",
-          "CANON.md"
+          "CANON.md",
+          "README.md"
         ],
         "assumptions": [
-          "The strategic requirements can be met with O1 without needing to complicate the system with a pluggable interface.",
-          "Maintaining O1 as the strategic model is consistent with the repository's language and architectural decisions."
+          "The current framing of O1 fulfills the optimization needs without requiring extensive changes.",
+          "Any future changes towards model-pluggability would complicate the current straightforward strategy. "
         ],
         "confidence": 0.85,
-        "next_action": "Confirm that all internal components are optimized to function under an O1-specific architecture before further assessments on additional model integrations.",
+        "next_action": "Continue development within the O1-specific framework while monitoring the need for future flexibility in model selection.",
         "kill_criteria": [
-          "If performance metrics indicate a bottleneck directly attributed to the O1-specific interface.",
-          "If model selections fail to meet optimization targets within defined constraints."
+          "A significant increase in complexity without clear benefits.",
+          "Failure to meet initial optimization goals within the O1 context."
         ],
-        "escalation_trigger": "If the O1 model consistently underperforms on strategic tasks despite iterative optimization efforts."
+        "escalation_trigger": "Identification of core limitations of the O1 strategy after testing with multiple models."
       },
       "retrieval_grade": {
         "expected_count": 2,
@@ -513,11 +466,11 @@
         }
       },
       "llm_meta": {
-        "latency_sec": 4.532,
+        "latency_sec": 5.632,
         "usage": {
-          "input_tokens": 3401,
-          "output_tokens": 251,
-          "total_tokens": 3652
+          "input_tokens": 2704,
+          "output_tokens": 250,
+          "total_tokens": 2954
         }
       }
     },
@@ -543,14 +496,6 @@
           "metadata": {}
         },
         {
-          "doc_id": "ai-lab/o1_system_prompt.md",
-          "chunk_id": "ai-lab/o1_system_prompt.md::chunk-2",
-          "text": " logs. You must diagnose the systemic issue and recommend a new approach.\n\n## 3. Persistent Memory and LangGraph State Management\n\nThe system manages context drift deliberately using a deterministic **LangGraph-like state machine**. Do not assume the worker models have your full context window. \n\nInstead of an endless chat thread, the system passes an explicit JSON **State Object** between nodes (Planner \u2192 Manager \u2192 Worker \u2192 Critic). This State Object enforces a **5-Layer Memory Hierarchy**:\n\n1.  **Identity Memory**: The system role.\n2.  **Working Memory**: The current goal, current design variables, and active hypothesis.\n3.  **Episodic Memory**: A buffer of the most recent actions, outputs, and errors.\n4.  **Semantic Memory (Skills DB)**: Heuristics learned from past successes/failures (e.g., \"flexure joints reduce hinge stress by 30%\").\n5.  **Artifact Memory (Filesystem)**: The physical code, reports, and CAD files.\n\nWhen you are asked to evaluate failures or plan tasks, you will receive a snapshot of this **State Object**. This ensures zero hallucination across long-horizon chains. \n\n## 4. Operational Directives for the Strategist\n\nWhen invoked as the **Planner (New Goal)**:\n- Output a precise, structured JSON `project_graph`. Break the problem down into logical, testable sub-tasks that a less capable model can execute one by one. Include explicit evaluation criteria.\n- Always present at least 2 candidate strategies and adjudicate between them. Never answer \"what's optima",
-          "score": 0.6736712481841772,
-          "source": "local",
-          "metadata": {}
-        },
-        {
           "doc_id": "ai-lab/o1_next_question_mvp.md",
           "chunk_id": "ai-lab/o1_next_question_mvp.md::chunk-0",
           "text": "# Next o1 Question: MVP Definition and First Build Slice\n\nUse this exact prompt (fill placeholders) when calling the strategic o1 model.\n\n---\n\nYou are the strategist for this project.\n\n## Objective\nDefine the smallest reliable MVP for this autonomous R&D lab and choose the first implementation slice.\n\n## Success Metric\nThe MVP is successful if it can:\n1. Build an executable task graph for a new goal.\n2. Run worker + critic retries on at least one task.\n3. Escalate to strategist after repeated failure.\n4. Persist state and resume cleanly.\n5. Stop safely on loop guardrails.\n\n## Current State Snapshot\n```json\n{\n  \"canon_path\": \"CANON.md\",\n  \"runtime_modules\": [\n    \"main.py\", \"planner.py\", \"worker.py\", \"critic.py\", \"state.py\", \"memory.py\", \"tools.py\"\n  ],\n  \"known_constraints\": [\n    \"deterministic-first architecture\",\n    \"o1 required for strategic decisions\",\n    \"single-machine friendly MVP\"\n  ],\n  \"known_gaps\": [\n    \"tool execution loop is still text-only\",\n    \"limited validation of strategist output\",\n    \"MVP tasks need strict prioritization\"\n  ]\n}\n```\n\n## Constraints\n- Keep MVP scope minimal.\n- Favor reliability over feature breadth.\n- No speculative framework sprawl.\n- Output must be directly implementable in this repo.\n\n## Decision Question\nWhat exact MVP scope and ordered task graph should we execute next to maximize delivery probability in the fewest steps?\n\n## Required Output Schema (JSON only)\n```json\n{\n  \"mvp_name\": \"string\",\n  \"mvp_scope\": \"string\",\n  \"non_goals",
@@ -567,59 +512,50 @@
           "metadata": {}
         },
         {
-          "doc_id": "docs/lab/architecture.md",
-          "chunk_id": "docs/lab/architecture.md::chunk-8",
-          "text": "st known config)\n2. Fixed evaluation metric (no subjective judgment)\n3. Atomic experiments (commit before run, revert on failure)\n4. Autonomous operation (never stop to ask \u2014 loop until interrupted)\n5. Results logging (TSV/structured log of all attempts)\n",
-          "score": 0.6296541457502176,
+          "doc_id": "CLAUDE.md",
+          "chunk_id": "CLAUDE.md::chunk-0",
+          "text": "# CLAUDE.md \u2014 Autonomous R&D Lab (01)\n\nA self-improving autonomous engineering system. O1 plans, workers execute, critics evaluate, and the system learns from every experiment. This repo builds and optimizes itself.\n\n## What This Is\n\nThree nested loops that run autonomously:\n- **Strategic Loop** (O1) \u2014 Plans task graphs, diagnoses failures. Called rarely.\n- **Project Loop** (GPT-4o / Gemini) \u2014 Evaluates results, manages task queue.\n- **Experiment Loop** (Ollama / fast) \u2014 Executes tasks, runs 100s of attempts.\n\n## Quick Start\n\n```bash\ncp .env.example .env        # Add your OPENAI_API_KEY\nuv sync                     # Install deps\ncd ai-lab && uv run main.py \"Your goal here\"\n```\n\n## Module Map\n\n| File | LOC | Role |\n|------|-----|------|\n| `ai-lab/main.py` | 186 | Three-loop orchestration engine |\n| `ai-lab/planner.py` | 323 | O1 strategic planning + failure diagnosis |\n| `ai-lab/llm.py` | 130 | Unified LLM client (handles O1 API quirks) |\n| `ai-lab/critic.py` | 113 | Worker output evaluation + scoring |\n| `ai-lab/state.py` | 121 | 5-layer memory hierarchy, JSON checkpoint/resume |\n| `ai-lab/config.py` | 101 | Model routing, thresholds, env config |\n| `ai-lab/memory.py` | 95 | Skill heuristics DB + artifact registry |\n| `ai-lab/tools.py` | 86 | Deterministic tools: Python exec, shell, file I/O |\n| `ai-lab/worker.py` | 65 | Stateless task execution (fast tier) |\n\n## Key Documents\n\n| Document | Purpose |\n|----------|---------|\n| `CANON.md` | Product spec authority \u2014 all decisions",
+          "score": 0.6157862094057976,
           "source": "local",
           "metadata": {}
         },
         {
-          "doc_id": "docs/lab/architecture.md",
-          "chunk_id": "docs/lab/architecture.md::chunk-5",
-          "text": "/ OpenCode fast<br/>Continuous]\n\n    Planner -.->|task graph| Lab\n    Workers -.->|results| Critic\n    Critic -.->|keep/revert| Lab\n    Critic -.->|5 failures| Planner\n\n    style Shizzle fill:#1a1a2e,stroke:#e94560,color:#fff\n    style Lab fill:#16213e,stroke:#0f3460,color:#fff\n    style Planner fill:#533483,stroke:#e94560,color:#fff\n    style Critic fill:#0f3460,stroke:#e94560,color:#fff\n    style Workers fill:#1a1a2e,stroke:#0f3460,color:#fff\n```\n\n### Model Tier Mapping\n\n| Role | Model | Tier | Cost | When Called |\n|------|-------|------|------|-------------|\n| Strategic Planner | O1 / O3 / reasoning model (eval-gated) | heavy | $$ | New goals, escalations only |\n| Critic / Evaluator | Gemini 2.5 Flash | medium | ~$0.001/call | Every experiment |\n| Worker / Executor | Ollama (llama3.3:70b on M4 Pro) | fast | $0 | Continuous |\n| Orchestrator | Claude Code (Max sub) | heavy | $0 (subscription) | Delegation, execution, tool routing |\n\n## 5. Optimization Sequence\n\nThe improvement loop optimizes the system in layers, where each layer multiplies the effectiveness of the next.\n\n```mermaid\ngraph TB\n    L1[Layer 1: LLM Models<br/>Which models run best on M4 Pro 24GB?<br/>Quantization, context windows, throughput]\n    L2[Layer 2: Tools<br/>Fork-terminal, OpenCode workflows<br/>Better tools = better experiments]\n    L3[Layer 3: Loop Chains<br/>Combine loops for complex goals<br/>Model optimization \u2192 tool optimization \u2192 ...]\n    L4[Layer 4: Orchestrator Tuning<br/>Shizzle prompt, routi",
-          "score": 0.627953105385189,
-          "source": "local",
-          "metadata": {}
-        },
-        {
-          "doc_id": "docs/lab/architecture.md",
-          "chunk_id": "docs/lab/architecture.md::chunk-0",
-          "text": "# Autonomous Self-Improvement Lab \u2014 Architecture\n\n## 1. System Overview \u2014 The Three Layers\n\n```mermaid\ngraph TB\n    subgraph Orchestrator[\"ORCHESTRATOR (Shizzle)\"]\n        direction LR\n        O1[Delegates only \u2014 never executes]\n        O2[Surfaces: Telegram / CLI / Cron]\n    end\n\n    subgraph Loops[\"IMPROVEMENT LOOPS\"]\n        direction LR\n        L1[Generic try \u2192 measure \u2192 keep/revert]\n        L2[Chainable for any goal]\n    end\n\n    subgraph Tools[\"TOOL LAYER\"]\n        direction LR\n        T1[OpenCode fork-terminal]\n        T2[Ollama local LLMs]\n        T3[Codex / Gemini workers]\n    end\n\n    subgraph Foundation[\"FOUNDATION\"]\n        direction LR\n        F1[Apple M4 Pro \u2014 24GB unified]\n        F2[State + Memory + Traces]\n        F3[Postgres + pgvector + FTS]\n    end\n\n    Orchestrator --> Loops\n    Loops --> Tools\n    Tools --> Foundation\n```\n\n## 2. Improvement Loop (Generic)\n\nThe core loop follows the autoresearch discipline: every experiment is a discrete, measurable unit with an explicit keep/revert decision.\n\n```mermaid\nstateDiagram-v2\n    [*] --> IDLE\n\n    IDLE --> PLAN: new goal or escalation\n    PLAN --> EXPERIMENT: task graph ready\n\n    EXPERIMENT --> EVALUATE: run complete\n    EVALUATE --> APPLY: metric improved \u2192 keep\n    EVALUATE --> EXPERIMENT: metric flat/worse \u2192 revert + try next\n    EVALUATE --> PLAN: 5 consecutive failures \u2192 escalate\n\n    APPLY --> IDLE: checkpoint saved\n\n    note right of PLAN\n        Strategic tier (O1 / O3 / any reasoning model)\n        Ca",
-          "score": 0.6185516559959235,
+          "doc_id": "CANON.md",
+          "chunk_id": "CANON.md::chunk-3",
+          "text": "s explicitly revised.\n\n## 13) Strategic Model Leverage Protocol (o1 Included by Design)\n\no1-class reasoning must be part of development, but used selectively for high-leverage decisions.\n\nMandatory o1 usage points:\n- Project initialization: produce initial decomposition and risk map.\n- Replanning after repeated failure: diagnose root cause and propose strategic pivot.\n- Architecture decisions with long-term consequences: state model, loop design, evaluation policy, safety boundaries.\n- High-uncertainty or high-stakes tradeoff decisions.\n\nDefault non-usage points:\n- Routine execution steps.\n- Brute-force retries.\n- Deterministic transformations.\n- Low-risk formatting or glue logic.\n\n## 14) Multi-Model Reasoning Workflow (Gemini + o1 + Worker Stack)\n\nUse role separation, not model averaging:\n- Gemini (or peer frontier model): generate an alternative plan, critique, or edge-case challenge.\n- o1 strategist: adjudicate, synthesize, and produce final decision framework.\n- Worker/Critic tiers: implement and validate experimentally.\n\nDecision pattern:\n1. Generate candidate strategies (at least 2 when problem is ambiguous).\n2. Run cross-model critique (Gemini challenges assumptions; o1 evaluates failure modes and selects approach).\n3. Commit one executable plan to the deterministic controller.\n4. Measure outcomes and feed back validated insights into state/memory.\n\no1 input contract for best leverage:\n- Goal and explicit success metric.\n- Current structured state snapshot.\n- Constrain",
+          "score": 0.6031763838740569,
           "source": "local",
           "metadata": {}
         }
       ],
-      "answer_raw": "{\n  \"answer\": \"The next system action is to escalate to the strategic loop to diagnose the systemic issue and recommend a new approach, as the worker has failed the task six times with no progress.\",\n  \"key_evidence_ids\": [\"ai-lab/o1_system_prompt.md\", \"docs/lab/architecture.md\"],\n  \"assumptions\": [\n    \"The system operates under predetermined failure thresholds for worker performance.\",\n    \"All existing retry mechanisms have been exhausted without improvement.\"\n  ],\n  \"confidence\": 0.95,\n  \"next_action\": \"Trigger the escalation procedure, transferring the failure logs to the planner for a new direction based on the systemic issue.\",\n  \"kill_criteria\": [\n    \"The worker successfully completes the task.\",\n    \"Future failures are identified that require follow-up interventions.\"\n  ],\n  \"escalation_trigger\": \"5 consecutive worker failures\"\n}",
+      "answer_raw": "{\n  \"answer\": \"Escalate to the strategic loop (O1) and provide a structured replanning strategy. Include the worker's failure logs to diagnose the root cause and recommend a new approach.\",\n  \"key_evidence_ids\": [\"CANON.md\", \"ai-lab/o1_system_prompt.md\"],\n  \"assumptions\": [\n    \"The system is stuck due to repeated worker failures.\",\n    \"An explicit escalation contract mandates that the strategist intervene after 5 failures.\"\n  ],\n  \"confidence\": 0.95,\n  \"next_action\": \"Invoke the strategic loop to perform the necessary diagnosis and propose a new task graph.\",\n  \"kill_criteria\": [\n    \"If the worker fails on the new strategy proposed by O1.\",\n    \"If the overall system performance continues to degrade after the new plan is executed.\"\n  ],\n  \"escalation_trigger\": \"After 5 consecutive worker failures and no measurable progress.\"\n}",
       "answer_obj": {
-        "answer": "The next system action is to escalate to the strategic loop to diagnose the systemic issue and recommend a new approach, as the worker has failed the task six times with no progress.",
+        "answer": "Escalate to the strategic loop (O1) and provide a structured replanning strategy. Include the worker's failure logs to diagnose the root cause and recommend a new approach.",
         "key_evidence_ids": [
-          "ai-lab/o1_system_prompt.md",
-          "docs/lab/architecture.md"
+          "CANON.md",
+          "ai-lab/o1_system_prompt.md"
         ],
         "assumptions": [
-          "The system operates under predetermined failure thresholds for worker performance.",
-          "All existing retry mechanisms have been exhausted without improvement."
+          "The system is stuck due to repeated worker failures.",
+          "An explicit escalation contract mandates that the strategist intervene after 5 failures."
         ],
         "confidence": 0.95,
-        "next_action": "Trigger the escalation procedure, transferring the failure logs to the planner for a new direction based on the systemic issue.",
+        "next_action": "Invoke the strategic loop to perform the necessary diagnosis and propose a new task graph.",
         "kill_criteria": [
-          "The worker successfully completes the task.",
-          "Future failures are identified that require follow-up interventions."
+          "If the worker fails on the new strategy proposed by O1.",
+          "If the overall system performance continues to degrade after the new plan is executed."
         ],
-        "escalation_trigger": "5 consecutive worker failures"
+        "escalation_trigger": "After 5 consecutive worker failures and no measurable progress."
       },
       "retrieval_grade": {
         "expected_count": 2,
-        "hit_count": 1,
-        "support_recall": 0.5,
+        "hit_count": 2,
+        "support_recall": 1.0,
         "hits": [
+          "CANON.md",
           "ai-lab/o1_system_prompt.md"
         ],
-        "misses": [
-          "CANON.md"
-        ]
+        "misses": []
       },
       "schema_grade": {
         "schema_ok": true,
@@ -635,7 +571,7 @@
         "matched_gold_facts": []
       },
       "aggregate": {
-        "case_score": 0.575,
+        "case_score": 0.75,
         "weights": {
           "support_recall": 0.35,
           "gold_fact_coverage": 0.25,
@@ -644,11 +580,11 @@
         }
       },
       "llm_meta": {
-        "latency_sec": 3.197,
+        "latency_sec": 4.709,
         "usage": {
-          "input_tokens": 3185,
-          "output_tokens": 182,
-          "total_tokens": 3367
+          "input_tokens": 2589,
+          "output_tokens": 194,
+          "total_tokens": 2783
         }
       }
     },
@@ -674,42 +610,10 @@
           "metadata": {}
         },
         {
-          "doc_id": "CANON.md",
-          "chunk_id": "CANON.md::chunk-2",
-          "text": "ministic components:\n- Workflow/state transitions.\n- Routing policies.\n- Tool interfaces.\n- Persistence and artifact lineage.\n\nProbabilistic components:\n- Planning.\n- Hypothesis generation.\n- Ambiguous interpretation.\n- Strategic tradeoff analysis.\n\n## 9) Simplicity Constraint\n\nPrefer the smallest architecture that preserves reliability.\n\nDefault build order:\n1. State store.\n2. Artifact store.\n3. Retrieval memory.\n4. Deterministic controller loop.\n5. Worker + critic.\n6. Strategic escalation.\n\nNo feature is added unless it improves reliability, observability, or decision quality.\n\n## 10) Success Criteria\n\nThe system is successful when it can:\n- Run for long periods without context collapse.\n- Recover from failures through structured replanning.\n- Improve over time via distilled reusable insights.\n- Keep high-reasoning model usage sparse and high-leverage.\n- Stay understandable, inspectable, and maintainable.\n\n## 11) Non-Goals (for now)\n\n- Building a bloated general assistant platform.\n- Adding channels/plugins before core loop stability.\n- Treating larger prompts as a substitute for state design.\n\n## 12) Change Control\n\nAny major prompt, architecture, or framework decision should be checked against this document first.\n\nIf a proposal conflicts with this canon, the canon wins unless explicitly revised.\n\n## 13) Strategic Model Leverage Protocol (o1 Included by Design)\n\no1-class reasoning must be part of development, but used selectively for high-leverage decisions.\n\nMandatory o1",
-          "score": 0.5490929736577681,
-          "source": "local",
-          "metadata": {}
-        },
-        {
-          "doc_id": "CANON.md",
-          "chunk_id": "CANON.md::chunk-4",
-          "text": "ller.\n4. Measure outcomes and feed back validated insights into state/memory.\n\no1 input contract for best leverage:\n- Goal and explicit success metric.\n- Current structured state snapshot.\n- Constraints (time, cost, tools, risk).\n- Attempts so far and failure signatures.\n- Exact decision question to answer.\n- Required output schema.\n\no1 output contract:\n- Chosen strategy and rationale.\n- Rejected alternatives with reasons.\n- Key assumptions and confidence level.\n- Concrete next tasks with evaluation criteria.\n- Trigger conditions for next escalation.\n\n## 15) Product Spec Authority\n\nThis document is the product specification authority for this project.\n\nImplications:\n- Architecture changes are product-spec changes.\n- Prompt-contract changes are product-spec changes.\n- Model-role changes are product-spec changes.\n- State schema changes are product-spec changes.\n\nNo major implementation work should proceed without a spec-consistent decision record.\n\n## 16) o1-in-the-Loop Spec Development Protocol\n\no1 must be used in defining the product, not only operating it.\n\nRequired spec cycle for major decisions:\n1. Draft proposal (human or implementation model).\n2. o1 strategic review (problem framing, tradeoffs, failure modes).\n3. Peer model challenge (Gemini or equivalent) to stress-test assumptions.\n4. o1 adjudication and final recommendation.\n5. Canon/spec update with accepted decision and rationale.\n\nA decision is \"major\" if it affects:\n- Control loop structure.\n- Escalation policy.\n-",
-          "score": 0.54845931593781,
-          "source": "local",
-          "metadata": {}
-        },
-        {
           "doc_id": "CLAUDE.md",
           "chunk_id": "CLAUDE.md::chunk-1",
           "text": "ll, file I/O |\n| `ai-lab/worker.py` | 65 | Stateless task execution (fast tier) |\n\n## Key Documents\n\n| Document | Purpose |\n|----------|---------|\n| `CANON.md` | Product spec authority \u2014 all decisions checked against this |\n| `ai-lab/o1_system_prompt.md` | Chief Strategist role definition for O1 |\n| `ai-lab/o1_next_question_mvp.md` | Template for structured O1 queries |\n| `docs/lab/architecture.md` | Mermaid diagrams of full system architecture |\n| `docs/lab/o1-strategy-prompt.md` | Structured O1 decision query for next phase |\n\n## Key Rules\n\n1. **CANON.md is the source of truth** \u2014 architecture changes are product-spec changes\n2. **O1 questions must include**: objective, state snapshot, constraints, prior attempts, decision question, output schema (Section 18)\n3. **State over context** \u2014 context windows are disposable; `state.db.json` is durable\n4. **Escalation is bounded** \u2014 max 5 worker failures \u2192 critic escalation \u2192 O1 strategic replan\n5. **Simplicity constraint** \u2014 no feature added unless it improves reliability, observability, or decision quality\n\n## Model Tiers\n\n| Tier | Default Model | Role | Cost |\n|------|---------------|------|------|\n| STRATEGIC | `o1` | Planning, diagnosis | $$ (rare) |\n| PROJECT | `gpt-4o` | Evaluation, routing | $ |\n| WORKER | `gpt-4o-mini` | Execution, attempts | \u00a2 |\n| LOCAL_WORKER | Ollama `llama3.3:70b` | Local execution | $0 |\n",
           "score": 0.5457835793580739,
-          "source": "local",
-          "metadata": {}
-        },
-        {
-          "doc_id": "CANON.md",
-          "chunk_id": "CANON.md::chunk-6",
-          "text": "\"What decisions are hard to undo, and what guardrails are required before execution?\"\n\n## 18) o1 Question Quality Standard\n\nDo not ask o1 vague prompts like \"design the system.\"\n\nEvery o1 question must include:\n- Objective and explicit success metric.\n- Current state snapshot.\n- Constraints (time, budget, tools, risk tolerance).\n- What has already been tried.\n- Exact decision to make.\n- Required output schema.\n\nIf this context is missing, gather/compress first, then call o1.\n",
-          "score": 0.5453035719511279,
-          "source": "local",
-          "metadata": {}
-        },
-        {
-          "doc_id": "CANON.md",
-          "chunk_id": "CANON.md::chunk-0",
-          "text": "# Canon: Autonomous R&D Lab Objective Contract\n\nStatus: Active  \nOwner: Project team  \nPurpose: This is the source of truth for what we are building and how decisions are made.\n\n## 1) Mission\n\nBuild a compact, long-horizon, autonomous engineering/research system that:\n- Accepts broad goals.\n- Decomposes them into executable experiments.\n- Runs experiments continuously at low cost.\n- Learns from outcomes.\n- Escalates to high-reasoning models only when needed.\n\n## 2) Core Philosophy\n\n- Deterministic by default.\n- Probabilistic only where reasoning is required.\n- State over prompt history.\n- Experiments over one-shot answers.\n- Modular system over monolithic framework.\n\n## 3) System Objective\n\nCreate a general-purpose goal engine that can handle coding, engineering, and research workflows by repeatedly executing:\n\nPlan -> Act -> Evaluate -> Update State -> Repeat\n\nFor hard blocks:\n\nRepeated failure -> Strategic diagnosis -> Replan\n\n## 4) Operating Model (Three Nested Loops)\n\n- Experiment Loop (minutes): run worker tasks, tools, checks, retries.\n- Project Loop (hours/days): choose next tasks, track progress, adapt plan.\n- Strategic Loop (days/weeks): architecture-level reframing and recovery when stuck.\n\n## 5) Model Role Contract\n\n- Worker tier (cheap/fast): execution, tool calls, implementation attempts.\n- Critic tier (mid): evaluation, scoring, failure categorization, improvement hints.\n- Strategist tier (o1-class reasoning): decomposition, diagnosis, reframing, decision framew",
-          "score": 0.5448449927220738,
           "source": "local",
           "metadata": {}
         },
@@ -720,27 +624,42 @@
           "score": 0.5330809685793244,
           "source": "local",
           "metadata": {}
+        },
+        {
+          "doc_id": "ai-lab/o1_next_question_mvp.md",
+          "chunk_id": "ai-lab/o1_next_question_mvp.md::chunk-0",
+          "text": "# Next o1 Question: MVP Definition and First Build Slice\n\nUse this exact prompt (fill placeholders) when calling the strategic o1 model.\n\n---\n\nYou are the strategist for this project.\n\n## Objective\nDefine the smallest reliable MVP for this autonomous R&D lab and choose the first implementation slice.\n\n## Success Metric\nThe MVP is successful if it can:\n1. Build an executable task graph for a new goal.\n2. Run worker + critic retries on at least one task.\n3. Escalate to strategist after repeated failure.\n4. Persist state and resume cleanly.\n5. Stop safely on loop guardrails.\n\n## Current State Snapshot\n```json\n{\n  \"canon_path\": \"CANON.md\",\n  \"runtime_modules\": [\n    \"main.py\", \"planner.py\", \"worker.py\", \"critic.py\", \"state.py\", \"memory.py\", \"tools.py\"\n  ],\n  \"known_constraints\": [\n    \"deterministic-first architecture\",\n    \"o1 required for strategic decisions\",\n    \"single-machine friendly MVP\"\n  ],\n  \"known_gaps\": [\n    \"tool execution loop is still text-only\",\n    \"limited validation of strategist output\",\n    \"MVP tasks need strict prioritization\"\n  ]\n}\n```\n\n## Constraints\n- Keep MVP scope minimal.\n- Favor reliability over feature breadth.\n- No speculative framework sprawl.\n- Output must be directly implementable in this repo.\n\n## Decision Question\nWhat exact MVP scope and ordered task graph should we execute next to maximize delivery probability in the fewest steps?\n\n## Required Output Schema (JSON only)\n```json\n{\n  \"mvp_name\": \"string\",\n  \"mvp_scope\": \"string\",\n  \"non_goals",
+          "score": 0.5309955268350901,
+          "source": "local",
+          "metadata": {}
+        },
+        {
+          "doc_id": "docs/lab/architecture.md",
+          "chunk_id": "docs/lab/architecture.md::chunk-5",
+          "text": "/ OpenCode fast<br/>Continuous]\n\n    Planner -.->|task graph| Lab\n    Workers -.->|results| Critic\n    Critic -.->|keep/revert| Lab\n    Critic -.->|5 failures| Planner\n\n    style Shizzle fill:#1a1a2e,stroke:#e94560,color:#fff\n    style Lab fill:#16213e,stroke:#0f3460,color:#fff\n    style Planner fill:#533483,stroke:#e94560,color:#fff\n    style Critic fill:#0f3460,stroke:#e94560,color:#fff\n    style Workers fill:#1a1a2e,stroke:#0f3460,color:#fff\n```\n\n### Model Tier Mapping\n\n| Role | Model | Tier | Cost | When Called |\n|------|-------|------|------|-------------|\n| Strategic Planner | O1 / O3 / reasoning model (eval-gated) | heavy | $$ | New goals, escalations only |\n| Critic / Evaluator | Gemini 2.5 Flash | medium | ~$0.001/call | Every experiment |\n| Worker / Executor | Ollama (llama3.3:70b on M4 Pro) | fast | $0 | Continuous |\n| Orchestrator | Claude Code (Max sub) | heavy | $0 (subscription) | Delegation, execution, tool routing |\n\n## 5. Optimization Sequence\n\nThe improvement loop optimizes the system in layers, where each layer multiplies the effectiveness of the next.\n\n```mermaid\ngraph TB\n    L1[Layer 1: LLM Models<br/>Which models run best on M4 Pro 24GB?<br/>Quantization, context windows, throughput]\n    L2[Layer 2: Tools<br/>Fork-terminal, OpenCode workflows<br/>Better tools = better experiments]\n    L3[Layer 3: Loop Chains<br/>Combine loops for complex goals<br/>Model optimization \u2192 tool optimization \u2192 ...]\n    L4[Layer 4: Orchestrator Tuning<br/>Shizzle prompt, routi",
+          "score": 0.5110767682206229,
+          "source": "local",
+          "metadata": {}
         }
       ],
-      "answer_raw": "{\n  \"answer\": \"Drift should be addressed by strengthening explicit state and retrieval memory rather than by larger prompt history. The system relies on a structured JSON **State Object** which enforces a **5-Layer Memory Hierarchy**: 'Identity Memory', 'Working Memory', 'Episodic Memory', 'Semantic Memory (Skills DB)', and 'Artifact Memory'. This architecture ensures 'context windows are disposable; state is durable'. The strategy should focus on maintaining 'explicit external state as the source of truth' and ensuring no features are added unless they improve reliability, observability, or decision quality.\",\n  \"key_evidence_ids\": [\"CANON.md\", \"ai-lab/o1_system_prompt.md\"],\n  \"assumptions\": [\n    \"Strengthening state management will mitigate drift effectively.\",\n    \"Larger prompts do not address the underlying structural issues.\",\n    \"Current architecture supports a state-based approach.\"\n  ],\n  \"confidence\": 0.85,\n  \"next_action\": \"Implement a structured improvement plan for the State Object and review the 5-Layer Memory Hierarchy alignment.\",\n  \"kill_criteria\": [\n    \"Increased drift despite implementing a structured state memory.\",\n    \"Failure to maintain context integrity over long interactions.\"\n  ],\n  \"escalation_trigger\": \"Significant context collapse or reliance on large context windows after implementing state improvements.\"\n}",
+      "answer_raw": "{\n  \"answer\": \"Drift should be addressed by strengthening explicit state and retrieval memory rather than using larger prompt history. As stated in retrieved evidence, 'context windows are disposable; state is durable.' This implies that leveraging a robust state architecture is critical for maintaining consistency over time. The system should follow the '5-Layer Memory Hierarchy' where the 'State Object enforces' structured layers, ensuring stability and reducing the need for extensive chat history.\",\n  \"key_evidence_ids\": [\"CANON.md\", \"ai-lab/o1_system_prompt.md\"],\n  \"assumptions\": [\n    \"Current architecture allows for explicit state management.\",\n    \"Improvement in state management will reduce drift.\"\n  ],\n  \"confidence\": 0.9,\n  \"next_action\": \"Reassess the architecture to ensure that state management is prioritized over context accumulation.\",\n  \"kill_criteria\": [\n    \"Failure to demonstrate reduced drift after implementing stronger state management.\",\n    \"Increased issues with hallucinations despite larger context.\"\n  ],\n  \"escalation_trigger\": \"Continued drift issues that cannot be resolved through structural improvements.\"\n}",
       "answer_obj": {
-        "answer": "Drift should be addressed by strengthening explicit state and retrieval memory rather than by larger prompt history. The system relies on a structured JSON **State Object** which enforces a **5-Layer Memory Hierarchy**: 'Identity Memory', 'Working Memory', 'Episodic Memory', 'Semantic Memory (Skills DB)', and 'Artifact Memory'. This architecture ensures 'context windows are disposable; state is durable'. The strategy should focus on maintaining 'explicit external state as the source of truth' and ensuring no features are added unless they improve reliability, observability, or decision quality.",
+        "answer": "Drift should be addressed by strengthening explicit state and retrieval memory rather than using larger prompt history. As stated in retrieved evidence, 'context windows are disposable; state is durable.' This implies that leveraging a robust state architecture is critical for maintaining consistency over time. The system should follow the '5-Layer Memory Hierarchy' where the 'State Object enforces' structured layers, ensuring stability and reducing the need for extensive chat history.",
         "key_evidence_ids": [
           "CANON.md",
           "ai-lab/o1_system_prompt.md"
         ],
         "assumptions": [
-          "Strengthening state management will mitigate drift effectively.",
-          "Larger prompts do not address the underlying structural issues.",
-          "Current architecture supports a state-based approach."
+          "Current architecture allows for explicit state management.",
+          "Improvement in state management will reduce drift."
         ],
-        "confidence": 0.85,
-        "next_action": "Implement a structured improvement plan for the State Object and review the 5-Layer Memory Hierarchy alignment.",
+        "confidence": 0.9,
+        "next_action": "Reassess the architecture to ensure that state management is prioritized over context accumulation.",
         "kill_criteria": [
-          "Increased drift despite implementing a structured state memory.",
-          "Failure to maintain context integrity over long interactions."
+          "Failure to demonstrate reduced drift after implementing stronger state management.",
+          "Increased issues with hallucinations despite larger context."
         ],
-        "escalation_trigger": "Significant context collapse or reliance on large context windows after implementing state improvements."
+        "escalation_trigger": "Continued drift issues that cannot be resolved through structural improvements."
       },
       "retrieval_grade": {
         "expected_count": 2,
@@ -762,14 +681,13 @@
         "invalid_citations": []
       },
       "fact_grade": {
-        "gold_fact_coverage": 0.5,
+        "gold_fact_coverage": 0.25,
         "matched_gold_facts": [
-          "context windows are disposable",
-          "explicit external state as the source of truth"
+          "context windows are disposable"
         ]
       },
       "aggregate": {
-        "case_score": 0.875,
+        "case_score": 0.8125,
         "weights": {
           "support_recall": 0.35,
           "gold_fact_coverage": 0.25,
@@ -778,11 +696,11 @@
         }
       },
       "llm_meta": {
-        "latency_sec": 4.705,
+        "latency_sec": 4.665,
         "usage": {
-          "input_tokens": 2974,
-          "output_tokens": 281,
-          "total_tokens": 3255
+          "input_tokens": 2688,
+          "output_tokens": 231,
+          "total_tokens": 2919
         }
       }
     },
@@ -824,39 +742,40 @@
           "metadata": {}
         },
         {
-          "doc_id": "CANON.md",
-          "chunk_id": "CANON.md::chunk-0",
-          "text": "# Canon: Autonomous R&D Lab Objective Contract\n\nStatus: Active  \nOwner: Project team  \nPurpose: This is the source of truth for what we are building and how decisions are made.\n\n## 1) Mission\n\nBuild a compact, long-horizon, autonomous engineering/research system that:\n- Accepts broad goals.\n- Decomposes them into executable experiments.\n- Runs experiments continuously at low cost.\n- Learns from outcomes.\n- Escalates to high-reasoning models only when needed.\n\n## 2) Core Philosophy\n\n- Deterministic by default.\n- Probabilistic only where reasoning is required.\n- State over prompt history.\n- Experiments over one-shot answers.\n- Modular system over monolithic framework.\n\n## 3) System Objective\n\nCreate a general-purpose goal engine that can handle coding, engineering, and research workflows by repeatedly executing:\n\nPlan -> Act -> Evaluate -> Update State -> Repeat\n\nFor hard blocks:\n\nRepeated failure -> Strategic diagnosis -> Replan\n\n## 4) Operating Model (Three Nested Loops)\n\n- Experiment Loop (minutes): run worker tasks, tools, checks, retries.\n- Project Loop (hours/days): choose next tasks, track progress, adapt plan.\n- Strategic Loop (days/weeks): architecture-level reframing and recovery when stuck.\n\n## 5) Model Role Contract\n\n- Worker tier (cheap/fast): execution, tool calls, implementation attempts.\n- Critic tier (mid): evaluation, scoring, failure categorization, improvement hints.\n- Strategist tier (o1-class reasoning): decomposition, diagnosis, reframing, decision framew",
-          "score": 0.5949851691067854,
+          "doc_id": "docs/lab/architecture.md",
+          "chunk_id": "docs/lab/architecture.md::chunk-1",
+          "text": "vert + try next\n    EVALUATE --> PLAN: 5 consecutive failures \u2192 escalate\n\n    APPLY --> IDLE: checkpoint saved\n\n    note right of PLAN\n        Strategic tier (O1 / O3 / any reasoning model)\n        Called rarely \u2014 only on new goals\n        or after repeated failure\n        v2 query contract required\n    end note\n\n    note right of EXPERIMENT\n        Ollama / OpenCode (fast tier)\n        Continuous \u2014 runs autonomously\n        Modify \u2192 commit \u2192 run \u2192 measure\n    end note\n\n    note right of EVALUATE\n        Gemini (medium tier)\n        Per-experiment judgment\n        Binary: improved or not\n    end note\n```\n\n### Loop Invariants\n\n1. **Every experiment is atomic** \u2014 committed before running, reverted on failure\n2. **Metrics are the only truth** \u2014 no subjective \"looks better\"\n3. **Memory prevents repetition** \u2014 query past results before starting\n4. **Escalation is bounded** \u2014 max 5 failures before strategic replanning\n5. **State survives crashes** \u2014 checkpointed between every iteration\n\n## 3. Memory & State System\n\n```mermaid\ngraph TB\n    subgraph Memory[\"LAYERED MEMORY\"]\n        direction TB\n        WM[Working Memory<br/>Current goal, hypothesis, design]\n        EM[Episodic Memory<br/>Recent experiments + outcomes]\n        SM[Semantic Memory<br/>Heuristics + constraints learned]\n        AM[Artifact Memory<br/>Filesystem \u2014 code, configs, logs]\n    end\n\n    subgraph State[\"STATE PERSISTENCE\"]\n        direction TB\n        CP[Checkpoints<br/>JSON snapshots between iterations]\n        ",
+          "score": 0.5776977233475072,
           "source": "local",
           "metadata": {}
         },
         {
-          "doc_id": "CANON.md",
-          "chunk_id": "CANON.md::chunk-5",
-          "text": "umptions.\n4. o1 adjudication and final recommendation.\n5. Canon/spec update with accepted decision and rationale.\n\nA decision is \"major\" if it affects:\n- Control loop structure.\n- Escalation policy.\n- State schema.\n- Evaluation rubric policy.\n- Safety or irreversible cost/risk exposure.\n\n## 17) Canonical o1 Question Set (Ask These Explicitly)\n\nFor every major product decision, ask o1 these question classes directly.\n\nProblem framing:\n- \"What problem are we actually solving, and what is the most likely misframing?\"\n\nSuccess contract:\n- \"What are the measurable success criteria and stopping conditions?\"\n\nDecomposition:\n- \"What is the minimal viable decomposition that preserves reliability?\"\n\nFailure forecasting:\n- \"What are the top failure modes, early warning signals, and mitigations?\"\n\nDeterminism boundary:\n- \"Which components must be deterministic, and which should remain probabilistic?\"\n\nState design:\n- \"What state fields are required for clean long-horizon evolution?\"\n\nEscalation policy:\n- \"What precise thresholds should trigger strategic escalation?\"\n\nEvaluation policy:\n- \"How should outputs be scored so we optimize for real progress, not proxy quality?\"\n\nCost and latency:\n- \"Where is high-reasoning spend highest leverage, and where is it waste?\"\n\nReversibility and safety:\n- \"What decisions are hard to undo, and what guardrails are required before execution?\"\n\n## 18) o1 Question Quality Standard\n\nDo not ask o1 vague prompts like \"design the system.\"\n\nEvery o1 question mus",
-          "score": 0.5859271845334195,
+          "doc_id": "README.md",
+          "chunk_id": "README.md::chunk-1",
+          "text": "and the system learns from every iteration. The lab builds and optimizes itself.\n\n## How It Works\n\nThree nested loops run autonomously against any goal:\n\n```\n\u250c\u2500 STRATEGIC LOOP (heavy reasoning \u2014 e.g. O1) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502  Called rarely \u2014 new goals and failure diagnosis only.        \u2502\n\u2502                                                              \u2502\n\u2502  \u250c\u2500 PROJECT LOOP (medium tier \u2014 critic/evaluator) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510  \u2502\n\u2502  \u2502  Evaluates results. Manages the task queue.             \u2502  \u2502\n\u2502  \u2502                                                         \u2502  \u2502\n\u2502  \u2502  \u250c\u2500 EXPERIMENT LOOP (fast tier \u2014 local or cheap) \u2500\u2500\u2500\u2500\u2510  \u2502  \u2502\n\u2502  \u2502  \u2502  Worker tries \u2192 Critic scores \u2192 Retry or escalate  \u2502  \u2502  \u2502\n\u2502  \u2502  \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518  \u2502  \u2502\n\u2502  \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518  \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n```\n\nModel selection for each tier is a key decision the lab optimizes. Defaults are configured in `.env` but the system is designed to evaluate and improve its own model choices.\n\nThe core discipline comes from [autoresearch](https://github.com/karpathy/autoresearch): every experiment is atomic, metrics are the only truth, and failures are reverted cleanly.\n\n## Quick Start\n\n```bash\n# 1. Install dependencies\nuv sync\n\n# 2. Configure\ncp .env.example .env\n# Edit .env \u2014 at minimum set OPENAI_API_KEY\n\n# 3. Run the lab on a goal\ncd ai-lab\nuv run main.py \"Optimize local LLM inference on Apple Silicon\"\n\n# Or ask O1 a str",
+          "score": 0.5761310886734556,
           "source": "local",
           "metadata": {}
         }
       ],
-      "answer_raw": "{\n  \"answer\": \"Prefer the smallest architecture that preserves reliability.\",\n  \"key_evidence_ids\": [\"CANON.md\"],\n  \"assumptions\": [\n    \"All proposed subsystems must fit within the existing architecture.\",\n    \"New subsystems should enhance reliability, observability, or decision quality.\"\n  ],\n  \"confidence\": 0.9,\n  \"next_action\": \"Apply this heuristic to all new subsystem proposals to ensure alignment with system reliability objectives.\",\n  \"kill_criteria\": [\n    \"If any proposed subsystem increases complexity without enhancing reliability.\",\n    \"If the proposal deviates from the established simplicity constraint.\"\n  ],\n  \"escalation_trigger\": \"If a proposed subsystem introduces significant uncertainty about reliability.\"\n}",
+      "answer_raw": "{\n  \"answer\": \"Prefer the smallest architecture that preserves reliability.\",\n  \"key_evidence_ids\": [\"CANON.md\", \"CLAUDE.md\"],\n  \"assumptions\": [\n    \"New subsystems can be evaluated based on their contribution to reliability and simplicity.\",\n    \"Reliability and observability are paramount for introducing new features.\"\n  ],\n  \"confidence\": 0.9,\n  \"next_action\": \"Develop a checklist based on the simplicity constraint for evaluating new subsystem proposals.\",\n  \"kill_criteria\": [\n    \"Any proposal that adds complexity without improving reliability or decision quality.\",\n    \"Proposals that increase the risk of context collapse.\"\n  ],\n  \"escalation_trigger\": \"Any new subsystem proposal that does not align with the Simplicity Constraint.\"\n}",
       "answer_obj": {
         "answer": "Prefer the smallest architecture that preserves reliability.",
         "key_evidence_ids": [
-          "CANON.md"
+          "CANON.md",
+          "CLAUDE.md"
         ],
         "assumptions": [
-          "All proposed subsystems must fit within the existing architecture.",
-          "New subsystems should enhance reliability, observability, or decision quality."
+          "New subsystems can be evaluated based on their contribution to reliability and simplicity.",
+          "Reliability and observability are paramount for introducing new features."
         ],
         "confidence": 0.9,
-        "next_action": "Apply this heuristic to all new subsystem proposals to ensure alignment with system reliability objectives.",
+        "next_action": "Develop a checklist based on the simplicity constraint for evaluating new subsystem proposals.",
         "kill_criteria": [
-          "If any proposed subsystem increases complexity without enhancing reliability.",
-          "If the proposal deviates from the established simplicity constraint."
+          "Any proposal that adds complexity without improving reliability or decision quality.",
+          "Proposals that increase the risk of context collapse."
         ],
-        "escalation_trigger": "If a proposed subsystem introduces significant uncertainty about reliability."
+        "escalation_trigger": "Any new subsystem proposal that does not align with the Simplicity Constraint."
       },
       "retrieval_grade": {
         "expected_count": 1,
@@ -873,7 +792,7 @@
       },
       "citation_grade": {
         "citations_ok": true,
-        "cited_count": 1,
+        "cited_count": 2,
         "invalid_citations": []
       },
       "fact_grade": {
@@ -892,11 +811,11 @@
         }
       },
       "llm_meta": {
-        "latency_sec": 3.332,
+        "latency_sec": 3.997,
         "usage": {
-          "input_tokens": 2406,
-          "output_tokens": 149,
-          "total_tokens": 2555
+          "input_tokens": 2496,
+          "output_tokens": 161,
+          "total_tokens": 2657
         }
       }
     },
@@ -930,30 +849,6 @@
           "metadata": {}
         },
         {
-          "doc_id": "CANON.md",
-          "chunk_id": "CANON.md::chunk-1",
-          "text": "plementation attempts.\n- Critic tier (mid): evaluation, scoring, failure categorization, improvement hints.\n- Strategist tier (o1-class reasoning): decomposition, diagnosis, reframing, decision frameworks.\n\nRule: reasoning models are not default workers.\n\n## 6) State and Memory Contract\n\nThe system must maintain explicit external state as the source of truth.\n\nRequired layers:\n- Structured state store: goals, constraints, hypotheses, task status, validated findings.\n- Artifact store: files, outputs, logs, reports, simulation assets.\n- Retrieval memory: distilled heuristics/insights for reuse.\n- Runtime context: only what is needed for the current node/task.\n\nRule: context windows are disposable; state is durable.\n\n## 7) Escalation Contract\n\nEscalate only when at least one condition is met:\n- Repeated failure without progress.\n- High uncertainty or conflicting evidence.\n- High-stakes decision with material downside.\n- Need for architectural reframing (not just local patching).\n\nEscalation input must include:\n- Goal and constraints.\n- What was tried.\n- Failure signatures.\n- Current state snapshot.\n- Decision question.\n\nEscalation output must include:\n- Root cause hypothesis.\n- Invalid assumptions.\n- Recommended new approach.\n- Concrete next tasks.\n\n## 8) Determinism Boundary\n\nDeterministic components:\n- Workflow/state transitions.\n- Routing policies.\n- Tool interfaces.\n- Persistence and artifact lineage.\n\nProbabilistic components:\n- Planning.\n- Hypothesis generation.\n- Ambiguou",
-          "score": 0.5973613643753258,
-          "source": "local",
-          "metadata": {}
-        },
-        {
-          "doc_id": "CANON.md",
-          "chunk_id": "CANON.md::chunk-4",
-          "text": "ller.\n4. Measure outcomes and feed back validated insights into state/memory.\n\no1 input contract for best leverage:\n- Goal and explicit success metric.\n- Current structured state snapshot.\n- Constraints (time, cost, tools, risk).\n- Attempts so far and failure signatures.\n- Exact decision question to answer.\n- Required output schema.\n\no1 output contract:\n- Chosen strategy and rationale.\n- Rejected alternatives with reasons.\n- Key assumptions and confidence level.\n- Concrete next tasks with evaluation criteria.\n- Trigger conditions for next escalation.\n\n## 15) Product Spec Authority\n\nThis document is the product specification authority for this project.\n\nImplications:\n- Architecture changes are product-spec changes.\n- Prompt-contract changes are product-spec changes.\n- Model-role changes are product-spec changes.\n- State schema changes are product-spec changes.\n\nNo major implementation work should proceed without a spec-consistent decision record.\n\n## 16) o1-in-the-Loop Spec Development Protocol\n\no1 must be used in defining the product, not only operating it.\n\nRequired spec cycle for major decisions:\n1. Draft proposal (human or implementation model).\n2. o1 strategic review (problem framing, tradeoffs, failure modes).\n3. Peer model challenge (Gemini or equivalent) to stress-test assumptions.\n4. o1 adjudication and final recommendation.\n5. Canon/spec update with accepted decision and rationale.\n\nA decision is \"major\" if it affects:\n- Control loop structure.\n- Escalation policy.\n-",
-          "score": 0.5722482051799074,
-          "source": "local",
-          "metadata": {}
-        },
-        {
-          "doc_id": "CANON.md",
-          "chunk_id": "CANON.md::chunk-3",
-          "text": "s explicitly revised.\n\n## 13) Strategic Model Leverage Protocol (o1 Included by Design)\n\no1-class reasoning must be part of development, but used selectively for high-leverage decisions.\n\nMandatory o1 usage points:\n- Project initialization: produce initial decomposition and risk map.\n- Replanning after repeated failure: diagnose root cause and propose strategic pivot.\n- Architecture decisions with long-term consequences: state model, loop design, evaluation policy, safety boundaries.\n- High-uncertainty or high-stakes tradeoff decisions.\n\nDefault non-usage points:\n- Routine execution steps.\n- Brute-force retries.\n- Deterministic transformations.\n- Low-risk formatting or glue logic.\n\n## 14) Multi-Model Reasoning Workflow (Gemini + o1 + Worker Stack)\n\nUse role separation, not model averaging:\n- Gemini (or peer frontier model): generate an alternative plan, critique, or edge-case challenge.\n- o1 strategist: adjudicate, synthesize, and produce final decision framework.\n- Worker/Critic tiers: implement and validate experimentally.\n\nDecision pattern:\n1. Generate candidate strategies (at least 2 when problem is ambiguous).\n2. Run cross-model critique (Gemini challenges assumptions; o1 evaluates failure modes and selects approach).\n3. Commit one executable plan to the deterministic controller.\n4. Measure outcomes and feed back validated insights into state/memory.\n\no1 input contract for best leverage:\n- Goal and explicit success metric.\n- Current structured state snapshot.\n- Constrain",
-          "score": 0.5676342844740233,
-          "source": "local",
-          "metadata": {}
-        },
-        {
           "doc_id": "ai-lab/o1_next_question_mvp.md",
           "chunk_id": "ai-lab/o1_next_question_mvp.md::chunk-0",
           "text": "# Next o1 Question: MVP Definition and First Build Slice\n\nUse this exact prompt (fill placeholders) when calling the strategic o1 model.\n\n---\n\nYou are the strategist for this project.\n\n## Objective\nDefine the smallest reliable MVP for this autonomous R&D lab and choose the first implementation slice.\n\n## Success Metric\nThe MVP is successful if it can:\n1. Build an executable task graph for a new goal.\n2. Run worker + critic retries on at least one task.\n3. Escalate to strategist after repeated failure.\n4. Persist state and resume cleanly.\n5. Stop safely on loop guardrails.\n\n## Current State Snapshot\n```json\n{\n  \"canon_path\": \"CANON.md\",\n  \"runtime_modules\": [\n    \"main.py\", \"planner.py\", \"worker.py\", \"critic.py\", \"state.py\", \"memory.py\", \"tools.py\"\n  ],\n  \"known_constraints\": [\n    \"deterministic-first architecture\",\n    \"o1 required for strategic decisions\",\n    \"single-machine friendly MVP\"\n  ],\n  \"known_gaps\": [\n    \"tool execution loop is still text-only\",\n    \"limited validation of strategist output\",\n    \"MVP tasks need strict prioritization\"\n  ]\n}\n```\n\n## Constraints\n- Keep MVP scope minimal.\n- Favor reliability over feature breadth.\n- No speculative framework sprawl.\n- Output must be directly implementable in this repo.\n\n## Decision Question\nWhat exact MVP scope and ordered task graph should we execute next to maximize delivery probability in the fewest steps?\n\n## Required Output Schema (JSON only)\n```json\n{\n  \"mvp_name\": \"string\",\n  \"mvp_scope\": \"string\",\n  \"non_goals",
@@ -962,33 +857,37 @@
           "metadata": {}
         },
         {
-          "doc_id": "docs/lab/architecture.md",
-          "chunk_id": "docs/lab/architecture.md::chunk-2",
-          "text": "   AM[Artifact Memory<br/>Filesystem \u2014 code, configs, logs]\n    end\n\n    subgraph State[\"STATE PERSISTENCE\"]\n        direction TB\n        CP[Checkpoints<br/>JSON snapshots between iterations]\n        GIT[Git Branch<br/>Branch tip = best known config]\n        PG[Postgres<br/>session_traces + memory_bank]\n    end\n\n    subgraph Dedup[\"DEDUPLICATION\"]\n        direction TB\n        QP[Query past results before experimenting]\n        HS[Hybrid search: pgvector + FTS + RRF]\n        SK[Skip if similar experiment failed recently]\n    end\n\n    Memory --> State\n    State --> Dedup\n    Dedup -->|inform| Memory\n```\n\n### Existing ai-lab/ Infrastructure\n\n| Module | LOC | What It Does |\n|--------|-----|-------------|\n| `ai-lab/llm.py` | ~130 | Unified LLM client with transparent O1/O3 API quirk handling |\n| `ai-lab/config.py` | ~101 | Model routing, safety thresholds, env config |\n| `ai-lab/main.py` | ~186 | Three nested loops: strategic \u2192 project \u2192 experiment |\n| `ai-lab/planner.py` | ~323 | O1 strategic planning + failure diagnosis |\n| `ai-lab/critic.py` | ~113 | Critic/evaluator \u2014 rates worker output, suggests improvements |\n| `ai-lab/worker.py` | ~65 | Stateless task execution (fast tier) |\n| `ai-lab/state.py` | ~121 | 5-layer memory hierarchy, JSON serialization, resume support |\n| `ai-lab/memory.py` | ~95 | Persistent skill heuristics + artifact registry |\n| `ai-lab/tools.py` | ~86 | Deterministic tools: Python exec, shell, file I/O |\n\n**Total: ~1,169 LOC of working infrastructure (+ ~4",
-          "score": 0.5648360082815354,
+          "doc_id": "README.md",
+          "chunk_id": "README.md::chunk-4",
+          "text": " Configuration\n\nAll settings live in `.env` (copy from `.env.example`):\n\n| Variable | Default | Description |\n|----------|---------|-------------|\n| `OPENAI_API_KEY` | *(required)* | Your OpenAI API key |\n| `STRATEGIC_MODEL` | `o1` | Model for planning/diagnosis |\n| `PROJECT_MODEL` | `gpt-4o` | Model for evaluation/routing |\n| `WORKER_MODEL` | `gpt-4o-mini` | Model for execution |\n| `OLLAMA_BASE_URL` | `http://localhost:11434` | Local Ollama instance |\n| `LOCAL_WORKER_MODEL` | `llama3.3:70b` | Ollama model for local execution |\n| `O1_REASONING_EFFORT` | `high` | O1 reasoning depth: low/medium/high |\n| `ESCALATE_THRESHOLD` | `5` | Worker failures before O1 escalation |\n| `MAX_PROJECT_ITERATIONS` | `200` | Hard safety cap on loop iterations |\n\n## Key Concepts\n\n### The Canon\n\n[`CANON.md`](CANON.md) is the product specification authority. All architecture, prompt, model-role, and state schema changes are product-spec changes. Major decisions go through the O1-in-the-loop spec cycle (CANON Section 16).\n\n### Asking the Strategic Tier the Right Questions\n\nThe strategic tier (O1, O3, or any reasoning model) is called rarely but with precision. Every query follows the **v2 Strategic Query Contract** (`ai-lab/o1_next_question_v2.md`), a 12-part protocol synthesized from O3, GPT-5.4, and Codex evaluations:\n\n1. **Meta** \u2014 caller type, confidence threshold, budget envelope\n2. **Objective** and explicit success metric\n3. **Current state snapshot** (structured, not narrative)\n4. **Constrain",
+          "score": 0.5600993446925504,
+          "source": "local",
+          "metadata": {}
+        },
+        {
+          "doc_id": "CLAUDE.md",
+          "chunk_id": "CLAUDE.md::chunk-1",
+          "text": "ll, file I/O |\n| `ai-lab/worker.py` | 65 | Stateless task execution (fast tier) |\n\n## Key Documents\n\n| Document | Purpose |\n|----------|---------|\n| `CANON.md` | Product spec authority \u2014 all decisions checked against this |\n| `ai-lab/o1_system_prompt.md` | Chief Strategist role definition for O1 |\n| `ai-lab/o1_next_question_mvp.md` | Template for structured O1 queries |\n| `docs/lab/architecture.md` | Mermaid diagrams of full system architecture |\n| `docs/lab/o1-strategy-prompt.md` | Structured O1 decision query for next phase |\n\n## Key Rules\n\n1. **CANON.md is the source of truth** \u2014 architecture changes are product-spec changes\n2. **O1 questions must include**: objective, state snapshot, constraints, prior attempts, decision question, output schema (Section 18)\n3. **State over context** \u2014 context windows are disposable; `state.db.json` is durable\n4. **Escalation is bounded** \u2014 max 5 worker failures \u2192 critic escalation \u2192 O1 strategic replan\n5. **Simplicity constraint** \u2014 no feature added unless it improves reliability, observability, or decision quality\n\n## Model Tiers\n\n| Tier | Default Model | Role | Cost |\n|------|---------------|------|------|\n| STRATEGIC | `o1` | Planning, diagnosis | $$ (rare) |\n| PROJECT | `gpt-4o` | Evaluation, routing | $ |\n| WORKER | `gpt-4o-mini` | Execution, attempts | \u00a2 |\n| LOCAL_WORKER | Ollama `llama3.3:70b` | Local execution | $0 |\n",
+          "score": 0.5475083469672736,
           "source": "local",
           "metadata": {}
         }
       ],
-      "answer_raw": "{\n  \"answer\": \"The distinction between deterministic machinery and probabilistic reasoning should follow the guideline that 'deterministic components' encompass 'workflow/state transitions', 'routing policies', and 'tool interfaces', whereas 'probabilistic components' focus on 'planning', 'hypothesis generation', and 'strategic tradeoff analysis'. This categorization provides a clear boundary that enables structured decision-making in the system's architecture.\",\n  \"key_evidence_ids\": [\"CANON.md\", \"CANON.md\", \"CANON.md\"],\n  \"assumptions\": [\"The categorization matches the system requirements.\", \"Strict boundaries between deterministic and probabilistic elements enhance system architecture.\"],\n  \"confidence\": 0.9,\n  \"next_action\": \"Implement the defined categories into system documentation and architecture plans.\",\n  \"kill_criteria\": [\"If new components blur the defined boundaries.\", \"If architectural complexity increases without clear justification.\"],\n  \"escalation_trigger\": \"Confusion or overlap in categorizing new capabilities or components.\"\n}",
+      "answer_raw": "{\n  \"answer\": \"Probabilistic reasoning belongs in areas involving 'Planning,' 'Hypothesis generation,' and 'Strategic tradeoff analysis,' while deterministic machinery should handle 'Workflow/state transitions,' 'Routing policies,' and 'Tool interfaces.' This alignment preserves reliability by ensuring that 'No feature is added unless it improves reliability, observability, or decision quality.'\",\n  \"key_evidence_ids\": [\"CANON.md\"],\n  \"assumptions\": [\"Probabilistic methods are suited for uncertain scenarios while deterministic methods ensure operational integrity.\"],\n  \"confidence\": 0.9,\n  \"next_action\": \"Map the new capability into one of the derived categories based on its functionality to ensure proper handling.\",\n  \"kill_criteria\": [\"Capability evolves into an ambiguous state where deterministic and probabilistic principles blur.\"],\n  \"escalation_trigger\": \"Deviation from outlined category definitions.\"\n}",
       "answer_obj": {
-        "answer": "The distinction between deterministic machinery and probabilistic reasoning should follow the guideline that 'deterministic components' encompass 'workflow/state transitions', 'routing policies', and 'tool interfaces', whereas 'probabilistic components' focus on 'planning', 'hypothesis generation', and 'strategic tradeoff analysis'. This categorization provides a clear boundary that enables structured decision-making in the system's architecture.",
+        "answer": "Probabilistic reasoning belongs in areas involving 'Planning,' 'Hypothesis generation,' and 'Strategic tradeoff analysis,' while deterministic machinery should handle 'Workflow/state transitions,' 'Routing policies,' and 'Tool interfaces.' This alignment preserves reliability by ensuring that 'No feature is added unless it improves reliability, observability, or decision quality.'",
         "key_evidence_ids": [
-          "CANON.md",
-          "CANON.md",
           "CANON.md"
         ],
         "assumptions": [
-          "The categorization matches the system requirements.",
-          "Strict boundaries between deterministic and probabilistic elements enhance system architecture."
+          "Probabilistic methods are suited for uncertain scenarios while deterministic methods ensure operational integrity."
         ],
         "confidence": 0.9,
-        "next_action": "Implement the defined categories into system documentation and architecture plans.",
+        "next_action": "Map the new capability into one of the derived categories based on its functionality to ensure proper handling.",
         "kill_criteria": [
-          "If new components blur the defined boundaries.",
-          "If architectural complexity increases without clear justification."
+          "Capability evolves into an ambiguous state where deterministic and probabilistic principles blur."
         ],
-        "escalation_trigger": "Confusion or overlap in categorizing new capabilities or components."
+        "escalation_trigger": "Deviation from outlined category definitions."
       },
       "retrieval_grade": {
         "expected_count": 1,
@@ -1005,7 +904,7 @@
       },
       "citation_grade": {
         "citations_ok": true,
-        "cited_count": 3,
+        "cited_count": 1,
         "invalid_citations": []
       },
       "fact_grade": {
@@ -1027,11 +926,11 @@
         }
       },
       "llm_meta": {
-        "latency_sec": 4.396,
+        "latency_sec": 3.654,
         "usage": {
-          "input_tokens": 3272,
-          "output_tokens": 208,
-          "total_tokens": 3480
+          "input_tokens": 2663,
+          "output_tokens": 182,
+          "total_tokens": 2845
         }
       }
     },
@@ -1049,14 +948,6 @@
           "metadata": {}
         },
         {
-          "doc_id": "ai-lab/o1_next_question_mvp.md",
-          "chunk_id": "ai-lab/o1_next_question_mvp.md::chunk-1",
-          "text": "d task graph should we execute next to maximize delivery probability in the fewest steps?\n\n## Required Output Schema (JSON only)\n```json\n{\n  \"mvp_name\": \"string\",\n  \"mvp_scope\": \"string\",\n  \"non_goals\": [\"string\"],\n  \"ordered_tasks\": [\n    {\n      \"task_id\": \"T-01\",\n      \"name\": \"string\",\n      \"description\": \"string\",\n      \"dependencies\": [\"T-00\"],\n      \"evaluation_criteria\": [\"string\"],\n      \"risk\": \"low|medium|high\"\n    }\n  ],\n  \"first_pr_slice\": {\n    \"objective\": \"string\",\n    \"files\": [\"path\"],\n    \"acceptance_checks\": [\"string\"]\n  },\n  \"escalation_triggers\": [\"string\"],\n  \"open_questions\": [\"string\"]\n}\n```\n\nRules:\n- Return JSON only (no markdown fences).\n- Keep `ordered_tasks` to 3-7 items.\n- Make acceptance checks observable and testable.\n",
-          "score": 0.6893715615666863,
-          "source": "local",
-          "metadata": {}
-        },
-        {
           "doc_id": "docs/lab/architecture.md",
           "chunk_id": "docs/lab/architecture.md::chunk-5",
           "text": "/ OpenCode fast<br/>Continuous]\n\n    Planner -.->|task graph| Lab\n    Workers -.->|results| Critic\n    Critic -.->|keep/revert| Lab\n    Critic -.->|5 failures| Planner\n\n    style Shizzle fill:#1a1a2e,stroke:#e94560,color:#fff\n    style Lab fill:#16213e,stroke:#0f3460,color:#fff\n    style Planner fill:#533483,stroke:#e94560,color:#fff\n    style Critic fill:#0f3460,stroke:#e94560,color:#fff\n    style Workers fill:#1a1a2e,stroke:#0f3460,color:#fff\n```\n\n### Model Tier Mapping\n\n| Role | Model | Tier | Cost | When Called |\n|------|-------|------|------|-------------|\n| Strategic Planner | O1 / O3 / reasoning model (eval-gated) | heavy | $$ | New goals, escalations only |\n| Critic / Evaluator | Gemini 2.5 Flash | medium | ~$0.001/call | Every experiment |\n| Worker / Executor | Ollama (llama3.3:70b on M4 Pro) | fast | $0 | Continuous |\n| Orchestrator | Claude Code (Max sub) | heavy | $0 (subscription) | Delegation, execution, tool routing |\n\n## 5. Optimization Sequence\n\nThe improvement loop optimizes the system in layers, where each layer multiplies the effectiveness of the next.\n\n```mermaid\ngraph TB\n    L1[Layer 1: LLM Models<br/>Which models run best on M4 Pro 24GB?<br/>Quantization, context windows, throughput]\n    L2[Layer 2: Tools<br/>Fork-terminal, OpenCode workflows<br/>Better tools = better experiments]\n    L3[Layer 3: Loop Chains<br/>Combine loops for complex goals<br/>Model optimization \u2192 tool optimization \u2192 ...]\n    L4[Layer 4: Orchestrator Tuning<br/>Shizzle prompt, routi",
@@ -1065,26 +956,10 @@
           "metadata": {}
         },
         {
-          "doc_id": "docs/lab/architecture.md",
-          "chunk_id": "docs/lab/architecture.md::chunk-0",
-          "text": "# Autonomous Self-Improvement Lab \u2014 Architecture\n\n## 1. System Overview \u2014 The Three Layers\n\n```mermaid\ngraph TB\n    subgraph Orchestrator[\"ORCHESTRATOR (Shizzle)\"]\n        direction LR\n        O1[Delegates only \u2014 never executes]\n        O2[Surfaces: Telegram / CLI / Cron]\n    end\n\n    subgraph Loops[\"IMPROVEMENT LOOPS\"]\n        direction LR\n        L1[Generic try \u2192 measure \u2192 keep/revert]\n        L2[Chainable for any goal]\n    end\n\n    subgraph Tools[\"TOOL LAYER\"]\n        direction LR\n        T1[OpenCode fork-terminal]\n        T2[Ollama local LLMs]\n        T3[Codex / Gemini workers]\n    end\n\n    subgraph Foundation[\"FOUNDATION\"]\n        direction LR\n        F1[Apple M4 Pro \u2014 24GB unified]\n        F2[State + Memory + Traces]\n        F3[Postgres + pgvector + FTS]\n    end\n\n    Orchestrator --> Loops\n    Loops --> Tools\n    Tools --> Foundation\n```\n\n## 2. Improvement Loop (Generic)\n\nThe core loop follows the autoresearch discipline: every experiment is a discrete, measurable unit with an explicit keep/revert decision.\n\n```mermaid\nstateDiagram-v2\n    [*] --> IDLE\n\n    IDLE --> PLAN: new goal or escalation\n    PLAN --> EXPERIMENT: task graph ready\n\n    EXPERIMENT --> EVALUATE: run complete\n    EVALUATE --> APPLY: metric improved \u2192 keep\n    EVALUATE --> EXPERIMENT: metric flat/worse \u2192 revert + try next\n    EVALUATE --> PLAN: 5 consecutive failures \u2192 escalate\n\n    APPLY --> IDLE: checkpoint saved\n\n    note right of PLAN\n        Strategic tier (O1 / O3 / any reasoning model)\n        Ca",
-          "score": 0.6681644878949481,
-          "source": "local",
-          "metadata": {}
-        },
-        {
           "doc_id": "ai-lab/o1_system_prompt.md",
           "chunk_id": "ai-lab/o1_system_prompt.md::chunk-1",
           "text": " beginning to draw the blueprint (the \"Project Graph\"), or when the worker tier has repeatedly failed and needs a fundamental change in direction.\n\n**Your Goal:** Do not write the low-level code yourself. Instead, write the *specification*, *architecture*, and *decision frameworks* that the fast worker models will execute.\n\n## 2. The Three Operating Loops\n\nThe system operates in three nested loops over a state machine:\n\n### A. The Experiment Loop (Seconds - Minutes)\nThe worker model receives a concrete task. It produces an output (e.g., Python code, a CAD file parameter). A Critic model immediately evaluates it. If it fails, the Critic gives a hint, and the Worker tries again. This loop runs rapidly and autonomously.\n\n### B. The Project Loop (Minutes - Hours)\nThis loop manages the queue of tasks you have designed. It pops a task off the queue, hands it to the Experiment Loop, and marks it complete if the worker succeeds.\n\n### C. The Strategic Loop (Hours - Days) \u2014 **This is where you live.**\nYou are invoked when:\n1.  **A new goal arrives:** You must produce the `project_graph`\u2014a JSON list of sub-tasks with dependencies\u2014that the Project Loop will ingest.\n2.  **The system is stuck (Escalation):** If the worker fails a task 5+ times, the system escalates back to you with the failure logs. You must diagnose the systemic issue and recommend a new approach.\n\n## 3. Persistent Memory and LangGraph State Management\n\nThe system manages context drift deliberately using a deterministic *",
           "score": 0.6470645133921283,
-          "source": "local",
-          "metadata": {}
-        },
-        {
-          "doc_id": "docs/lab/architecture.md",
-          "chunk_id": "docs/lab/architecture.md::chunk-4",
-          "text": "ple Silicon optimization** | Unknown \u2014 CUDA-focused ecosystem | Full control over Ollama/MLX integration |\n| **Observability** | LangSmith (paid) or custom callbacks | Logging + state.db.json checkpoints (working, free) |\n| **Community/docs** | Large, mature, many examples | Just us (but code is simple) |\n| **Bloat risk** | High \u2014 LangChain transitive deps | Low \u2014 we own every line |\n| **Upgrade risk** | API churn (LangChain ecosystem moves fast) | Stable \u2014 we control the interface |\n\n**Key question for O1:** Given that ai-lab/ already provides a working three-loop orchestration, O1 API handling, state checkpointing, and escalation \u2014 is the incremental value of LangGraph's graph execution engine worth the dependency weight and loss of control?\n\n## 4. Agent Topology\n\n```mermaid\ngraph TB\n    Shizzle[Shizzle<br/>Orchestrator<br/>Delegates only]\n\n    Shizzle --> Heartbeat[Heartbeat Agent<br/>Monitoring + cron<br/>Health checks]\n    Shizzle --> Lab[Lab Controller<br/>Improvement loops<br/>State management]\n    Shizzle --> Fork[Fork Terminal<br/>OpenCode workflows<br/>Code execution]\n\n    Lab --> Planner[Strategic Planner<br/>Strategic tier \u00b7 eval-gated<br/>Called rarely]\n    Lab --> Critic[Critic / Evaluator<br/>Gemini medium<br/>Per-experiment]\n    Lab --> Workers[Workers<br/>Ollama / OpenCode fast<br/>Continuous]\n\n    Planner -.->|task graph| Lab\n    Workers -.->|results| Critic\n    Critic -.->|keep/revert| Lab\n    Critic -.->|5 failures| Planner\n\n    style Shizzle fill:#1a1a2e,",
-          "score": 0.6450488158390362,
           "source": "local",
           "metadata": {}
         },
@@ -1103,236 +978,35 @@
           "score": 0.6368865131562205,
           "source": "local",
           "metadata": {}
-        }
-      ],
-      "answer_raw": "{\n  \"mvp_name\": \"Basic Task Execution MVP\",\n  \"mvp_scope\": \"Enable the system to create a task graph, execute tasks, and handle failure escalation while persisting state.\",\n  \"non_goals\": [\"Feature enhancements\", \"Complex task handling\"],\n  \"ordered_tasks\": [\n    {\n      \"task_id\": \"T-01\",\n      \"name\": \"Create Task Graph\",\n      \"description\": \"Develop a basic task graph structure for a predefined goal.\",\n      \"dependencies\": [],\n      \"evaluation_criteria\": [\"Task graph is complete and executable\"],\n      \"risk\": \"low\"\n    },\n    {\n      \"task_id\": \"T-02\",\n      \"name\": \"Implement Worker Execution\",\n      \"description\": \"Develop worker logic to execute tasks from the task graph.\",\n      \"dependencies\": [\"T-01\"],\n      \"evaluation_criteria\": [\"Tasks executed successfully or retried\"],\n      \"risk\": \"medium\"\n    },\n    {\n      \"task_id\": \"T-03\",\n      \"name\": \"Setup Critic Evaluation\",\n      \"description\": \"Implement the critic model to evaluate task outputs and determine success or failure.\",\n      \"dependencies\": [\"T-02\"],\n      \"evaluation_criteria\": [\"Critic responds with success or failure verdict\"],\n      \"risk\": \"medium\"\n    },\n    {\n      \"task_id\": \"T-04\",\n      \"name\": \"Handle Escalation Triggers\",\n      \"description\": \"Develop mechanism to escalate to strategist after repeated worker failures.\",\n      \"dependencies\": [\"T-03\"],\n      \"evaluation_criteria\": [\"Escalation occurs after 5 consecutive failures\"],\n      \"risk\": \"high\"\n    },\n    {\n      \"task_id\": \"T-05\",\n      \"name\": \"Implement State Persistence\",\n      \"description\": \"Ensure state is saved to allow resuming after failures.\",\n      \"dependencies\": [\"T-04\"],\n      \"evaluation_criteria\": [\"System can resume from last state checkpoint\"],\n      \"risk\": \"low\"\n    }\n  ],\n  \"first_pr_slice\": {\n    \"objective\": \"Build and test basic implementation of task graph creation and worker execution.\",\n    \"files\": [\"main.py\", \"planner.py\", \"worker.py\", \"critic.py\", \"state.py\"],\n    \"acceptance_checks\": [\"Task graph created successfully\", \"Worker executes tasks and evaluates results\"]\n  },\n  \"escalation_triggers\": [\"5 consecutive worker failures\"],\n  \"open_questions\": [\"What specific goals should the task graph address initially?\"]\n}",
-      "answer_obj": {
-        "mvp_name": "Basic Task Execution MVP",
-        "mvp_scope": "Enable the system to create a task graph, execute tasks, and handle failure escalation while persisting state.",
-        "non_goals": [
-          "Feature enhancements",
-          "Complex task handling"
-        ],
-        "ordered_tasks": [
-          {
-            "task_id": "T-01",
-            "name": "Create Task Graph",
-            "description": "Develop a basic task graph structure for a predefined goal.",
-            "dependencies": [],
-            "evaluation_criteria": [
-              "Task graph is complete and executable"
-            ],
-            "risk": "low"
-          },
-          {
-            "task_id": "T-02",
-            "name": "Implement Worker Execution",
-            "description": "Develop worker logic to execute tasks from the task graph.",
-            "dependencies": [
-              "T-01"
-            ],
-            "evaluation_criteria": [
-              "Tasks executed successfully or retried"
-            ],
-            "risk": "medium"
-          },
-          {
-            "task_id": "T-03",
-            "name": "Setup Critic Evaluation",
-            "description": "Implement the critic model to evaluate task outputs and determine success or failure.",
-            "dependencies": [
-              "T-02"
-            ],
-            "evaluation_criteria": [
-              "Critic responds with success or failure verdict"
-            ],
-            "risk": "medium"
-          },
-          {
-            "task_id": "T-04",
-            "name": "Handle Escalation Triggers",
-            "description": "Develop mechanism to escalate to strategist after repeated worker failures.",
-            "dependencies": [
-              "T-03"
-            ],
-            "evaluation_criteria": [
-              "Escalation occurs after 5 consecutive failures"
-            ],
-            "risk": "high"
-          },
-          {
-            "task_id": "T-05",
-            "name": "Implement State Persistence",
-            "description": "Ensure state is saved to allow resuming after failures.",
-            "dependencies": [
-              "T-04"
-            ],
-            "evaluation_criteria": [
-              "System can resume from last state checkpoint"
-            ],
-            "risk": "low"
-          }
-        ],
-        "first_pr_slice": {
-          "objective": "Build and test basic implementation of task graph creation and worker execution.",
-          "files": [
-            "main.py",
-            "planner.py",
-            "worker.py",
-            "critic.py",
-            "state.py"
-          ],
-          "acceptance_checks": [
-            "Task graph created successfully",
-            "Worker executes tasks and evaluates results"
-          ]
-        },
-        "escalation_triggers": [
-          "5 consecutive worker failures"
-        ],
-        "open_questions": [
-          "What specific goals should the task graph address initially?"
-        ]
-      },
-      "retrieval_grade": {
-        "expected_count": 2,
-        "hit_count": 1,
-        "support_recall": 0.5,
-        "hits": [
-          "ai-lab/o1_next_question_mvp.md"
-        ],
-        "misses": [
-          "CANON.md"
-        ]
-      },
-      "schema_grade": {
-        "schema_ok": false,
-        "missing_fields": [
-          "answer",
-          "key_evidence_ids",
-          "assumptions",
-          "confidence",
-          "next_action",
-          "kill_criteria",
-          "escalation_trigger"
-        ]
-      },
-      "citation_grade": {
-        "citations_ok": true,
-        "cited_count": 0,
-        "invalid_citations": []
-      },
-      "fact_grade": {
-        "gold_fact_coverage": 0.0,
-        "matched_gold_facts": []
-      },
-      "aggregate": {
-        "case_score": 0.375,
-        "weights": {
-          "support_recall": 0.35,
-          "gold_fact_coverage": 0.25,
-          "schema_ok": 0.2,
-          "citations_ok": 0.2
-        }
-      },
-      "llm_meta": {
-        "latency_sec": 8.72,
-        "usage": {
-          "input_tokens": 3445,
-          "output_tokens": 522,
-          "total_tokens": 3967
-        }
-      }
-    },
-    {
-      "case_id": "runbook_002",
-      "arm": "local",
-      "question": "What exact information must be bundled when submitting a strategic question to the strategist model?",
-      "retrieved": [
-        {
-          "doc_id": "CANON.md",
-          "chunk_id": "CANON.md::chunk-6",
-          "text": "\"What decisions are hard to undo, and what guardrails are required before execution?\"\n\n## 18) o1 Question Quality Standard\n\nDo not ask o1 vague prompts like \"design the system.\"\n\nEvery o1 question must include:\n- Objective and explicit success metric.\n- Current state snapshot.\n- Constraints (time, budget, tools, risk tolerance).\n- What has already been tried.\n- Exact decision to make.\n- Required output schema.\n\nIf this context is missing, gather/compress first, then call o1.\n",
-          "score": 0.7001832682179325,
-          "source": "local",
-          "metadata": {}
         },
         {
           "doc_id": "CANON.md",
-          "chunk_id": "CANON.md::chunk-4",
-          "text": "ller.\n4. Measure outcomes and feed back validated insights into state/memory.\n\no1 input contract for best leverage:\n- Goal and explicit success metric.\n- Current structured state snapshot.\n- Constraints (time, cost, tools, risk).\n- Attempts so far and failure signatures.\n- Exact decision question to answer.\n- Required output schema.\n\no1 output contract:\n- Chosen strategy and rationale.\n- Rejected alternatives with reasons.\n- Key assumptions and confidence level.\n- Concrete next tasks with evaluation criteria.\n- Trigger conditions for next escalation.\n\n## 15) Product Spec Authority\n\nThis document is the product specification authority for this project.\n\nImplications:\n- Architecture changes are product-spec changes.\n- Prompt-contract changes are product-spec changes.\n- Model-role changes are product-spec changes.\n- State schema changes are product-spec changes.\n\nNo major implementation work should proceed without a spec-consistent decision record.\n\n## 16) o1-in-the-Loop Spec Development Protocol\n\no1 must be used in defining the product, not only operating it.\n\nRequired spec cycle for major decisions:\n1. Draft proposal (human or implementation model).\n2. o1 strategic review (problem framing, tradeoffs, failure modes).\n3. Peer model challenge (Gemini or equivalent) to stress-test assumptions.\n4. o1 adjudication and final recommendation.\n5. Canon/spec update with accepted decision and rationale.\n\nA decision is \"major\" if it affects:\n- Control loop structure.\n- Escalation policy.\n-",
-          "score": 0.6918217309472335,
-          "source": "local",
-          "metadata": {}
-        },
-        {
-          "doc_id": "README.md",
-          "chunk_id": "README.md::chunk-5",
-          "text": "dex evaluations:\n\n1. **Meta** \u2014 caller type, confidence threshold, budget envelope\n2. **Objective** and explicit success metric\n3. **Current state snapshot** (structured, not narrative)\n4. **Constraints** with blast radius (patch | refactor | rewrite)\n5. **Prior attempts** and failure signatures with categories\n6. **Explicit option set** \u2014 named alternatives to adjudicate, never open-ended \"what's optimal?\"\n7. **Assumptions & unknowns** \u2014 what we believe but haven't verified, what's missing\n8. **Decision question** \u2014 precise, bounded, against named options\n9. **Required output** \u2014 strategy, rejected alternatives, risk forecast, smallest validating experiment, kill criteria, memory actions, verification conditions\n\nKey principle: **if confidence is below threshold, output an experiment, not a plan.** Uncertainty contracts beat confident plans built on shaky premises.\n\nSee also: `ai-lab/o1_system_prompt.md` for the full strategist role definition, and `docs/lab/model-eval/` for the source evaluations.\n\n### State Over Context\n\nContext windows are disposable. State is durable. The `SystemState` object in `state.py` implements a 5-layer memory hierarchy:\n\n- **Identity** \u2014 system role (permanent)\n- **Working** \u2014 current goal, hypothesis, design (active)\n- **Episodic** \u2014 recent experiments and outcomes (rolling)\n- **Semantic** \u2014 learned heuristics from past runs (persistent)\n- **Artifact** \u2014 generated files and outputs (filesystem)\n\nState is checkpointed to `state.db.json` between e",
-          "score": 0.6366922939847779,
-          "source": "local",
-          "metadata": {}
-        },
-        {
-          "doc_id": "CANON.md",
-          "chunk_id": "CANON.md::chunk-5",
-          "text": "umptions.\n4. o1 adjudication and final recommendation.\n5. Canon/spec update with accepted decision and rationale.\n\nA decision is \"major\" if it affects:\n- Control loop structure.\n- Escalation policy.\n- State schema.\n- Evaluation rubric policy.\n- Safety or irreversible cost/risk exposure.\n\n## 17) Canonical o1 Question Set (Ask These Explicitly)\n\nFor every major product decision, ask o1 these question classes directly.\n\nProblem framing:\n- \"What problem are we actually solving, and what is the most likely misframing?\"\n\nSuccess contract:\n- \"What are the measurable success criteria and stopping conditions?\"\n\nDecomposition:\n- \"What is the minimal viable decomposition that preserves reliability?\"\n\nFailure forecasting:\n- \"What are the top failure modes, early warning signals, and mitigations?\"\n\nDeterminism boundary:\n- \"Which components must be deterministic, and which should remain probabilistic?\"\n\nState design:\n- \"What state fields are required for clean long-horizon evolution?\"\n\nEscalation policy:\n- \"What precise thresholds should trigger strategic escalation?\"\n\nEvaluation policy:\n- \"How should outputs be scored so we optimize for real progress, not proxy quality?\"\n\nCost and latency:\n- \"Where is high-reasoning spend highest leverage, and where is it waste?\"\n\nReversibility and safety:\n- \"What decisions are hard to undo, and what guardrails are required before execution?\"\n\n## 18) o1 Question Quality Standard\n\nDo not ask o1 vague prompts like \"design the system.\"\n\nEvery o1 question mus",
-          "score": 0.6309965774349252,
-          "source": "local",
-          "metadata": {}
-        },
-        {
-          "doc_id": "ai-lab/o1_system_prompt.md",
-          "chunk_id": "ai-lab/o1_system_prompt.md::chunk-2",
-          "text": " logs. You must diagnose the systemic issue and recommend a new approach.\n\n## 3. Persistent Memory and LangGraph State Management\n\nThe system manages context drift deliberately using a deterministic **LangGraph-like state machine**. Do not assume the worker models have your full context window. \n\nInstead of an endless chat thread, the system passes an explicit JSON **State Object** between nodes (Planner \u2192 Manager \u2192 Worker \u2192 Critic). This State Object enforces a **5-Layer Memory Hierarchy**:\n\n1.  **Identity Memory**: The system role.\n2.  **Working Memory**: The current goal, current design variables, and active hypothesis.\n3.  **Episodic Memory**: A buffer of the most recent actions, outputs, and errors.\n4.  **Semantic Memory (Skills DB)**: Heuristics learned from past successes/failures (e.g., \"flexure joints reduce hinge stress by 30%\").\n5.  **Artifact Memory (Filesystem)**: The physical code, reports, and CAD files.\n\nWhen you are asked to evaluate failures or plan tasks, you will receive a snapshot of this **State Object**. This ensures zero hallucination across long-horizon chains. \n\n## 4. Operational Directives for the Strategist\n\nWhen invoked as the **Planner (New Goal)**:\n- Output a precise, structured JSON `project_graph`. Break the problem down into logical, testable sub-tasks that a less capable model can execute one by one. Include explicit evaluation criteria.\n- Always present at least 2 candidate strategies and adjudicate between them. Never answer \"what's optima",
-          "score": 0.6208702722977457,
-          "source": "local",
-          "metadata": {}
-        },
-        {
-          "doc_id": "ai-lab/o1_system_prompt.md",
-          "chunk_id": "ai-lab/o1_system_prompt.md::chunk-4",
-          "text": "ack orchestrated by Claude Code. Other frontier models may generate candidate strategies or challenge assumptions. Your job is to **adjudicate, synthesize, and produce the final decision framework**. Do not average the models; make direct, concrete decisions based on cross-model critiques.\n\n**Prompt Context Standard:** You will always receive a query conforming to the v2 Strategic Query Contract (see `o1_next_question_v2.md`). It will contain: meta (caller type, confidence threshold, budget), objective, success metric, state snapshot, constraints with blast radius, prior attempts with failure signatures, explicit option set, assumptions & unknowns, decision question, and required output schema. If you do not have these things, demand them.\n\n**Strategic Output Contract:** When you output a decision, you must include:\n- Chosen strategy with rationale and expected outcome.\n- Rejected alternatives with reasons.\n- Assumptions (what we believe but haven't verified).\n- Confidence score (0-1) with rationale.\n- Risk forecast: failure modes with likelihood, impact, detection signals, and mitigations.\n- Smallest validating experiment: what to run first, how long, what signals success or failure.\n- Kill criteria: when to stop, when to pivot, when to escalate.\n- Ordered tasks with dependencies and evaluation criteria.\n- Interface contract: what artifacts you emit, what format workers consume.\n- Memory actions: what heuristics to write/update/delete in the Skills DB. Be intentional \u2014 only ",
-          "score": 0.612038572841421,
-          "source": "local",
-          "metadata": {}
-        },
-        {
-          "doc_id": "ai-lab/o1_next_question_mvp.md",
-          "chunk_id": "ai-lab/o1_next_question_mvp.md::chunk-0",
-          "text": "# Next o1 Question: MVP Definition and First Build Slice\n\nUse this exact prompt (fill placeholders) when calling the strategic o1 model.\n\n---\n\nYou are the strategist for this project.\n\n## Objective\nDefine the smallest reliable MVP for this autonomous R&D lab and choose the first implementation slice.\n\n## Success Metric\nThe MVP is successful if it can:\n1. Build an executable task graph for a new goal.\n2. Run worker + critic retries on at least one task.\n3. Escalate to strategist after repeated failure.\n4. Persist state and resume cleanly.\n5. Stop safely on loop guardrails.\n\n## Current State Snapshot\n```json\n{\n  \"canon_path\": \"CANON.md\",\n  \"runtime_modules\": [\n    \"main.py\", \"planner.py\", \"worker.py\", \"critic.py\", \"state.py\", \"memory.py\", \"tools.py\"\n  ],\n  \"known_constraints\": [\n    \"deterministic-first architecture\",\n    \"o1 required for strategic decisions\",\n    \"single-machine friendly MVP\"\n  ],\n  \"known_gaps\": [\n    \"tool execution loop is still text-only\",\n    \"limited validation of strategist output\",\n    \"MVP tasks need strict prioritization\"\n  ]\n}\n```\n\n## Constraints\n- Keep MVP scope minimal.\n- Favor reliability over feature breadth.\n- No speculative framework sprawl.\n- Output must be directly implementable in this repo.\n\n## Decision Question\nWhat exact MVP scope and ordered task graph should we execute next to maximize delivery probability in the fewest steps?\n\n## Required Output Schema (JSON only)\n```json\n{\n  \"mvp_name\": \"string\",\n  \"mvp_scope\": \"string\",\n  \"non_goals",
-          "score": 0.610670522724265,
-          "source": "local",
-          "metadata": {}
-        },
-        {
-          "doc_id": "CLAUDE.md",
-          "chunk_id": "CLAUDE.md::chunk-1",
-          "text": "ll, file I/O |\n| `ai-lab/worker.py` | 65 | Stateless task execution (fast tier) |\n\n## Key Documents\n\n| Document | Purpose |\n|----------|---------|\n| `CANON.md` | Product spec authority \u2014 all decisions checked against this |\n| `ai-lab/o1_system_prompt.md` | Chief Strategist role definition for O1 |\n| `ai-lab/o1_next_question_mvp.md` | Template for structured O1 queries |\n| `docs/lab/architecture.md` | Mermaid diagrams of full system architecture |\n| `docs/lab/o1-strategy-prompt.md` | Structured O1 decision query for next phase |\n\n## Key Rules\n\n1. **CANON.md is the source of truth** \u2014 architecture changes are product-spec changes\n2. **O1 questions must include**: objective, state snapshot, constraints, prior attempts, decision question, output schema (Section 18)\n3. **State over context** \u2014 context windows are disposable; `state.db.json` is durable\n4. **Escalation is bounded** \u2014 max 5 worker failures \u2192 critic escalation \u2192 O1 strategic replan\n5. **Simplicity constraint** \u2014 no feature added unless it improves reliability, observability, or decision quality\n\n## Model Tiers\n\n| Tier | Default Model | Role | Cost |\n|------|---------------|------|------|\n| STRATEGIC | `o1` | Planning, diagnosis | $$ (rare) |\n| PROJECT | `gpt-4o` | Evaluation, routing | $ |\n| WORKER | `gpt-4o-mini` | Execution, attempts | \u00a2 |\n| LOCAL_WORKER | Ollama `llama3.3:70b` | Local execution | $0 |\n",
-          "score": 0.6101429622376859,
+          "chunk_id": "CANON.md::chunk-2",
+          "text": "ministic components:\n- Workflow/state transitions.\n- Routing policies.\n- Tool interfaces.\n- Persistence and artifact lineage.\n\nProbabilistic components:\n- Planning.\n- Hypothesis generation.\n- Ambiguous interpretation.\n- Strategic tradeoff analysis.\n\n## 9) Simplicity Constraint\n\nPrefer the smallest architecture that preserves reliability.\n\nDefault build order:\n1. State store.\n2. Artifact store.\n3. Retrieval memory.\n4. Deterministic controller loop.\n5. Worker + critic.\n6. Strategic escalation.\n\nNo feature is added unless it improves reliability, observability, or decision quality.\n\n## 10) Success Criteria\n\nThe system is successful when it can:\n- Run for long periods without context collapse.\n- Recover from failures through structured replanning.\n- Improve over time via distilled reusable insights.\n- Keep high-reasoning model usage sparse and high-leverage.\n- Stay understandable, inspectable, and maintainable.\n\n## 11) Non-Goals (for now)\n\n- Building a bloated general assistant platform.\n- Adding channels/plugins before core loop stability.\n- Treating larger prompts as a substitute for state design.\n\n## 12) Change Control\n\nAny major prompt, architecture, or framework decision should be checked against this document first.\n\nIf a proposal conflicts with this canon, the canon wins unless explicitly revised.\n\n## 13) Strategic Model Leverage Protocol (o1 Included by Design)\n\no1-class reasoning must be part of development, but used selectively for high-leverage decisions.\n\nMandatory o1",
+          "score": 0.6307447269472726,
           "source": "local",
           "metadata": {}
         }
       ],
-      "answer_raw": "{\"answer\":\"The minimal but sufficient question contract for a strategist escalation should include:\\n\\n1. **Objective**: Define the goal clearly.\\n\\n2. **Success Metric**: State an explicit, measurable success criterion.\\n\\n3. **Current State Snapshot**: Provide a structured JSON encapsulation of the project's current status, including relevant variables and known gaps.\\n\\n4. **Constraints**: Mention all constraints (e.g., time, budget, tools, risk) that affect the decision-making process.\\n\\n5. **What Has Already Been Tried**: Document previous attempts and their failure signatures to avoid repetition.\\n\\n6. **Exact Decision to Make**: Frame a precise and bounded decision question, avoiding open-ended formats.\\n\\n7. **Required Output Schema**: Specify the format and structure for the output (preferably in JSON) including desired information outputs like chosen strategies, alternative options, and evaluation criteria.\\n\\nThis contract allows for clarity and structured escalation, ensuring adherence to guidelines documented in the retrieved evidence especially pertaining to the nuances of o1 question requirements as specified in the Evidence.\",\"key_evidence_ids\":[\"CANON.md\",\"ai-lab/o1_system_prompt.md\",\"ai-lab/o1_next_question_mvp.md\"],\"assumptions\":[\"Understanding of project goals and scope is clear among all stakeholders.\",\"All necessary constraints and state snapshots are available for each escalation.\"],\"confidence\":0.85,\"next_action\":\"Implement the outlined question contract for the next strategist escalation.\",\"kill_criteria\":[\"When the proposed strategies fail to yield expected insights or actionable outcomes.\",\"When the scope of the project diverges significantly from the defined objective.\"],\"escalation_trigger\":\"Trigger an escalation after exceeding the maximum threshold of three consecutive unproductive iterations.\"}",
+      "answer_raw": "{\n  \"answer\": \"Define an MVP that enables executing a task graph with assessment capabilities, specifically focusing on the Experiment Loop, which includes task execution by the Worker, immediate evaluation by the Critic, and escalation to the Strategic Loop upon repeated failures.\",\n  \"key_evidence_ids\": [\"ai-lab/o1_next_question_mvp.md\", \"ai-lab/o1_system_prompt.md\", \"CANON.md\"],\n  \"assumptions\": [\n    \"Existing modules ('worker.py' and 'critic.py') are capable of basic task execution and evaluation.\",\n    \"The architecture allows transitions between loops smoothly.\"\n  ],\n  \"confidence\": 0.85,\n  \"next_action\": \"Implement the Experiment Loop: Build a minimal task graph within 'planner.py' for executing one task via 'worker.py', then immediately evaluate it using 'critic.py'. Include logic to handle repeated failures and trigger escalation to the strategic layer.\",\n  \"kill_criteria\": [\"Task execution fails completely and cannot escalate after 5 attempts.\", \"The system collapses without recovering state.\"],\n  \"escalation_trigger\": \"If the worker fails a task 5+ times, escalate to the Strategic Loop for strategic replanning.\"\n}",
       "answer_obj": {
-        "answer": "The minimal but sufficient question contract for a strategist escalation should include:\n\n1. **Objective**: Define the goal clearly.\n\n2. **Success Metric**: State an explicit, measurable success criterion.\n\n3. **Current State Snapshot**: Provide a structured JSON encapsulation of the project's current status, including relevant variables and known gaps.\n\n4. **Constraints**: Mention all constraints (e.g., time, budget, tools, risk) that affect the decision-making process.\n\n5. **What Has Already Been Tried**: Document previous attempts and their failure signatures to avoid repetition.\n\n6. **Exact Decision to Make**: Frame a precise and bounded decision question, avoiding open-ended formats.\n\n7. **Required Output Schema**: Specify the format and structure for the output (preferably in JSON) including desired information outputs like chosen strategies, alternative options, and evaluation criteria.\n\nThis contract allows for clarity and structured escalation, ensuring adherence to guidelines documented in the retrieved evidence especially pertaining to the nuances of o1 question requirements as specified in the Evidence.",
+        "answer": "Define an MVP that enables executing a task graph with assessment capabilities, specifically focusing on the Experiment Loop, which includes task execution by the Worker, immediate evaluation by the Critic, and escalation to the Strategic Loop upon repeated failures.",
         "key_evidence_ids": [
-          "CANON.md",
+          "ai-lab/o1_next_question_mvp.md",
           "ai-lab/o1_system_prompt.md",
-          "ai-lab/o1_next_question_mvp.md"
+          "CANON.md"
         ],
         "assumptions": [
-          "Understanding of project goals and scope is clear among all stakeholders.",
-          "All necessary constraints and state snapshots are available for each escalation."
+          "Existing modules ('worker.py' and 'critic.py') are capable of basic task execution and evaluation.",
+          "The architecture allows transitions between loops smoothly."
         ],
         "confidence": 0.85,
-        "next_action": "Implement the outlined question contract for the next strategist escalation.",
+        "next_action": "Implement the Experiment Loop: Build a minimal task graph within 'planner.py' for executing one task via 'worker.py', then immediately evaluate it using 'critic.py'. Include logic to handle repeated failures and trigger escalation to the strategic layer.",
         "kill_criteria": [
-          "When the proposed strategies fail to yield expected insights or actionable outcomes.",
-          "When the scope of the project diverges significantly from the defined objective."
+          "Task execution fails completely and cannot escalate after 5 attempts.",
+          "The system collapses without recovering state."
         ],
-        "escalation_trigger": "Trigger an escalation after exceeding the maximum threshold of three consecutive unproductive iterations."
+        "escalation_trigger": "If the worker fails a task 5+ times, escalate to the Strategic Loop for strategic replanning."
       },
       "retrieval_grade": {
         "expected_count": 2,
@@ -1354,16 +1028,11 @@
         "invalid_citations": []
       },
       "fact_grade": {
-        "gold_fact_coverage": 0.6666666666666666,
-        "matched_gold_facts": [
-          "failure signatures",
-          "current state snapshot",
-          "decision question",
-          "required output schema"
-        ]
+        "gold_fact_coverage": 0.0,
+        "matched_gold_facts": []
       },
       "aggregate": {
-        "case_score": 0.9167,
+        "case_score": 0.75,
         "weights": {
           "support_recall": 0.35,
           "gold_fact_coverage": 0.25,
@@ -1372,11 +1041,128 @@
         }
       },
       "llm_meta": {
-        "latency_sec": 7.123,
+        "latency_sec": 7.064,
         "usage": {
-          "input_tokens": 3016,
-          "output_tokens": 360,
-          "total_tokens": 3376
+          "input_tokens": 2680,
+          "output_tokens": 248,
+          "total_tokens": 2928
+        }
+      }
+    },
+    {
+      "case_id": "runbook_002",
+      "arm": "local",
+      "question": "What exact information must be bundled when submitting a strategic question to the strategist model?",
+      "retrieved": [
+        {
+          "doc_id": "CANON.md",
+          "chunk_id": "CANON.md::chunk-6",
+          "text": "\"What decisions are hard to undo, and what guardrails are required before execution?\"\n\n## 18) o1 Question Quality Standard\n\nDo not ask o1 vague prompts like \"design the system.\"\n\nEvery o1 question must include:\n- Objective and explicit success metric.\n- Current state snapshot.\n- Constraints (time, budget, tools, risk tolerance).\n- What has already been tried.\n- Exact decision to make.\n- Required output schema.\n\nIf this context is missing, gather/compress first, then call o1.\n",
+          "score": 0.7001832682179325,
+          "source": "local",
+          "metadata": {}
+        },
+        {
+          "doc_id": "README.md",
+          "chunk_id": "README.md::chunk-5",
+          "text": "dex evaluations:\n\n1. **Meta** \u2014 caller type, confidence threshold, budget envelope\n2. **Objective** and explicit success metric\n3. **Current state snapshot** (structured, not narrative)\n4. **Constraints** with blast radius (patch | refactor | rewrite)\n5. **Prior attempts** and failure signatures with categories\n6. **Explicit option set** \u2014 named alternatives to adjudicate, never open-ended \"what's optimal?\"\n7. **Assumptions & unknowns** \u2014 what we believe but haven't verified, what's missing\n8. **Decision question** \u2014 precise, bounded, against named options\n9. **Required output** \u2014 strategy, rejected alternatives, risk forecast, smallest validating experiment, kill criteria, memory actions, verification conditions\n\nKey principle: **if confidence is below threshold, output an experiment, not a plan.** Uncertainty contracts beat confident plans built on shaky premises.\n\nSee also: `ai-lab/o1_system_prompt.md` for the full strategist role definition, and `docs/lab/model-eval/` for the source evaluations.\n\n### State Over Context\n\nContext windows are disposable. State is durable. The `SystemState` object in `state.py` implements a 5-layer memory hierarchy:\n\n- **Identity** \u2014 system role (permanent)\n- **Working** \u2014 current goal, hypothesis, design (active)\n- **Episodic** \u2014 recent experiments and outcomes (rolling)\n- **Semantic** \u2014 learned heuristics from past runs (persistent)\n- **Artifact** \u2014 generated files and outputs (filesystem)\n\nState is checkpointed to `state.db.json` between e",
+          "score": 0.6366922939847779,
+          "source": "local",
+          "metadata": {}
+        },
+        {
+          "doc_id": "ai-lab/o1_system_prompt.md",
+          "chunk_id": "ai-lab/o1_system_prompt.md::chunk-2",
+          "text": " logs. You must diagnose the systemic issue and recommend a new approach.\n\n## 3. Persistent Memory and LangGraph State Management\n\nThe system manages context drift deliberately using a deterministic **LangGraph-like state machine**. Do not assume the worker models have your full context window. \n\nInstead of an endless chat thread, the system passes an explicit JSON **State Object** between nodes (Planner \u2192 Manager \u2192 Worker \u2192 Critic). This State Object enforces a **5-Layer Memory Hierarchy**:\n\n1.  **Identity Memory**: The system role.\n2.  **Working Memory**: The current goal, current design variables, and active hypothesis.\n3.  **Episodic Memory**: A buffer of the most recent actions, outputs, and errors.\n4.  **Semantic Memory (Skills DB)**: Heuristics learned from past successes/failures (e.g., \"flexure joints reduce hinge stress by 30%\").\n5.  **Artifact Memory (Filesystem)**: The physical code, reports, and CAD files.\n\nWhen you are asked to evaluate failures or plan tasks, you will receive a snapshot of this **State Object**. This ensures zero hallucination across long-horizon chains. \n\n## 4. Operational Directives for the Strategist\n\nWhen invoked as the **Planner (New Goal)**:\n- Output a precise, structured JSON `project_graph`. Break the problem down into logical, testable sub-tasks that a less capable model can execute one by one. Include explicit evaluation criteria.\n- Always present at least 2 candidate strategies and adjudicate between them. Never answer \"what's optima",
+          "score": 0.6208702722977457,
+          "source": "local",
+          "metadata": {}
+        },
+        {
+          "doc_id": "ai-lab/o1_next_question_mvp.md",
+          "chunk_id": "ai-lab/o1_next_question_mvp.md::chunk-0",
+          "text": "# Next o1 Question: MVP Definition and First Build Slice\n\nUse this exact prompt (fill placeholders) when calling the strategic o1 model.\n\n---\n\nYou are the strategist for this project.\n\n## Objective\nDefine the smallest reliable MVP for this autonomous R&D lab and choose the first implementation slice.\n\n## Success Metric\nThe MVP is successful if it can:\n1. Build an executable task graph for a new goal.\n2. Run worker + critic retries on at least one task.\n3. Escalate to strategist after repeated failure.\n4. Persist state and resume cleanly.\n5. Stop safely on loop guardrails.\n\n## Current State Snapshot\n```json\n{\n  \"canon_path\": \"CANON.md\",\n  \"runtime_modules\": [\n    \"main.py\", \"planner.py\", \"worker.py\", \"critic.py\", \"state.py\", \"memory.py\", \"tools.py\"\n  ],\n  \"known_constraints\": [\n    \"deterministic-first architecture\",\n    \"o1 required for strategic decisions\",\n    \"single-machine friendly MVP\"\n  ],\n  \"known_gaps\": [\n    \"tool execution loop is still text-only\",\n    \"limited validation of strategist output\",\n    \"MVP tasks need strict prioritization\"\n  ]\n}\n```\n\n## Constraints\n- Keep MVP scope minimal.\n- Favor reliability over feature breadth.\n- No speculative framework sprawl.\n- Output must be directly implementable in this repo.\n\n## Decision Question\nWhat exact MVP scope and ordered task graph should we execute next to maximize delivery probability in the fewest steps?\n\n## Required Output Schema (JSON only)\n```json\n{\n  \"mvp_name\": \"string\",\n  \"mvp_scope\": \"string\",\n  \"non_goals",
+          "score": 0.610670522724265,
+          "source": "local",
+          "metadata": {}
+        },
+        {
+          "doc_id": "CLAUDE.md",
+          "chunk_id": "CLAUDE.md::chunk-1",
+          "text": "ll, file I/O |\n| `ai-lab/worker.py` | 65 | Stateless task execution (fast tier) |\n\n## Key Documents\n\n| Document | Purpose |\n|----------|---------|\n| `CANON.md` | Product spec authority \u2014 all decisions checked against this |\n| `ai-lab/o1_system_prompt.md` | Chief Strategist role definition for O1 |\n| `ai-lab/o1_next_question_mvp.md` | Template for structured O1 queries |\n| `docs/lab/architecture.md` | Mermaid diagrams of full system architecture |\n| `docs/lab/o1-strategy-prompt.md` | Structured O1 decision query for next phase |\n\n## Key Rules\n\n1. **CANON.md is the source of truth** \u2014 architecture changes are product-spec changes\n2. **O1 questions must include**: objective, state snapshot, constraints, prior attempts, decision question, output schema (Section 18)\n3. **State over context** \u2014 context windows are disposable; `state.db.json` is durable\n4. **Escalation is bounded** \u2014 max 5 worker failures \u2192 critic escalation \u2192 O1 strategic replan\n5. **Simplicity constraint** \u2014 no feature added unless it improves reliability, observability, or decision quality\n\n## Model Tiers\n\n| Tier | Default Model | Role | Cost |\n|------|---------------|------|------|\n| STRATEGIC | `o1` | Planning, diagnosis | $$ (rare) |\n| PROJECT | `gpt-4o` | Evaluation, routing | $ |\n| WORKER | `gpt-4o-mini` | Execution, attempts | \u00a2 |\n| LOCAL_WORKER | Ollama `llama3.3:70b` | Local execution | $0 |\n",
+          "score": 0.6101429622376859,
+          "source": "local",
+          "metadata": {}
+        },
+        {
+          "doc_id": "docs/lab/architecture.md",
+          "chunk_id": "docs/lab/architecture.md::chunk-4",
+          "text": "ple Silicon optimization** | Unknown \u2014 CUDA-focused ecosystem | Full control over Ollama/MLX integration |\n| **Observability** | LangSmith (paid) or custom callbacks | Logging + state.db.json checkpoints (working, free) |\n| **Community/docs** | Large, mature, many examples | Just us (but code is simple) |\n| **Bloat risk** | High \u2014 LangChain transitive deps | Low \u2014 we own every line |\n| **Upgrade risk** | API churn (LangChain ecosystem moves fast) | Stable \u2014 we control the interface |\n\n**Key question for O1:** Given that ai-lab/ already provides a working three-loop orchestration, O1 API handling, state checkpointing, and escalation \u2014 is the incremental value of LangGraph's graph execution engine worth the dependency weight and loss of control?\n\n## 4. Agent Topology\n\n```mermaid\ngraph TB\n    Shizzle[Shizzle<br/>Orchestrator<br/>Delegates only]\n\n    Shizzle --> Heartbeat[Heartbeat Agent<br/>Monitoring + cron<br/>Health checks]\n    Shizzle --> Lab[Lab Controller<br/>Improvement loops<br/>State management]\n    Shizzle --> Fork[Fork Terminal<br/>OpenCode workflows<br/>Code execution]\n\n    Lab --> Planner[Strategic Planner<br/>Strategic tier \u00b7 eval-gated<br/>Called rarely]\n    Lab --> Critic[Critic / Evaluator<br/>Gemini medium<br/>Per-experiment]\n    Lab --> Workers[Workers<br/>Ollama / OpenCode fast<br/>Continuous]\n\n    Planner -.->|task graph| Lab\n    Workers -.->|results| Critic\n    Critic -.->|keep/revert| Lab\n    Critic -.->|5 failures| Planner\n\n    style Shizzle fill:#1a1a2e,",
+          "score": 0.6079614751125586,
+          "source": "local",
+          "metadata": {}
+        }
+      ],
+      "answer_raw": "{\"answer\":\"To streamline the escalation process for a strategist, the minimal but sufficient question contract must include the following elements: **Objective and explicit success metric**, **Current state snapshot**, **Constraints (time, budget, tools, risk tolerance)**, **What has already been tried**, **Exact decision to make**, and **Required output schema**. Specifically, avoid vague prompts and ensure clarity in the decision to facilitate efficient responses. In particular, your escalation must be structured as: 1. **Objective** - Clearly define the aim of the question. 2. **Current state** - An overview snapshot showing existing conditions. 3. **Constraints** - What factors limit the decision process? 4. **Prior attempts** - Summarize previous efforts and their outcomes. 5. **Decision question** - A succinct phrasing of the decision needed. 6. **Required output schema** - Outline what format the response should take. Grounding this framework in the documentation ensures consistency and clarity.\",\"key_evidence_ids\":[\"ai-lab/o1_system_prompt.md\",\"ai-lab/o1_next_question_mvp.md\"],\"assumptions\":[\"Structured input enhances the effectiveness of strategic decision-making.\",\"Detailed background info increases the strategist's accuracy in recommendations.\"],\"confidence\":0.85,\"next_action\":\"Create a detailed template based on this framework for future strategic escalations.\",\"kill_criteria\":[\"If responses remain vague or unstructured despite using this template, further refinement is needed.\"],\"escalation_trigger\":\"If the decision cannot be made within two iterations of the question template.\"}",
+      "answer_obj": {
+        "answer": "To streamline the escalation process for a strategist, the minimal but sufficient question contract must include the following elements: **Objective and explicit success metric**, **Current state snapshot**, **Constraints (time, budget, tools, risk tolerance)**, **What has already been tried**, **Exact decision to make**, and **Required output schema**. Specifically, avoid vague prompts and ensure clarity in the decision to facilitate efficient responses. In particular, your escalation must be structured as: 1. **Objective** - Clearly define the aim of the question. 2. **Current state** - An overview snapshot showing existing conditions. 3. **Constraints** - What factors limit the decision process? 4. **Prior attempts** - Summarize previous efforts and their outcomes. 5. **Decision question** - A succinct phrasing of the decision needed. 6. **Required output schema** - Outline what format the response should take. Grounding this framework in the documentation ensures consistency and clarity.",
+        "key_evidence_ids": [
+          "ai-lab/o1_system_prompt.md",
+          "ai-lab/o1_next_question_mvp.md"
+        ],
+        "assumptions": [
+          "Structured input enhances the effectiveness of strategic decision-making.",
+          "Detailed background info increases the strategist's accuracy in recommendations."
+        ],
+        "confidence": 0.85,
+        "next_action": "Create a detailed template based on this framework for future strategic escalations.",
+        "kill_criteria": [
+          "If responses remain vague or unstructured despite using this template, further refinement is needed."
+        ],
+        "escalation_trigger": "If the decision cannot be made within two iterations of the question template."
+      },
+      "retrieval_grade": {
+        "expected_count": 2,
+        "hit_count": 2,
+        "support_recall": 1.0,
+        "hits": [
+          "CANON.md",
+          "ai-lab/o1_next_question_mvp.md"
+        ],
+        "misses": []
+      },
+      "schema_grade": {
+        "schema_ok": true,
+        "missing_fields": []
+      },
+      "citation_grade": {
+        "citations_ok": true,
+        "cited_count": 2,
+        "invalid_citations": []
+      },
+      "fact_grade": {
+        "gold_fact_coverage": 0.5,
+        "matched_gold_facts": [
+          "current state snapshot",
+          "decision question",
+          "required output schema"
+        ]
+      },
+      "aggregate": {
+        "case_score": 0.875,
+        "weights": {
+          "support_recall": 0.35,
+          "gold_fact_coverage": 0.25,
+          "schema_ok": 0.2,
+          "citations_ok": 0.2
+        }
+      },
+      "llm_meta": {
+        "latency_sec": 5.512,
+        "usage": {
+          "input_tokens": 2414,
+          "output_tokens": 320,
+          "total_tokens": 2734
         }
       }
     }
