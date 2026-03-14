@@ -1,0 +1,140 @@
+{
+  "meta": {
+    "caller": "planner",
+    "confidence_score": 0.85,
+    "confidence_rationale": "This plan builds on the existing JSON-based memory usage, minimal dependencies, and proven Git-based workflow for keep/revert. A hybrid template/LLM strategy balances token costs with flexibility."
+  },
+  "design_decisions": {
+    "memory_format": {
+      "chosen": "A",
+      "rationale": "JSON files are simpler to track in Git, easy to parse, require no additional dependencies, and align with existing skill storage."
+    },
+    "task_generation": {
+      "chosen": "C",
+      "rationale": "Use known template-based improvements for predictable issues, escalate to LLM for novel or complex scenarios where templates do not apply."
+    },
+    "keep_revert": {
+      "chosen": "A",
+      "rationale": "Git-based commits and reverts are auditable, track code changes well, and avoid additional overhead or duplication."
+    },
+    "memory_module_location": {
+      "chosen": "extend_memory",
+      "rationale": "Centralizing memory logic in memory.py is cleaner than expanding main.py; we can reuse the existing patterns for vector search and skill storage."
+    },
+    "first_test_cycles": {
+      "count": 5,
+      "rationale": "Five cycles allow enough iterations to see multiple keep/revert decisions, ensuring the autonomous loop behaves as intended."
+    }
+  },
+  "ordered_tasks": [
+    {
+      "task_id": "T-01",
+      "name": "Persist Episodic Memory to JSON",
+      "description": "Create and maintain an episodic.json file to store experiment outcomes, changes, and scores for each run so they persist across system restarts.",
+      "dependencies": [],
+      "files_to_modify": ["memory.py", "main.py"],
+      "evaluation_criteria": [
+        "episodic.json is created/updated after each experiment loop",
+        "Entries include date/time, changes made, scores, and pass/fail status"
+      ],
+      "risk": "low",
+      "why_this_order": "We must begin by capturing experiment data long-term before we can automate decisions based on past outcomes."
+    },
+    {
+      "task_id": "T-02",
+      "name": "Implement Git-Based Keep/Revert",
+      "description": "Automatically commit code changes before each improvement and revert if the subsequent evaluation yields a regression.",
+      "dependencies": ["T-01"],
+      "files_to_modify": ["main.py", "opencode_executor.py"],
+      "evaluation_criteria": [
+        "A new commit is created whenever code is updated",
+        "System issues a git revert on negative score deltas"
+      ],
+      "risk": "medium",
+      "why_this_order": "After we store experiment metadata, we need a reliable mechanism to keep or discard changes based on performance."
+    },
+    {
+      "task_id": "T-03",
+      "name": "Implement Template-Based Improvement Logic",
+      "description": "Add a simple decision rule set that proposes improvements based on known shortfalls (e.g., recall below threshold triggers retrieval prompt tweaks).",
+      "dependencies": ["T-02"],
+      "files_to_modify": ["planner.py", "main.py"],
+      "evaluation_criteria": [
+        "System suggests a next step if a monitored metric is below a known target",
+        "Improvement hypothesis is captured in the episodic.json file"
+      ],
+      "risk": "low",
+      "why_this_order": "Provides a baseline method to propose improvements without burning tokens for every scenario."
+    },
+    {
+      "task_id": "T-04",
+      "name": "Introduce Heuristic Storage in JSON",
+      "description": "Enable save_skill() to record proven successful strategies in a heuristics.json so they can be retrieved in future runs.",
+      "dependencies": ["T-03"],
+      "files_to_modify": ["memory.py"],
+      "evaluation_criteria": [
+        "Heuristic entries are saved to heuristics.json upon successful improvements",
+        "Heuristics can be retrieved by vector or keyword search"
+      ],
+      "risk": "low",
+      "why_this_order": "We want to retain lessons from prior successes. This complements the template-based logic with historically proven heuristics."
+    },
+    {
+      "task_id": "T-05",
+      "name": "Wire Memory Updates into Experiment Loop",
+      "description": "Integrate storing experiment results and heuristics into the existing experiment_loop in main.py so that each iteration automatically logs, saves or reverts, and references prior knowledge.",
+      "dependencies": ["T-04"],
+      "files_to_modify": ["main.py", "memory.py"],
+      "evaluation_criteria": [
+        "Each loop iteration updates episodic.json and heuristics.json automatically",
+        "No manual intervention required for memory updates"
+      ],
+      "risk": "medium",
+      "why_this_order": "Completes the pipeline so that each experiment is automatically documented and prior heuristics are consulted for future runs."
+    },
+    {
+      "task_id": "T-06",
+      "name": "Add LLM-Based Fallback for Novel Improvements",
+      "description": "If the template-based approach finds no matching condition, escalate to the project-tier LLM for a new improvement idea.",
+      "dependencies": ["T-05"],
+      "files_to_modify": ["planner.py", "main.py"],
+      "evaluation_criteria": [
+        "System only calls LLM when template logic doesn't match known patterns",
+        "Ensures no duplication of token spend on simple, repeated improvements"
+      ],
+      "risk": "medium",
+      "why_this_order": "Allows more flexibility after the base logic is established. This step ensures coverage of edge cases but is optional for a minimal loop."
+    },
+    {
+      "task_id": "T-07",
+      "name": "Run 5-Cycle Automated Test",
+      "description": "Conduct a fully unattended multi-cycle run with the new memory, keep/revert, and improvement logic in place. Observe final net score.",
+      "dependencies": ["T-05"],
+      "files_to_modify": [],
+      "evaluation_criteria": [
+        "System completes 5 full improvement cycles without human intervention",
+        "Git track shows commits for improvements and reverts for regressions",
+        "At least one net improvement remains in final code state"
+      ],
+      "risk": "low",
+      "why_this_order": "Verifies the end-to-end flow works in practice. Confirms that the entire pipeline can run autonomously."
+    }
+  ],
+  "minimum_viable_loop": {
+    "required_tasks": ["T-01", "T-02", "T-03", "T-04", "T-05", "T-07"],
+    "nice_to_have_tasks": ["T-06"],
+    "description": "The essential loop is: (T-01) record runs, (T-02) keep/revert, (T-03) propose improvements, (T-04) store heuristics, (T-05) wire it up, and (T-07) prove it over multiple cycles. T-06 adds advanced fallback logic but is optional initially."
+  },
+  "kill_criteria": {
+    "stop_when": [
+      "System fails to improve after 3 consecutive changes",
+      "Score drops below 0.60 and fails to recover within 2 subsequent attempts",
+      "Hardware or cost constraints are exceeded"
+    ],
+    "pivot_to": "Manual review (human operator) for debugging or major architectural changes"
+  },
+  "verification": {
+    "how_to_confirm": "Perform a fully automated run of 5 cycles, track commits, reverts, and final net improvement in score.",
+    "observable_result": "An updated codebase and memory files that reflect successful improvements or reverts, with a net positive score gain vs the baseline."
+  }
+}
