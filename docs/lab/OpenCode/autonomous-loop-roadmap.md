@@ -143,3 +143,54 @@ Perfect:        1.000  ███████████████████
 | No keep/revert | Git-based discipline (auto commit + revert) | ✅ T-02 |
 | Can't explain decisions | Oracle queries + responses saved | ✅ |
 | Vendor lock-in | Self-reliant, any model, flat rate | ✅ |
+
+## Canon Alignment Critique (2026-03-15)
+
+This section compares the current implementation to `CANON.md` and focuses on alignment quality, improvement opportunities, and remaining tasks needed for fuller compliance.
+
+### Current Alignment Snapshot
+
+**Strong alignment (implemented and active):**
+- **Three-loop operating model** (CANON §4): implemented in `ai-lab/main.py` via strategic, project, and experiment loops.
+- **Model role separation** (CANON §5): strategist/project/worker routing is explicit in `ai-lab/config.py`, `ai-lab/planner.py`, `ai-lab/critic.py`, and `ai-lab/worker.py`.
+- **State over context** (CANON §6): durable state + episodic/semantic/artifact memory are implemented in `ai-lab/state.py` and `ai-lab/memory.py`.
+- **Failure-driven escalation** (CANON §7): repeated-failure escalation and strategic diagnosis are implemented in `ai-lab/main.py` and `ai-lab/planner.py`.
+- **Deterministic/probabilistic boundary** (CANON §8): deterministic control flow and tool wrappers with probabilistic planning/evaluation are clearly separated.
+- **Keep/revert discipline + measurement gate** (CANON §9/§10): git snapshot/revert and eval gating are wired in `ai-lab/main.py` and `ai-lab/tools.py`.
+
+**Partially aligned (works, but can be tightened):**
+- **Escalation policy breadth** (CANON §7): current triggers are mostly repeated failure / eval failure; high-uncertainty and high-stakes triggers are not first-class signals yet.
+- **Change-control authority** (CANON §12/§15/§16): canon is referenced in prompts, but there is no automated enforcement that major architecture/model/state changes require a decision record.
+- **Retrieval memory targeting** (CANON §6/§10): heuristics are retrieved, but worker-side retrieval is not query-specific, which can dilute relevance.
+
+**Not yet aligned to canon intent:**
+- **Multi-model reasoning workflow** (CANON §14): no explicit Gemini (or peer model) challenge + O1 adjudication pipeline in the strategic planner path.
+
+### Improvement Opportunities (Not Errors)
+
+1. **Add uncertainty-aware escalation signals**
+   - Introduce explicit uncertainty/conflict fields from critic/planner outputs and escalate earlier when uncertainty is high.
+2. **Make heuristic retrieval task-aware**
+   - Pass task text into heuristic retrieval so worker prompts preferentially include semantically relevant patterns.
+3. **Harden memory-action validation**
+   - Validate strategic `memory_actions` schema and warn/fail on unsupported layer/action combinations instead of only logging skips.
+4. **Track trend, not only point scores**
+   - Add short-horizon trend tracking for critic/eval scores to detect stagnation before hard failure thresholds.
+5. **Mechanize canon change control**
+   - Add lightweight guardrails (policy/check script/CI check) requiring decision records for major spec-impacting changes.
+
+### Remaining Tasks to Reach Fuller CANON Alignment
+
+**Priority A — Required to close core canon gaps**
+- [ ] Implement **multi-model strategic challenge + adjudication** flow (CANON §14).
+- [ ] Add **major-change decision record enforcement** for architecture/model-role/state-schema/escalation changes (CANON §15–§16).
+- [ ] Expand escalation triggers to include **high-uncertainty/conflicting-evidence/high-stakes** conditions, not only retry counts (CANON §7).
+
+**Priority B — High-value reliability/learning improvements**
+- [ ] Make worker heuristic retrieval **query-aware** using task context (CANON §6/§10).
+- [ ] Add stricter validation for strategic **memory_actions** contract handling (CANON §18 contract reliability).
+- [ ] Store and use **score trajectories** to trigger earlier strategic replans (CANON §10 long-horizon recovery quality).
+
+**Priority C — Operability polish**
+- [ ] Add a concise **canon alignment checklist** in CI/docs so drift is reviewed continuously.
+- [ ] Record periodic alignment reviews (this section) after major loop or model-routing changes.
