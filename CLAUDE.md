@@ -59,7 +59,7 @@ T-01: Persist Episodic Memory     🟢  ✅ DONE
       T-04: Heuristic Storage      🟢  ✅ DONE
         T-05: Wire Into Loop       🟢  ✅ DONE
           T-06: LLM Fallback       🟢  ✅ DONE
-          T-07: 5-Cycle Test       🔴  ← VALIDATION
+          T-07: 5-Cycle Test       🟢  ✅ DONE (3 kept, 1 reverted, Δ+0.0405)
 ```
 
 Full details, Mermaid diagrams, and design decisions in `docs/lab/OpenCode/autonomous-loop-roadmap.md`.

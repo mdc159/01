@@ -92,7 +92,7 @@ def strategic_prompt(case: dict[str, Any], context_pack: str) -> str:
 
 ## Success Metric
 Return the highest-leverage answer grounded in the retrieved evidence.
-In your answer, quote key phrases and terminology exactly as they appear in the retrieved evidence. Do not paraphrase technical terms, principles, or named concepts; use the exact wording from the source.
+In your answer, quote key phrases and terminology exactly as they appear in the retrieved evidence. Do not paraphrase technical terms, principles, or named concepts; use the exact wording from the source. Ensure that key phrases are quoted verbatim to maintain accuracy.
 
 ## Current State Snapshot
 {json.dumps(case["context"], indent=2)}
@@ -120,7 +120,7 @@ Return JSON only with this schema:
   "kill_criteria": ["string"],
   "escalation_trigger": "string"
 }}
-`key_evidence_ids` must contain `doc_id` values from the Retrieved Evidence section (for example, `CANON.md`), not bracket index numbers like `1`, `2`, or `3`.
+IMPORTANT: `key_evidence_ids` must contain `doc_id` values from the Retrieved Evidence section (for example, `CANON.md`), not bracket index numbers like `1`, `2`, or `3`. Use the exact `doc_id` values to ensure alignment.
 """.strip()
 
 

@@ -1,0 +1,32 @@
+[
+  {
+    "metric": "citations_ok",
+    "action": "Add explicit instruction in strategic_prompt() to use doc_id values (e.g. CANON.md) in key_evidence_ids, not bracket index numbers",
+    "score_before": 0.7662,
+    "score_after": 0.7717,
+    "score_delta": 0.0055,
+    "template_id": "TPL-01",
+    "files_changed": [],
+    "timestamp": 1773533035.65477
+  },
+  {
+    "metric": "citations_ok",
+    "action": "Add explicit instruction in strategic_prompt() to use doc_id values (e.g. CANON.md) in key_evidence_ids, not bracket index numbers",
+    "score_before": 0.7921,
+    "score_after": 0.8083,
+    "score_delta": 0.0162,
+    "template_id": "TPL-01",
+    "files_changed": [],
+    "timestamp": 1773533233.677136
+  },
+  {
+    "metric": "citations_ok",
+    "action": "Add explicit instruction in strategic_prompt() to use doc_id values (e.g. CANON.md) in key_evidence_ids, not bracket index numbers",
+    "score_before": 0.7779,
+    "score_after": 0.7967,
+    "score_delta": 0.0188,
+    "template_id": "TPL-01",
+    "files_changed": [],
+    "timestamp": 1773533336.195164
+  }
+]

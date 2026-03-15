@@ -469,7 +469,7 @@ def _apply_code_improvement(template: dict) -> bool:
     No external agent dependency — just a clean LLM call + file I/O.
     Uses PROJECT tier (gpt-4o) for reliable code generation.
     """
-    import json as _json
+    import llm as _llm
     from config import Models
 
     files = template.get("files", [])
@@ -500,7 +500,7 @@ Return ONLY the complete modified file content. No explanations, no markdown fen
 The output must be valid Python that can replace the entire file."""
 
     try:
-        modified_code = llm.call(
+        modified_code = _llm.call(
             [{"role": "user", "content": prompt}],
             model=Models.PROJECT,
             system_prompt="You are a precise code modification agent. Return only the modified file content.",
