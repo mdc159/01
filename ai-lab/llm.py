@@ -17,9 +17,63 @@ from typing import Any
 
 from openai import OpenAI
 
-from config import OPENAI_API_KEY, Models, O1Settings
+from config import OPENAI_API_KEY, Models, O1Settings, Budget
 
 logger = logging.getLogger(__name__)
+
+# ── Cost tracking ──────────────────────────────────────────────
+# Approximate costs per 1M tokens (input/output). Conservative estimates.
+_COST_PER_1M: dict[str, tuple[float, float]] = {
+    "gpt-4o-mini": (0.15, 0.60),
+    "gpt-4o": (2.50, 10.00),
+    "o1": (15.00, 60.00),
+    "o1-mini": (3.00, 12.00),
+    "o3": (15.00, 60.00),
+    "o3-mini": (1.10, 4.40),
+}
+_cumulative_cost_usd: float = 0.0
+_budget_exceeded: bool = False
+
+
+def _estimate_cost(model: str, response) -> float:
+    """Estimate cost from a chat completion response."""
+    usage = getattr(response, "usage", None)
+    if not usage:
+        return 0.0
+    rates = _COST_PER_1M.get(model, (1.0, 3.0))  # default conservative
+    input_cost = (usage.prompt_tokens / 1_000_000) * rates[0]
+    output_cost = (usage.completion_tokens / 1_000_000) * rates[1]
+    return input_cost + output_cost
+
+
+def _track_cost(model: str, response) -> None:
+    """Track cumulative API spend and enforce budget cap."""
+    global _cumulative_cost_usd, _budget_exceeded
+    cost = _estimate_cost(model, response)
+    _cumulative_cost_usd += cost
+
+    if _cumulative_cost_usd >= Budget.CAP_USD and not _budget_exceeded:
+        _budget_exceeded = True
+        logger.warning(
+            "💰 BUDGET CAP REACHED: $%.4f / $%.2f. Switching to Ollama-only.",
+            _cumulative_cost_usd, Budget.CAP_USD,
+        )
+    elif _cumulative_cost_usd >= Budget.CAP_USD * Budget.WARN_AT_PCT:
+        logger.info(
+            "💰 Budget: $%.4f / $%.2f (%.0f%%)",
+            _cumulative_cost_usd, Budget.CAP_USD,
+            (_cumulative_cost_usd / Budget.CAP_USD) * 100,
+        )
+
+
+def get_cost_summary() -> dict:
+    """Return current spend tracking data."""
+    return {
+        "cumulative_usd": round(_cumulative_cost_usd, 4),
+        "cap_usd": Budget.CAP_USD,
+        "pct_used": round((_cumulative_cost_usd / Budget.CAP_USD) * 100, 1) if Budget.CAP_USD > 0 else 0,
+        "exceeded": _budget_exceeded,
+    }
 
 # ── Shared clients ──────────────────────────────────────────────
 _client = OpenAI(api_key=OPENAI_API_KEY)
@@ -85,6 +139,11 @@ def call(
     if _is_ollama(model):
         return _call_ollama(messages, model, max_tokens, **kwargs)
 
+    # Budget enforcement — switch to Ollama when cap exceeded
+    if _budget_exceeded and _get_ollama_client() is not None:
+        logger.info("💰 Budget exceeded — routing to Ollama %s", Models.LOCAL_WORKER)
+        return _call_ollama(messages, Models.LOCAL_WORKER, max_tokens)
+
     # API calls with Ollama auto-fallback
     try:
         if _is_o1(model):
@@ -131,6 +190,7 @@ def _call_o1(
     )
 
     response = _client.chat.completions.create(**params)
+    _track_cost(model, response)
     return response.choices[0].message.content.strip()
 
 
@@ -177,6 +237,7 @@ def _call_standard(
 
     logger.info("→ [LLM] %s", model)
     response = _client.chat.completions.create(**params)
+    _track_cost(model, response)
     return response.choices[0].message.content.strip()
 
 

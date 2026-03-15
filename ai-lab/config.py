@@ -70,6 +70,12 @@ class O1Settings:
 #  System Loop Thresholds
 # ════════════════════════════════════════════════════════════════
 
+class Budget:
+    """API spend limits. When exceeded, system falls back to Ollama."""
+    CAP_USD: float = float(os.environ.get("BUDGET_CAP_USD", "5.00"))
+    WARN_AT_PCT: float = float(os.environ.get("BUDGET_WARN_PCT", "0.80"))  # warn at 80%
+
+
 class Thresholds:
     # How many worker failures before escalating to o1 for diagnosis
     ESCALATE_TO_STRATEGIC_AFTER: int = int(
