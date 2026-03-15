@@ -13,6 +13,7 @@ from __future__ import annotations
 import logging
 
 import llm
+import memory
 from config import Models
 from state import SystemState
 
@@ -48,6 +49,14 @@ def run_task(
     if improvement_hint:
         hint_block = f"\n\nIMPROVEMENT HINT FROM PRIOR ATTEMPT:\n{improvement_hint}"
 
+    # Inject relevant heuristics from prior successful experiments
+    heuristics = memory.retrieve_heuristics(top_k=3)
+    heuristics_block = ""
+    if heuristics:
+        heuristics_block = "\n\nPRIOR SUCCESSFUL PATTERNS:\n"
+        for h in heuristics:
+            heuristics_block += f"  - [{h['metric']}] {h['action'][:100]} (Δ{h.get('score_delta', 0):+.4f})\n"
+
     messages = [
         {
             "role": "user",
@@ -55,6 +64,7 @@ def run_task(
                 f"SYSTEM CONTEXT:\n{context}\n\n"
                 f"TASK:\n{task}"
                 f"{hint_block}"
+                f"{heuristics_block}"
             ),
         }
     ]

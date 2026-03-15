@@ -261,6 +261,26 @@ def _process_v2_response(state: SystemState, payload: dict[str, Any]) -> SystemS
     return state
 
 
+def _build_memory_context() -> str:
+    """Build a compact memory context string for injection into o1 prompts."""
+    lines = []
+
+    heuristics = memory.retrieve_heuristics(top_k=5)
+    if heuristics:
+        lines.append("Proven heuristics:")
+        for h in heuristics:
+            lines.append(f"  - [{h['metric']}] {h['action'][:80]} (Δ{h.get('score_delta', 0):+.4f})")
+
+    from memory import EpisodicMemory
+    from config import Paths as _Paths
+    _ep = EpisodicMemory(_Paths.EPISODIC_DB)
+    if _ep.entries:
+        lines.append("")
+        lines.append(_ep.summary(n=10))
+
+    return "\n".join(lines) if lines else "(no prior patterns recorded)"
+
+
 def build_project_graph(state: SystemState) -> SystemState:
     """Call strategist model using v2 contract and set a normalized, executable project graph."""
     logger.info("[STRATEGIC] Building project graph for goal: %s", state.current_goal)
@@ -277,7 +297,9 @@ def build_project_graph(state: SystemState) -> SystemState:
     }, indent=2)
 
     skills = memory.retrieve_skills(top_k=10)
-    heuristics_block = "\n".join(f"  - {h}" for h in skills) if skills else "  (none yet)"
+    skills_block = "\n".join(f"  - {h}" for h in skills) if skills else "  (none yet)"
+
+    memory_context = _build_memory_context()
 
     prompt = f"""## 0. Meta
 - caller: planner
@@ -303,8 +325,11 @@ The project graph is successful if it produces observable, measurable progress t
 - Loop iteration: {state.loop_iteration}
 - Failure count this cycle: {state.failure_count}
 - Last error: {state.last_error[:400] if state.last_error else 'None'}
-- Known heuristics from skills DB:
-{heuristics_block}
+- Known skills from skills DB:
+{skills_block}
+
+## 5b. Learned Patterns (from prior successful runs)
+{memory_context}
 
 ## 6. Explicit Option Set
 Present at least 2 candidate strategies and adjudicate between them.
@@ -398,6 +423,9 @@ The corrected strategy produces at least one successful experiment in the next c
 {failure_log}
 
 Failure category analysis requested: logic | tooling | architecture | data | resource
+
+## 5b. Learned Patterns (from prior successful runs)
+{_build_memory_context()}
 
 ## 6. Explicit Option Set
 Present at least 2 candidate recovery strategies:
