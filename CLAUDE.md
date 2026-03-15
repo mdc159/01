@@ -9,7 +9,7 @@ Three nested loops that run autonomously:
 - **Project Loop** (GPT-4o / Gemini) — Evaluates results, manages task queue.
 - **Experiment Loop** (OpenCode / Ollama / fast) — Executes tasks via OMO agents or built-in worker.
 
-**Current status:** OpenCode execution pilot validated. 4 self-improvement cycles ran autonomously at $0.00 (flat rate), improving eval score from 0.547 → 0.778 (+42%). Now building the autonomous loop (see roadmap below).
+**Current status:** Autonomous self-improvement loop complete (T-01 through T-07). Validated with 5 unattended cycles: 3 kept, 1 reverted, net Δ+0.04. Eval score 0.547 → ~0.80. No external agent dependency — clean LLM code modification.
 
 ## Quick Start
 
